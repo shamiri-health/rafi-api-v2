@@ -1,6 +1,5 @@
 import { pgTable, unique, serial, varchar, timestamp, doublePrecision, integer, foreignKey, text, boolean, date, primaryKey } from "drizzle-orm/pg-core"
-  import { sql } from "drizzle-orm"
-
+import { sql } from "drizzle-orm"
 
 
 export const tip = pgTable("Tip", {
@@ -13,13 +12,13 @@ export const tip = pgTable("Tip", {
 	relatedGoal1: integer("relatedGoal1"),
 	relatedGoal2: integer("relatedGoal2"),
 },
-(table) => {
-	return {
-		tipNameKey: unique("Tip_name_key").on(table.name),
-		tipTextKey: unique("Tip_text_key").on(table.text),
-		tipSummaryKey: unique("Tip_summary_key").on(table.summary),
-	}
-});
+	(table) => {
+		return {
+			tipNameKey: unique("Tip_name_key").on(table.name),
+			tipTextKey: unique("Tip_text_key").on(table.text),
+			tipSummaryKey: unique("Tip_summary_key").on(table.summary),
+		}
+	});
 
 export const admin = pgTable("admin", {
 	id: integer("id").primaryKey().notNull().references(() => human.id),
@@ -43,7 +42,7 @@ export const affirmationOfTheDay = pgTable("affirmation_of_the_day", {
 	category: text("category"),
 	subCategory: text("sub_category"),
 	affirmation: text("affirmation"),
-	userId: integer("user_id").references(() => user.id, { onDelete: "set null" } ),
+	userId: integer("user_id").references(() => user.id, { onDelete: "set null" }),
 });
 
 export const affirmationReminder = pgTable("affirmation_reminder", {
@@ -81,25 +80,25 @@ export const blacklistToken = pgTable("blacklistToken", {
 	token: varchar("token", { length: 500 }).notNull(),
 	blacklistedOn: timestamp("blacklistedOn", { mode: 'string' }).notNull(),
 },
-(table) => {
-	return {
-		blacklistTokenTokenKey: unique("blacklistToken_token_key").on(table.token),
-	}
-});
+	(table) => {
+		return {
+			blacklistTokenTokenKey: unique("blacklistToken_token_key").on(table.token),
+		}
+	});
 
 export const calendar = pgTable("calendar", {
 	id: serial("id").primaryKey().notNull(),
 	googleId: varchar("googleId", { length: 120 }),
 	summary: varchar("summary", { length: 80 }),
-	timeZone: varchar("timeZone", { length: 40 }).default('Africa/Nairobi'::character varying),
+	timeZone: varchar("timeZone", { length: 40 }).default(sql`'Africa/Nairobi'::character varying`),
 	description: varchar("description", { length: 80 }),
 	type: varchar("type", { length: 40 }),
 },
-(table) => {
-	return {
-		calendarGoogleIdKey: unique("calendar_googleId_key").on(table.googleId),
-	}
-});
+	(table) => {
+		return {
+			calendarGoogleIdKey: unique("calendar_googleId_key").on(table.googleId),
+		}
+	});
 
 export const cbtCourse = pgTable("cbtCourse", {
 	id: serial("id").primaryKey().notNull(),
@@ -110,11 +109,11 @@ export const cbtCourse = pgTable("cbtCourse", {
 	about: varchar("about", { length: 1500 }),
 	assetUrl: varchar("assetUrl"),
 	backgroundColor: varchar("backgroundColor").default('rgba(67, 143, 120, 0.1)'),
-	buttonColor: varchar("buttonColor", { length: 30 }).default('rgba(67, 143, 120)'::character varying),
+	buttonColor: varchar("buttonColor", { length: 30 }).default(sql`'rgba(67, 143, 120)'::character varying`),
 });
 
 export const cbtEvent = pgTable("cbtEvent", {
-	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" } ),
+	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" }),
 	userModule: integer("userModule"),
 	cbtCourseId: integer("cbtCourseId").references(() => cbtCourse.id),
 	userProgress: varchar("userProgress", { length: 10 }),
@@ -144,7 +143,7 @@ export const chat = pgTable("chat", {
 });
 
 export const chatEvent = pgTable("chatEvent", {
-	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" } ),
+	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" }),
 	therapistId: integer("therapistId").references(() => therapist.id),
 	timeZone: varchar("timeZone", { length: 40 }),
 	startTime: timestamp("startTime", { mode: 'string' }),
@@ -162,13 +161,13 @@ export const client = pgTable("client", {
 	kraPin: varchar("KRAPin", { length: 200 }),
 	nEmployees: integer("nEmployees"),
 },
-(table) => {
-	return {
-		clientCompanyNameKey: unique("client_companyName_key").on(table.companyName),
-		clientLabelKey: unique("client_label_key").on(table.label),
-		clientKraPinKey: unique("client_KRAPin_key").on(table.kraPin),
-	}
-});
+	(table) => {
+		return {
+			clientCompanyNameKey: unique("client_companyName_key").on(table.companyName),
+			clientLabelKey: unique("client_label_key").on(table.label),
+			clientKraPinKey: unique("client_KRAPin_key").on(table.kraPin),
+		}
+	});
 
 export const coachingSession = pgTable("coachingSession", {
 	id: integer("id").primaryKey().notNull().references(() => providerSession.id),
@@ -225,7 +224,7 @@ export const goalCategory = pgTable("goal_category", {
 	deletedAt: timestamp("deleted_at", { withTimezone: true, mode: 'string' }),
 	title: varchar("title", { length: 255 }),
 	backgroundImageColour: varchar("background_image_colour", { length: 100 }),
-	userId: integer("user_id").references(() => user.id, { onDelete: "set null" } ),
+	userId: integer("user_id").references(() => user.id, { onDelete: "set null" }),
 	backgroundImageName: text("background_image_name"),
 });
 
@@ -233,7 +232,7 @@ export const goalProgress = pgTable("goal_progress", {
 	id: text("id").primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
-	goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" } ),
+	goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
 });
 
 export const goals = pgTable("goals", {
@@ -249,21 +248,21 @@ export const goals = pgTable("goals", {
 	weeklyFrequency: integer("weekly_frequency"),
 	reasonForGoal: text("reason_for_goal"),
 	parentGoalId: text("parent_goal_id"),
-	goalCategoryId: text("goal_category_id").references(() => goalCategory.id, { onDelete: "set null" } ),
+	goalCategoryId: text("goal_category_id").references(() => goalCategory.id, { onDelete: "set null" }),
 },
-(table) => {
-	return {
-		goalsParentGoalIdFkey: foreignKey({
-			columns: [table.parentGoalId],
-			foreignColumns: [table.id],
-			name: "goals_parent_goal_id_fkey"
-		}).onDelete("set null"),
-	}
-});
+	(table) => {
+		return {
+			goalsParentGoalIdFkey: foreignKey({
+				columns: [table.parentGoalId],
+				foreignColumns: [table.id],
+				name: "goals_parent_goal_id_fkey"
+			}).onDelete("set null"),
+		}
+	});
 
 export const groupEvent = pgTable("groupEvent", {
-	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" } ),
-	timeZone: varchar("timeZone", { length: 40 }).default('Africa/Nairobi'::character varying),
+	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" }),
+	timeZone: varchar("timeZone", { length: 40 }).default(sql`'Africa/Nairobi'::character varying`),
 	groupTopicId: integer("groupTopicId").references(() => groupTopic.id),
 	groupSessionId: integer("groupSessionId").references(() => groupSession.id),
 });
@@ -317,12 +316,12 @@ export const human = pgTable("human", {
 	mobile: varchar("mobile", { length: 120 }),
 	lastLogin: timestamp("lastLogin", { mode: 'string' }),
 },
-(table) => {
-	return {
-		humanEmailKey: unique("human_email_key").on(table.email),
-		mobileUnique: unique("mobile_unique").on(table.mobile),
-	}
-});
+	(table) => {
+		return {
+			humanEmailKey: unique("human_email_key").on(table.email),
+			mobileUnique: unique("mobile_unique").on(table.mobile),
+		}
+	});
 
 export const individualBasic = pgTable("individualBasic", {
 	id: integer("id").primaryKey().notNull().references(() => subscription.id),
@@ -337,11 +336,11 @@ export const insurance = pgTable("insurance", {
 	active: boolean("active"),
 	userId: integer("userId").references(() => user.id),
 },
-(table) => {
-	return {
-		insuranceUserIdKey: unique("insurance_userId_key").on(table.userId),
-	}
-});
+	(table) => {
+		return {
+			insuranceUserIdKey: unique("insurance_userId_key").on(table.userId),
+		}
+	});
 
 export const joinShamiri = pgTable("joinShamiri", {
 	id: serial("id").primaryKey().notNull(),
@@ -373,11 +372,11 @@ export const message = pgTable("message", {
 	datetime: timestamp("datetime", { mode: 'string' }),
 	text: varchar("text", { length: 1000 }),
 	chatId: integer("chatId").notNull().references(() => chat.id),
-	role: varchar("role", { length: 20 }).default('assistant'::character varying).notNull(),
+	role: varchar("role", { length: 20 }).default(sql`'assistant'::character varying`).notNull(),
 });
 
 export const onsiteEvent = pgTable("onsiteEvent", {
-	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" } ),
+	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" }),
 	summary: varchar("summary", { length: 500 }),
 	startTime: timestamp("startTime", { mode: 'string' }),
 	endTime: timestamp("endTime", { mode: 'string' }),
@@ -396,13 +395,13 @@ export const order = pgTable("order", {
 	paymentMethod: varchar("paymentMethod", { length: 15 }),
 	paymentRef: varchar("paymentRef", { length: 50 }),
 	paymentNote: varchar("paymentNote", { length: 100 }),
-	kind: varchar("kind", { length: 25 }).default('subscriptionOrder'::character varying),
+	kind: varchar("kind", { length: 25 }).default(sql`'subscriptionOrder'::character varying`),
 },
-(table) => {
-	return {
-		orderPaymentRefKey: unique("order_paymentRef_key").on(table.paymentRef),
-	}
-});
+	(table) => {
+		return {
+			orderPaymentRefKey: unique("order_paymentRef_key").on(table.paymentRef),
+		}
+	});
 
 export const organization = pgTable("organization", {
 	id: serial("id").primaryKey().notNull(),
@@ -412,30 +411,30 @@ export const organization = pgTable("organization", {
 	phone: varchar("phone", { length: 120 }),
 	location: varchar("location", { length: 6000 }),
 },
-(table) => {
-	return {
-		organizationEmailKey: unique("organization_email_key").on(table.email),
-		organizationPhoneKey: unique("organization_phone_key").on(table.phone),
-		organizationLocationKey: unique("organization_location_key").on(table.location),
-	}
-});
+	(table) => {
+		return {
+			organizationEmailKey: unique("organization_email_key").on(table.email),
+			organizationPhoneKey: unique("organization_phone_key").on(table.phone),
+			organizationLocationKey: unique("organization_location_key").on(table.location),
+		}
+	});
 
 export const phoneEvent = pgTable("phoneEvent", {
-	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" } ),
+	id: varchar("id", { length: 64 }).primaryKey().notNull().references(() => therapySession.id, { onDelete: "cascade" }),
 	therapistId: integer("therapistId").default(205).references(() => therapist.id),
 	googleTherapistEventId: varchar("googleTherapistEventId", { length: 120 }),
 	summary: varchar("summary", { length: 500 }),
-	timeZone: varchar("timeZone", { length: 40 }).default('Africa/Nairobi'::character varying),
+	timeZone: varchar("timeZone", { length: 40 }).default(sql`'Africa/Nairobi'::character varying`),
 	startTime: timestamp("startTime", { mode: 'string' }),
 	endTime: timestamp("endTime", { mode: 'string' }),
 	mobile: varchar("mobile", { length: 13 }),
 	dataPrivacyString: varchar("dataPrivacyString", { length: 100 }),
 },
-(table) => {
-	return {
-		phoneEventGoogleTherapistEventIdKey: unique("phoneEvent_googleTherapistEventId_key").on(table.googleTherapistEventId),
-	}
-});
+	(table) => {
+		return {
+			phoneEventGoogleTherapistEventIdKey: unique("phoneEvent_googleTherapistEventId_key").on(table.googleTherapistEventId),
+		}
+	});
 
 export const provider = pgTable("provider", {
 	id: integer("id").primaryKey().notNull().references(() => organization.id),
@@ -571,11 +570,11 @@ export const therapistCal = pgTable("therapistCal", {
 	id: integer("id").primaryKey().notNull().references(() => calendar.id),
 	therapistId: integer("therapistId").references(() => therapist.id),
 },
-(table) => {
-	return {
-		therapistCalTherapistIdKey: unique("therapistCal_therapistId_key").on(table.therapistId),
-	}
-});
+	(table) => {
+		return {
+			therapistCalTherapistIdKey: unique("therapistCal_therapistId_key").on(table.therapistId),
+		}
+	});
 
 export const therapySession = pgTable("therapySession", {
 	id: varchar("id", { length: 64 }).primaryKey().notNull(),
@@ -615,11 +614,11 @@ export const user = pgTable("user", {
 	pinH: unknown("pinH").notNull(),
 	profession: text("profession"),
 },
-(table) => {
-	return {
-		userAliasKey: unique("user_alias_key").on(table.alias),
-	}
-});
+	(table) => {
+		return {
+			userAliasKey: unique("user_alias_key").on(table.alias),
+		}
+	});
 
 export const userAchievement = pgTable("userAchievement", {
 	id: serial("id").primaryKey().notNull(),
@@ -753,12 +752,12 @@ export const userDisplay = pgTable("userDisplay", {
 	streamId: varchar("streamId", { length: 50 }),
 	discoverStreamId: varchar("discoverStreamId", { length: 50 }),
 },
-(table) => {
-	return {
-		userDisplayStreamIdKey: unique("userDisplay_streamId_key").on(table.streamId),
-		userDisplayDiscoverStreamIdKey: unique("userDisplay_discoverStreamId_key").on(table.discoverStreamId),
-	}
-});
+	(table) => {
+		return {
+			userDisplayStreamIdKey: unique("userDisplay_streamId_key").on(table.streamId),
+			userDisplayDiscoverStreamIdKey: unique("userDisplay_discoverStreamId_key").on(table.discoverStreamId),
+		}
+	});
 
 export const userGoal = pgTable("userGoal", {
 	id: serial("id").primaryKey().notNull(),
@@ -801,7 +800,7 @@ export const userRewardHub = pgTable("userRewardHub", {
 export const userService = pgTable("userService", {
 	id: serial("id").primaryKey().notNull(),
 	userId: integer("userId").references(() => user.id),
-	notificationTime: varchar("notificationTime", { length: 8 }).default('10:00 AM'::character varying),
+	notificationTime: varchar("notificationTime", { length: 8 }).default(sql`'10:00 AM'::character varying`),
 	notificationOn: boolean("notificationOn").default(true),
 	notificationOn2: boolean("notificationOn2").default(true),
 	notificationTime2: varchar("notificationTime2").default('10:00 AM'),
@@ -831,11 +830,11 @@ export const friendRequest = pgTable("friendRequest", {
 	createdAt: timestamp("createdAt", { mode: 'string' }),
 	updatedAt: timestamp("updatedAt", { mode: 'string' }),
 },
-(table) => {
-	return {
-		friendRequestPkey: primaryKey({ columns: [table.initiatorId, table.targetId], name: "friendRequest_pkey"})
-	}
-});
+	(table) => {
+		return {
+			friendRequestPkey: primaryKey({ columns: [table.initiatorId, table.targetId], name: "friendRequest_pkey" })
+		}
+	});
 
 export const friendship = pgTable("friendship", {
 	leftId: integer("leftId").notNull().references(() => user.id),
@@ -843,8 +842,8 @@ export const friendship = pgTable("friendship", {
 	createdAt: timestamp("createdAt", { mode: 'string' }),
 	updatedAt: timestamp("updatedAt", { mode: 'string' }),
 },
-(table) => {
-	return {
-		friendshipPkey: primaryKey({ columns: [table.leftId, table.rightId], name: "friendship_pkey"})
-	}
-});
+	(table) => {
+		return {
+			friendshipPkey: primaryKey({ columns: [table.leftId, table.rightId], name: "friendship_pkey" })
+		}
+	});
