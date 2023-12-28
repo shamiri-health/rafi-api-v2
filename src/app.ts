@@ -1,11 +1,11 @@
 import { join } from "path";
 import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
 import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
-import fp from 'fastify-plugin'
+import fp from "fastify-plugin";
 
 export interface AppOptions
   extends FastifyServerOptions,
-  Partial<AutoloadPluginOptions> { }
+    Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {};
 
