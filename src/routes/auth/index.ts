@@ -1,6 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
 import { blacklistToken } from "../../schema";
-import { eq } from "drizzle-orm";
 
 const authRouther: FastifyPluginAsync = async (
   fastify,
@@ -19,21 +18,25 @@ const authRouther: FastifyPluginAsync = async (
   fastify.post("/forgot-pin", async (request, response) => {});
 
   fastify.post("/logout", async (request, _) => {
-    if (request.headers["authorization"]) {
+    const authorizationHeader =
+      request.headers.authorization ||
+      (request.headers.Authorization as string);
+    if (authorizationHeader) {
       try {
-        const token = request.headers.authorization.split(" ")[1].trim();
-        console.log("Token: ", token);
-        await fastify.db
-          .insert(blacklistToken)
-          .values({ token, blacklistedOn: new Date().toISOString() });
-        console.log(
-          await fastify.db
-            .select()
-            .from(blacklistToken)
-            .where(eq(blacklistToken.token, token)),
-        );
+        const [bearer, token] = authorizationHeader.split(" ");
+
+        if (bearer.trim() !== "Bearer") {
+          throw fastify.httpErrors.badRequest("Incorrect header format");
+        }
+
+        await fastify.db.insert(blacklistToken).values({
+          token: token.trim(),
+          blacklistedOn: new Date().toISOString(),
+        });
+
         return { message: "sucessfully logged out user" };
       } catch (e) {
+        fastify.log.error(e);
         throw fastify.httpErrors.badRequest(
           "Unable to parse token, please provided a valid header in the form of Bearer <Token>",
         );
