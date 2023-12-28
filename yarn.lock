@@ -717,6 +717,11 @@
     type-is "^1.6.18"
     vary "^1.1.2"
 
+"@fastify/type-provider-typebox@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@fastify/type-provider-typebox/-/type-provider-typebox-3.5.0.tgz#8942285502944761e8c5f0970547ddc18b5097d6"
+  integrity sha512-f48uGzvLflE/y4pvXOS8qjAC+mZmlqev9CPHnB8NDsBSL4EbeydO61IgPuzOkeNlAYeRP9Y56UOKj1XWFibgMw==
+
 "@isaacs/import-jsx@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@isaacs/import-jsx/-/import-jsx-4.0.1.tgz#493cab5fc543a0703dba7c3f5947d6499028a169"
@@ -792,6 +797,11 @@
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@lukeed/ms/-/ms-2.0.2.tgz#07f09e59a74c52f4d88c6db5c1054e819538e2a8"
   integrity sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA==
+
+"@sinclair/typebox@^0.32.3":
+  version "0.32.3"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.32.3.tgz#ccc2ae8b59f9a7e8e1f6aea0965ef8ee2c7796c8"
+  integrity sha512-o1OzDySkCSEobAEAVS1SGrzznes9KqPOC3arGfH5rQhOIeokLQYLKQmy68lr979BmPr43v4m9d85ttUSRpHdFA==
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
