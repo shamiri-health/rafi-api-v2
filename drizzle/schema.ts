@@ -11,8 +11,29 @@ import {
   boolean,
   date,
   primaryKey,
+  customType,
+  json,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+
+/* check if this works */
+const bytea = customType<{ data: string; notNull: false; default: false }>({
+  dataType() {
+    return "bytea";
+  },
+  toDriver(val) {
+    let newVal = val;
+    if (val.startsWith("0x")) {
+      newVal = val.slice(2);
+    }
+
+    return Buffer.from(newVal, "hex");
+  },
+  fromDriver(val) {
+    // @ts-ignore
+    return val.toString("hex");
+  },
+});
 
 export const tip = pgTable(
   "Tip",
@@ -788,7 +809,7 @@ export const user = pgTable(
     avatarId: integer("avatarId"),
     clientId: integer("clientId").references(() => client.id),
     // TODO: failed to parse database type 'bytea'
-    rafibot: unknown("rafibot"),
+    rafibot: bytea("rafibot"),
     gender: integer("gender"),
     edLevel: integer("edLevel"),
     marStatus: integer("marStatus"),
@@ -802,7 +823,7 @@ export const user = pgTable(
     organizationalLevel: varchar("organizationalLevel"),
     educationalLevel: varchar("educationalLevel"),
     // TODO: failed to parse database type 'bytea'
-    pinH: unknown("pinH").notNull(),
+    pinH: bytea("pinH").notNull(),
     profession: dbText("profession"),
   },
   (table) => {
