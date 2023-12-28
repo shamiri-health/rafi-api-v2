@@ -7,7 +7,7 @@ import {
   doublePrecision,
   integer,
   foreignKey,
-  text,
+  text as dbText,
   boolean,
   date,
   primaryKey,
@@ -47,26 +47,26 @@ export const affirmation = pgTable("affirmation", {
   createdAt: timestamp("createdAt", { mode: "string" }),
   updatedAt: timestamp("updatedAt", { mode: "string" }),
   deletedAt: timestamp("deletedAt", { mode: "string" }),
-  content: text("content"),
-  category: text("category"),
+  content: dbText("content"),
+  category: dbText("category"),
   userId: integer("userId").references(() => user.id),
-  backgroundFileName: text("background_file_name"),
+  backgroundFileName: dbText("background_file_name"),
 });
 
 export const affirmationOfTheDay = pgTable("affirmation_of_the_day", {
-  id: text("id").primaryKey().notNull(),
+  id: dbText("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
-  category: text("category"),
-  subCategory: text("sub_category"),
-  affirmation: text("affirmation"),
+  category: dbText("category"),
+  subCategory: dbText("sub_category"),
+  affirmation: dbText("affirmation"),
   userId: integer("user_id").references(() => user.id, {
     onDelete: "set null",
   }),
 });
 
 export const affirmationReminder = pgTable("affirmation_reminder", {
-  id: text("id"),
+  id: dbText("id"),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
@@ -76,9 +76,9 @@ export const affirmationReminder = pgTable("affirmation_reminder", {
     mode: "string",
   }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
-  category: text("category"),
-  name: text("name"),
-  frequency: text("frequency"),
+  category: dbText("category"),
+  name: dbText("name"),
+  frequency: dbText("frequency"),
   numberOfTimes: integer("number_of_times"),
   userId: integer("user_id").references(() => user.id),
 });
@@ -241,17 +241,17 @@ export const coachingSession = pgTable("coachingSession", {
 });
 
 export const dailyCheckIn = pgTable("daily_check_in", {
-  id: text("id"),
+  id: dbText("id"),
   createdAt: timestamp("created_at", { mode: "string" }),
   updatedAt: timestamp("updated_at", { mode: "string" }),
-  howAreYouFeeling: text("how_are_you_feeling"),
-  moodDescription: text("mood_description"),
-  moodDescriptionCauseCategory1: text("mood_description_cause_category_1"),
-  moodDescriptionCauseResponse1: text("mood_description_cause_response_1"),
-  moodDescriptionCauseCategory2: text("mood_description_cause_category_2"),
-  moodDescriptionCauseResponse2: text("mood_description_cause_response_2"),
-  moodDescriptionCauseCategory3: text("mood_description_cause_category_3"),
-  moodDescriptionCauseResponse3: text("mood_description_cause_response_3"),
+  howAreYouFeeling: dbText("how_are_you_feeling"),
+  moodDescription: dbText("mood_description"),
+  moodDescriptionCauseCategory1: dbText("mood_description_cause_category_1"),
+  moodDescriptionCauseResponse1: dbText("mood_description_cause_response_1"),
+  moodDescriptionCauseCategory2: dbText("mood_description_cause_category_2"),
+  moodDescriptionCauseResponse2: dbText("mood_description_cause_response_2"),
+  moodDescriptionCauseCategory3: dbText("mood_description_cause_category_3"),
+  moodDescriptionCauseResponse3: dbText("mood_description_cause_response_3"),
   userId: integer("user_id").references(() => user.id),
 });
 
@@ -275,11 +275,11 @@ export const enterpriseStandard = pgTable("enterpriseStandard", {
 });
 
 export const favouritedAffirmation = pgTable("favourited_affirmation", {
-  id: text("id").primaryKey().notNull(),
+  id: dbText("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { mode: "string" }),
   updatedAt: timestamp("updated_at", { mode: "string" }),
   removedAt: timestamp("removed_at", { mode: "string" }),
-  category: text("category"),
+  category: dbText("category"),
   userId: integer("user_id").references(() => user.id),
 });
 
@@ -291,7 +291,7 @@ export const fitnessClass = pgTable("fitnessClass", {
 });
 
 export const goalCategory = pgTable("goal_category", {
-  id: text("id").primaryKey().notNull(),
+  id: dbText("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
   deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
@@ -300,14 +300,16 @@ export const goalCategory = pgTable("goal_category", {
   userId: integer("user_id").references(() => user.id, {
     onDelete: "set null",
   }),
-  backgroundImageName: text("background_image_name"),
+  backgroundImageName: dbText("background_image_name"),
 });
 
 export const goalProgress = pgTable("goal_progress", {
-  id: text("id").primaryKey().notNull(),
+  id: dbText("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
-  goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
+  goalId: dbText("goal_id").references(() => goals.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const goals = pgTable(
@@ -324,7 +326,7 @@ export const goals = pgTable(
       mode: "string",
     }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
-    description: text("description").notNull(),
+    description: dbText("description").notNull(),
     durationStart: timestamp("duration_start", {
       withTimezone: true,
       mode: "string",
@@ -335,11 +337,14 @@ export const goals = pgTable(
     }),
     timeOfDay: varchar("time_of_day", { length: 50 }),
     weeklyFrequency: integer("weekly_frequency"),
-    reasonForGoal: text("reason_for_goal"),
-    parentGoalId: text("parent_goal_id"),
-    goalCategoryId: text("goal_category_id").references(() => goalCategory.id, {
-      onDelete: "set null",
-    }),
+    reasonForGoal: dbText("reason_for_goal"),
+    parentGoalId: dbText("parent_goal_id"),
+    goalCategoryId: dbText("goal_category_id").references(
+      () => goalCategory.id,
+      {
+        onDelete: "set null",
+      },
+    ),
   },
   (table) => {
     return {
@@ -473,13 +478,13 @@ export const journal = pgTable("journal", {
   userId: integer("userId").references(() => user.id),
   deletedAt: timestamp("deletedAt", { mode: "string" }),
   updatedAt: timestamp("updatedAt", { mode: "string" }),
-  question1: text("question_1").notNull(),
-  content1: text("content_1").notNull(),
-  question2: text("question_2"),
-  content2: text("content_2"),
-  question3: text("question_3"),
-  content3: text("content_3"),
-  tag: text("tag"),
+  question1: dbText("question_1").notNull(),
+  content1: dbText("content_1").notNull(),
+  question2: dbText("question_2"),
+  content2: dbText("content_2"),
+  question3: dbText("question_3"),
+  content3: dbText("content_3"),
+  tag: dbText("tag"),
 });
 
 export const message = pgTable("message", {
@@ -692,7 +697,7 @@ export const systemResponse = pgTable("systemResponse", {
   motivation: boolean("motivation"),
   purpose: boolean("purpose"),
   // TODO: failed to parse database type 'json[]'
-  rewardHubActions: unknown("rewardHubActions").array(),
+  rewardHubActions: json("rewardHubActions").array(),
 });
 
 export const teamAdmin = pgTable("teamAdmin", {
@@ -798,7 +803,7 @@ export const user = pgTable(
     educationalLevel: varchar("educationalLevel"),
     // TODO: failed to parse database type 'bytea'
     pinH: unknown("pinH").notNull(),
-    profession: text("profession"),
+    profession: dbText("profession"),
   },
   (table) => {
     return {
