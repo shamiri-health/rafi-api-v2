@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier . --write",
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
+    "generate": "drizzle-kit generate:pg"
   },
   "keywords": [],
   "author": "",
