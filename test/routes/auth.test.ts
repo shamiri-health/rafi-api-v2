@@ -3,7 +3,7 @@ import { build } from "../helper";
 import { eq } from "drizzle-orm";
 import { blacklistToken } from "../../src/schema";
 
-test("should be able to logout a user given a token in req.headers.authroziation", async (t) => {
+test("should be able to logout a user given a token in req.headers.authorization", async (t) => {
   t.plan(3);
   const app = await build(t);
 
@@ -23,4 +23,10 @@ test("should be able to logout a user given a token in req.headers.authroziation
     .where(eq(blacklistToken.token, tokenText));
 
   t.equal(dbResult[0].token, tokenText);
+});
+
+test("should be redirect the user from /forgotPin to /forgot-pin", async (t) => {
+  const app = await build(t);
+
+  const res = await app.inject().post();
 });

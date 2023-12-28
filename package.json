@@ -29,7 +29,9 @@
     "fastify": "^4.0.0",
     "fastify-cli": "^5.9.0",
     "fastify-plugin": "^4.0.0",
-    "postgres": "^3.4.3"
+    "libphonenumber-js": "^1.10.53",
+    "postgres": "^3.4.3",
+    "twilio": "^4.20.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.4",

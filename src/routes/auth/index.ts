@@ -1,22 +1,47 @@
 import { FastifyPluginAsync } from "fastify";
 import { blacklistToken } from "../../schema";
-import { Type } from "@sinclair/typebox";
+import { Type, Static } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
+import { parsePhoneNumber } from "libphonenumber-js";
 
-const authRouther: FastifyPluginAsync = async (
-  fastify,
-  opts,
-): Promise<void> => {
-  fastify.post("/verify", async (request, response) => {});
+export const ForgotPinResponse = Type.Object({
+  username: Type.String(),
+});
 
-  fastify.post("/token", async (request, response) => {});
+export type ForgotPinResponseType = Static<typeof ForgotPinResponse>;
 
-  fastify.post("/create-user", async (request, response) => {});
+const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
+  fastify.post("/verify", async () => {});
 
-  fastify.post("/forgotPin", async (request, response) => {
+  fastify.post("/token", async () => {});
+
+  fastify.post("/create-user", async () => {});
+
+  fastify.post("/forgotPin", async (_, response) => {
     response.redirect(302, "/forgot-pin");
   });
 
-  fastify.post("/forgot-pin", async (request, response) => {});
+  fastify.post<{ Body: ForgotPinResponseType }>(
+    "/forgot-pin",
+    {
+      schema: {
+        body: Type.Object({
+          username: Type.String(),
+        }),
+      },
+    },
+    async (request, response) => {
+      const { username } = request.body;
+
+      if (Value.Check(Type.String({ format: "email" }), username)) {
+      } else if (parsePhoneNumber(username, "KE")) {
+      } else {
+        throw fastify.httpErrors.badRequest(
+          "Please provided a valid email or a valid Kenyan Phonenumber",
+        );
+      }
+    },
+  );
 
   fastify.post(
     "/logout",
