@@ -2,18 +2,18 @@
 import twillio from "twilio";
 import fp from "fastify-plugin";
 
-export const twilioClient = twillio(
+export const twillioClient = twillio(
   process.env.TWILLIO_ACCOUNT_SID,
   process.env.TWILLIO_AUTH_TOKEN,
   { autoRetry: true, maxRetries: 10 },
 );
 
 export default fp(async (fastify, _) => {
-  fastify.decorate("twilio", twilioClient);
+  fastify.decorate("twilio", twillioClient);
 });
 
 declare module "fastify" {
   export interface FastifyInterface {
-    twilio: typeof twilioClient;
+    twilio: typeof twillioClient;
   }
 }

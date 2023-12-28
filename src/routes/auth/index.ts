@@ -3,6 +3,7 @@ import { blacklistToken } from "../../schema";
 import { Type, Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { parsePhoneNumber } from "libphonenumber-js";
+import { sendVerificationCode, checkVerificationCode } from "../../lib/auth";
 
 export const ForgotPinResponse = Type.Object({
   username: Type.String(),
@@ -30,11 +31,15 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }),
       },
     },
-    async (request, response) => {
+    async (request, _) => {
       const { username } = request.body;
 
       if (Value.Check(Type.String({ format: "email" }), username)) {
+        await sendVerificationCode(username, "email");
+        return { message: "successfuly sent code via email" };
       } else if (parsePhoneNumber(username, "KE")) {
+        sendVerificationCode(username, "sms");
+        return { message: "successfuly sent code via sms" };
       } else {
         throw fastify.httpErrors.badRequest(
           "Please provided a valid email or a valid Kenyan Phonenumber",
