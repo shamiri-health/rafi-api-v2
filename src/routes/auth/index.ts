@@ -3,7 +3,7 @@ import { blacklistToken } from "../../schema";
 import { Type, Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { parsePhoneNumber } from "libphonenumber-js";
-import { sendVerificationCode, checkVerificationCode } from "../../lib/auth";
+import { sendVerificationCode } from "../../lib/auth";
 
 export const ForgotPinResponse = Type.Object({
   username: Type.String(),
@@ -31,7 +31,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }),
         response: {
           200: Type.Object({
-            message: Type.string(),
+            message: Type.String(),
           }),
         },
       },
