@@ -29,20 +29,26 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         body: Type.Object({
           username: Type.String(),
         }),
+        response: {
+          200: Type.Object({
+            message: Type.string(),
+          }),
+        },
       },
     },
     async (request, _) => {
       const { username } = request.body;
 
+      // TODO: consider if this is something worth awaiting
       if (Value.Check(Type.String({ format: "email" }), username)) {
         await sendVerificationCode(username, "email");
         return { message: "successfuly sent code via email" };
       } else if (parsePhoneNumber(username, "KE")) {
-        sendVerificationCode(username, "sms");
+        await sendVerificationCode(username, "sms");
         return { message: "successfuly sent code via sms" };
       } else {
         throw fastify.httpErrors.badRequest(
-          "Please provided a valid email or a valid Kenyan Phonenumber",
+          "Please provide a valid email or a valid Kenyan Phonenumber",
         );
       }
     },

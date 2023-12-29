@@ -1,10 +1,4 @@
-import twillio from "twilio";
-
-export const client = twillio(
-  process.env.TWILLIO_ACCOUNT_SID,
-  process.env.TWILLIO_AUTH_TOKEN,
-);
-
+import { twillioClient } from "./sms";
 // @ts-ignore
 export function sendVerificationCode(
   username: string,
