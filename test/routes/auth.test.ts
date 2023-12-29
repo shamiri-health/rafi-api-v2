@@ -68,3 +68,60 @@ test("should ensure that user is sent a verification code if sent via email", as
 
   t.match(body, { message: "successfuly sent code via email" });
 });
+
+test("should ensure that user is sent a verification code if sent via sms", async (t) => {
+  t.plan(1);
+  // given
+  // @ts-ignore
+  let sendCodeStub;
+  t.before(() => {
+    // @ts-ignore
+    sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+  });
+  t.teardown(() => {
+    // @ts-ignore
+    sendCodeStub.restore();
+  });
+  // @ts-ignore
+  sendCodeStub.returns(Promise.resolve({ success: true }));
+  const app = await build(t);
+
+  // when
+  const res = await app.inject().post("/auth/forgot-pin").payload({
+    username: "0712345678",
+  });
+
+  const body = await res.json();
+
+  t.match(body, { message: "successfuly sent code via sms" });
+});
+
+test("should throw a 400 error if it's not a valid paramenter", async (t) => {
+  t.plan(2);
+  // given
+  // @ts-ignore
+  let sendCodeStub;
+  t.before(() => {
+    // @ts-ignore
+    sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+  });
+  t.teardown(() => {
+    // @ts-ignore
+    sendCodeStub.restore();
+  });
+  // @ts-ignore
+  sendCodeStub.returns(Promise.resolve({ success: true }));
+  const app = await build(t);
+
+  // when
+  const res = await app.inject().post("/auth/forgot-pin").payload({
+    username: "something random",
+  });
+
+  const body = await res.json();
+
+  t.equal(400, res.statusCode);
+  t.match(body, {
+    message: "Please provide a valid email or a valid Kenyan Phonenumber",
+  });
+});
