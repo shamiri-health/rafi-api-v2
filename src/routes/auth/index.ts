@@ -1,9 +1,9 @@
 import { FastifyPluginAsync } from "fastify";
 import { blacklistToken } from "../../schema";
 import { Type, Static } from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode } from "../../lib/auth";
+import { z } from "zod";
 
 export const ForgotPinResponse = Type.Object({
   username: Type.String(),
@@ -39,18 +39,22 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     async (request, _) => {
       const { username } = request.body;
 
-      // TODO: consider if this is something worth awaiting
-      if (Value.Check(Type.String({ format: "email" }), username)) {
+      const emailSchema = z.string().email();
+      const result1 = emailSchema.safeParse(username);
+
+      if (result1.success) {
         await sendVerificationCode(username, "email");
         return { message: "successfuly sent code via email" };
-      } else if (parsePhoneNumber(username, "KE")) {
+      }
+
+      if (isValidPhoneNumber(username, "KE")) {
         await sendVerificationCode(username, "sms");
         return { message: "successfuly sent code via sms" };
-      } else {
-        throw fastify.httpErrors.badRequest(
-          "Please provide a valid email or a valid Kenyan Phonenumber",
-        );
       }
+
+      throw fastify.httpErrors.badRequest(
+        "Please provide a valid email or a valid Kenyan Phonenumber",
+      );
     },
   );
 
