@@ -6,7 +6,7 @@ import postgres from "postgres";
 const queryClient = postgres(process.env.DATABASE_URL ?? "");
 const db = drizzle(queryClient);
 
-export default fp(async (fastify, opts) => {
+export default fp(async (fastify) => {
   try {
     fastify.decorate("db", db);
     fastify.addHook("onClose", () => queryClient.end());

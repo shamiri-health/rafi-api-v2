@@ -50,14 +50,15 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       // TODO: deprecate this once we use the correct key i.e. phone_number
       const phoneValue = phoneNumber ?? phone_number;
-      const result = await fastify.db
-        .select()
-        .from(human)
-        .where(or(eq(human.email, email), eq(human.mobile, phoneValue)));
+
+      const predicate = email
+        ? or(eq(human.email, email), eq(human.mobile, phoneValue))
+        : eq(human.mobile, phoneValue);
+      const result = await fastify.db.select().from(human).where(predicate);
 
       if (!result.length) {
         throw fastify.httpErrors.notFound(
-          "Could not find a user with the specified email",
+          "Could not find a user with the specified phone_number/email",
         );
       }
 
