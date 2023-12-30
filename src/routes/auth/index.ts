@@ -23,46 +23,59 @@ export const ForgotPinResponse = Type.Object({
 export type ForgotPinResponseType = Static<typeof ForgotPinResponse>;
 
 const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
-  fastify.post<{ Body: VerifyTokenBody }>("/verify", async (request) => {
-    const { phoneNumber, phone_number, email, channel } = request.body;
+  fastify.post<{ Body: VerifyTokenBody }>(
+    "/verify",
+    {
+      schema: {
+        body: VerifyTokenBody,
+        response: {
+          200: Type.Object({
+            message: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request) => {
+      const { phoneNumber, phone_number, email, channel } = request.body;
 
-    if (!phoneNumber || (!phone_number && channel === "sms")) {
-      throw fastify.httpErrors.badRequest(
-        "You need to specify either phone_number or phoneNumber if the specified channel is sms",
-      );
-    }
-
-    if (!email && channel === "email") {
-      throw fastify.httpErrors.badRequest("You need to specify eithe");
-    }
-
-    // TODO: deprecate this once we use the correct key i.e. phone_number
-    const phoneValue = phoneNumber ?? phone_number;
-    const result = await fastify.db
-      .select()
-      .from(human)
-      .where(or(eq(human.email, email), eq(human.mobile, phoneValue)));
-
-    if (!result.length) {
-      throw fastify.httpErrors.notFound(
-        "Could not find a user with the specified email",
-      );
-    }
-
-    try {
-      if (channel === "sms") {
-        await sendVerificationCode(phoneValue, "sms");
-      } else {
-        await sendVerificationCode(phoneValue, "email");
+      if (!phoneNumber || (!phone_number && channel === "sms")) {
+        throw fastify.httpErrors.badRequest(
+          "You need to specify either phone_number or phoneNumber if the specified channel is sms",
+        );
       }
-      return { message: "Verification token sent successfully" };
-    } catch (e) {
-      fastify.log.error(e);
-      throw fastify.httpErrors.internalServerError(
-        "Sorry could not process request. Please contact software support",
-      );
-    }
-  });
+
+      if (!email && channel === "email") {
+        throw fastify.httpErrors.badRequest("You need to specify eithe");
+      }
+
+      // TODO: deprecate this once we use the correct key i.e. phone_number
+      const phoneValue = phoneNumber ?? phone_number;
+      const result = await fastify.db
+        .select()
+        .from(human)
+        .where(or(eq(human.email, email), eq(human.mobile, phoneValue)));
+
+      if (!result.length) {
+        throw fastify.httpErrors.notFound(
+          "Could not find a user with the specified email",
+        );
+      }
+
+      try {
+        if (channel === "sms") {
+          await sendVerificationCode(phoneValue, "sms");
+        } else {
+          await sendVerificationCode(phoneValue, "email");
+        }
+        return { message: "Verification token sent successfully" };
+      } catch (e) {
+        fastify.log.error(e);
+        throw fastify.httpErrors.internalServerError(
+          "Sorry could not process request. Please contact software support",
+        );
+      }
+    },
+  );
 
   fastify.post("/token", async () => {});
 
@@ -80,9 +93,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     "/forgot-pin",
     {
       schema: {
-        body: Type.Object({
-          username: Type.String(),
-        }),
+        body: ForgotPinResponse,
         response: {
           200: Type.Object({
             message: Type.String(),
