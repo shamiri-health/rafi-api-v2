@@ -11,8 +11,16 @@ import {
   boolean,
   date,
   primaryKey,
+  customType,
+  json,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+
+const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
+  dataType() {
+    return "bytea";
+  },
+});
 
 export const tip = pgTable(
   "Tip",
@@ -709,6 +717,10 @@ export const subscriptionOrder = pgTable("subscriptionOrder", {
   actionNow: boolean("actionNow").notNull(),
 });
 
+type RewardHubActions = {
+  value: string | { displayText: string };
+};
+
 export const systemResponse = pgTable("systemResponse", {
   id: varchar("id", { length: 20 }).primaryKey().notNull(),
   responseId: integer("responseId"),
@@ -726,8 +738,7 @@ export const systemResponse = pgTable("systemResponse", {
   social: boolean("social"),
   motivation: boolean("motivation"),
   purpose: boolean("purpose"),
-  // TODO: failed to parse database type 'json[]'
-  rewardHubActions: unknown("rewardHubActions").array(),
+  rewardHubActions: json("rewardHubActions").$type<RewardHubActions>(),
 });
 
 export const teamAdmin = pgTable("teamAdmin", {
@@ -818,8 +829,7 @@ export const user = pgTable(
     dateOfBirth: date("dateOfBirth"),
     avatarId: integer("avatarId"),
     clientId: integer("clientId").references(() => client.id),
-    // TODO: failed to parse database type 'bytea'
-    rafibot: unknown("rafibot"),
+    rafibot: bytea("rafibot"),
     gender: integer("gender"),
     edLevel: integer("edLevel"),
     marStatus: integer("marStatus"),
@@ -832,8 +842,7 @@ export const user = pgTable(
     maritalStatus: varchar("maritalStatus"),
     organizationalLevel: varchar("organizationalLevel"),
     educationalLevel: varchar("educationalLevel"),
-    // TODO: failed to parse database type 'bytea'
-    pinH: unknown("pinH").notNull(),
+    pinH: bytea("pinH").notNull(),
     profession: text("profession"),
     referralRecordId: varchar("referral_record_id", { length: 100 }).references(
       () => referralCodes.id,
