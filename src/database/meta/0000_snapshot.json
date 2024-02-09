@@ -1684,6 +1684,30 @@
           "primaryKey": false,
           "notNull": false,
           "default": 15
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2683,6 +2707,90 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "referral_codes": {
+      "name": "referral_codes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referral_code": {
+          "name": "referral_code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "referral_code_client_fkey": {
+          "name": "referral_code_client_fkey",
+          "tableFrom": "referral_codes",
+          "tableTo": "client",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "referral_codes_email_key": {
+          "columns": ["email"],
+          "nullsNotDistinct": false,
+          "name": "referral_codes_email_key"
+        },
+        "unique_email_referral_code_combination": {
+          "columns": ["email", "referral_code"],
+          "nullsNotDistinct": false,
+          "name": "unique_email_referral_code_combination"
+        },
+        "referral_codes_referral_code_key": {
+          "columns": ["referral_code"],
+          "nullsNotDistinct": false,
+          "name": "referral_codes_referral_code_key"
+        }
+      }
+    },
     "rewardHubRecord": {
       "name": "rewardHubRecord",
       "schema": "",
@@ -3251,6 +3359,12 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -3260,6 +3374,15 @@
           "tableFrom": "therapist",
           "tableTo": "human",
           "columnsFrom": ["id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "therapist_client_id_fkey": {
+          "name": "therapist_client_id_fkey",
+          "tableFrom": "therapist",
+          "tableTo": "client",
+          "columnsFrom": ["client_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -3525,6 +3648,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "referral_record_id": {
+          "name": "referral_record_id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -3543,6 +3672,15 @@
           "tableFrom": "user",
           "tableTo": "human",
           "columnsFrom": ["id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_referral_record_id_fkey": {
+          "name": "user_referral_record_id_fkey",
+          "tableFrom": "user",
+          "tableTo": "referral_codes",
+          "columnsFrom": ["referral_record_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"

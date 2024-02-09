@@ -263,7 +263,11 @@ CREATE TABLE IF NOT EXISTS "groupSession" (
 	"therapistId" integer DEFAULT 8 NOT NULL,
 	"groupTopicId" integer,
 	"discordLink" varchar(120),
-	"capacity" integer DEFAULT 15
+	"capacity" integer DEFAULT 15,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL,
+	"archived_at" timestamp with time zone,
+	"day_of_week" integer
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "groupTopic" (
@@ -428,6 +432,20 @@ CREATE TABLE IF NOT EXISTS "quickReplies" (
 	"text" varchar(200) NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "referral_codes" (
+	"id" text PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"updated_at" timestamp,
+	"archived_at" timestamp,
+	"email" varchar(100),
+	"referral_code" varchar(100),
+	"client_id" integer,
+	"name" varchar(100),
+	CONSTRAINT "referral_codes_email_key" UNIQUE("email"),
+	CONSTRAINT "unique_email_referral_code_combination" UNIQUE("email","referral_code"),
+	CONSTRAINT "referral_codes_referral_code_key" UNIQUE("referral_code")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rewardHubRecord" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"userRewardHubId" integer,
@@ -515,7 +533,8 @@ CREATE TABLE IF NOT EXISTS "therapist" (
 	"workingTimeEnd" varchar(15),
 	"specialtyTags" varchar(80),
 	"supportPhone" boolean,
-	"supportInPerson" boolean
+	"supportInPerson" boolean,
+	"client_id" integer
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "therapistCal" (
@@ -559,6 +578,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"educationalLevel" varchar,
 	"pinH" "bytea" NOT NULL,
 	"profession" text,
+	"referral_record_id" varchar(100),
 	CONSTRAINT "user_alias_key" UNIQUE("alias")
 );
 --> statement-breakpoint
@@ -1073,6 +1093,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "referral_codes" ADD CONSTRAINT "referral_code_client_fkey" FOREIGN KEY ("client_id") REFERENCES "client"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "rewardHubRecord" ADD CONSTRAINT "rewardHubRecord_userRewardHubId_fkey" FOREIGN KEY ("userRewardHubId") REFERENCES "userRewardHub"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -1145,6 +1171,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "therapist" ADD CONSTRAINT "therapist_client_id_fkey" FOREIGN KEY ("client_id") REFERENCES "client"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "therapistCal" ADD CONSTRAINT "therapistCal_id_fkey" FOREIGN KEY ("id") REFERENCES "calendar"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -1170,6 +1202,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "user" ADD CONSTRAINT "user_id_fkey" FOREIGN KEY ("id") REFERENCES "human"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user" ADD CONSTRAINT "user_referral_record_id_fkey" FOREIGN KEY ("referral_record_id") REFERENCES "referral_codes"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
