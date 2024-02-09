@@ -4,7 +4,7 @@ import { Type, Static } from "@sinclair/typebox";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode } from "../../lib/auth";
 import { z } from "zod";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 // TODO: harden validation here
 export const VerifyTokenBody = Type.Object({
@@ -38,21 +38,22 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     async (request) => {
       const { phoneNumber, phone_number, email, channel } = request.body;
 
-      if (!phoneNumber || (!phone_number && channel === "sms")) {
+      if ((!phoneNumber || !phone_number) && channel === "sms") {
         throw fastify.httpErrors.badRequest(
           "You need to specify either phone_number or phoneNumber if the specified channel is sms",
         );
       }
 
       if (!email && channel === "email") {
-        throw fastify.httpErrors.badRequest("You need to specify eithe");
+        throw fastify.httpErrors.badRequest("You need to specify the email if channel is email");
       }
 
       // TODO: deprecate this once we use the correct key i.e. phone_number
       const phoneValue = phoneNumber ?? phone_number;
 
       const predicate = email
-        ? or(eq(human.email, email), eq(human.mobile, phoneValue))
+        ? eq(human.email, email)
+        // @ts-ignore
         : eq(human.mobile, phoneValue);
       const result = await fastify.db.select().from(human).where(predicate);
 
@@ -63,10 +64,12 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       }
 
       try {
-        if (channel === "sms") {
+        if (channel === "sms" && phoneValue) {
           await sendVerificationCode(phoneValue, "sms");
+        } else if (channel === 'email' && email) { // TODO: revisit typescript complaint
+          await sendVerificationCode(email, "email");
         } else {
-          await sendVerificationCode(phoneValue, "email");
+          throw new Error('invalid combination')
         }
         return { message: "Verification token sent successfully" };
       } catch (e) {
@@ -78,9 +81,9 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     },
   );
 
-  fastify.post("/token", async () => {});
+  fastify.post("/token", async () => { });
 
-  fastify.post("/create-user", async () => {});
+  fastify.post("/create-user", async () => { });
 
   fastify.post(
     "/forgotPin",

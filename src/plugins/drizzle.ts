@@ -1,15 +1,16 @@
 import fp from "fastify-plugin";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-
-// TODO: have this come from zod schema
-const queryClient = postgres(process.env.DATABASE_URL ?? "");
-const db = drizzle(queryClient);
+import { generateDbClient } from "../lib/db";
+import type { database } from "../lib/db";
 
 export default fp(async (fastify) => {
+  const { db, queryClient } = generateDbClient();
+
   try {
-    fastify.decorate("db", db);
-    fastify.addHook("onClose", () => queryClient.end());
+    if (!fastify.db) {
+      //@ts-ignore
+      fastify.decorate("db", db);
+      fastify.addHook("onClose", async () => await queryClient.end());
+    }
   } catch (e) {
     fastify.log.error(
       "AN ISSUE OCCURRED WITH CONNECTING TO THE DATABASE...CLOSING: ",
@@ -21,6 +22,6 @@ export default fp(async (fastify) => {
 
 declare module "fastify" {
   export interface FastifyInstance {
-    db: typeof db;
+    db: database;
   }
 }
