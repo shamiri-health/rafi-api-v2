@@ -1,43 +1,43 @@
 import { test } from "tap";
 import { build } from "../helper";
-// import { eq } from "drizzle-orm";
-// import { blacklistToken } from "../../src/schema";
+import { eq } from "drizzle-orm";
+import { blacklistToken } from "../../src/schema";
 import sinon from "sinon";
 import * as authCode from "../../src/lib/auth";
 import { generateHuman } from "../fixtures/users";
 
-// test("/logout", (t) => {
-//   t.test(
-//     "should be able to logout a user given a token in req.headers.authorization",
-//     async (t) => {
-//       // given
-//       const app = await build(t);
-//       const tokenText = "somethingRandom";
-//
-//       // when
-//       const res = await app
-//         .inject()
-//         .post("/auth/logout")
-//         .headers({ Authorization: `Bearer ${tokenText}` });
-//
-//       // then
-//       t.equal(res.statusCode, 200);
-//       t.match(JSON.parse(res.payload), {
-//         message: "successfully logged out user",
-//       });
-//
-//       const dbResult = await app.db
-//         .select()
-//         .from(blacklistToken)
-//         .where(eq(blacklistToken.token, tokenText));
-//
-//       t.equal(dbResult[0].token, tokenText);
-//       t.teardown(() => app.db.delete(blacklistToken));
-//     },
-//   );
-//   t.end();
-// });
-//
+test("/logout", (t) => {
+  t.test(
+    "should be able to logout a user given a token in req.headers.authorization",
+    async (t) => {
+      // given
+      const app = await build(t);
+      const tokenText = "somethingRandom";
+
+      // when
+      const res = await app
+        .inject()
+        .post("/auth/logout")
+        .headers({ Authorization: `Bearer ${tokenText}` });
+
+      // then
+      t.equal(res.statusCode, 200);
+      t.match(JSON.parse(res.payload), {
+        message: "successfully logged out user",
+      });
+
+      const dbResult = await app.db
+        .select()
+        .from(blacklistToken)
+        .where(eq(blacklistToken.token, tokenText));
+
+      t.equal(dbResult[0].token, tokenText);
+      t.teardown(() => app.db.delete(blacklistToken));
+    },
+  );
+  t.end();
+});
+
 test("/forgotPin", (t) => {
   t.test(
     "should be redirect the user from /forgotPin to /forgot-pin",
