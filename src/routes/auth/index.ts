@@ -40,7 +40,6 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       // TODO: deprecate this once we use the correct key i.e. phone_number
       const phoneValue = phoneNumber ?? phone_number;
-      console.log('Value of phone value: ', phoneValue)
 
       if (!phoneValue && channel === "sms") {
         throw fastify.httpErrors.badRequest(
@@ -69,7 +68,6 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       try {
         if (channel === "sms" && phoneValue) {
-          console.log("got here");
           await sendVerificationCode(phoneValue, "sms");
         } else if (channel === "email" && email) {
           // TODO: revisit typescript complaint

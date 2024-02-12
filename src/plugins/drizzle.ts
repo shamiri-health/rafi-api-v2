@@ -8,7 +8,10 @@ export default fp(async (fastify) => {
     if (!fastify.db) {
       fastify.decorate("db", db);
 
-      fastify.addHook("onClose", async () => await queryClient.end());
+      fastify.addHook("onClose", (_, done) => {
+        queryClient.end();
+        done();
+      });
     }
   } catch (e) {
     fastify.log.error(

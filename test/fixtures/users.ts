@@ -1,10 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { human } from "../../src/schema";
-import { generateDbClient } from "../../src/lib/db";
+import type { database } from "../../src/lib/db";
 
-const { db } = generateDbClient();
-
-export const generateHuman = async () => {
+export const generateHuman = async (db: database["db"]) => {
   const result = await db
     .insert(human)
     .values({

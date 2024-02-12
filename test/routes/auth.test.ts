@@ -1,6 +1,5 @@
 import { test } from "tap";
 import { build } from "../helper";
-import request from "request";
 // import { eq } from "drizzle-orm";
 // import { blacklistToken } from "../../src/schema";
 import sinon from "sinon";
@@ -198,13 +197,12 @@ test("/verify", async (t) => {
     sendCodeStub.returns(new Promise((resolve) => resolve({ success: true })));
   });
   t.teardown(() => {
-    console.log("called");
     // @ts-ignore
     sendCodeStub.restore();
   });
   // @ts-ignore
   const app = await build(t);
-  const user = await generateHuman();
+  const user = await generateHuman(app.db);
 
   // when
   const res = await app.inject().post("/auth/verify").payload({
