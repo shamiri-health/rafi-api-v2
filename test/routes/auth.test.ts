@@ -150,34 +150,68 @@ test("/forgot-pin", (t) => {
   t.end();
 });
 
-test("/verify should work if ", async (t) => {
-  // "should ensure that user is sent a verification code if sent via email",
-  // given
-  // @ts-ignore
-  let sendCodeStub;
-  t.before(() => {
+test("/auth/verify", (t) => {
+  t.test("should ensure that user is sent a verification code if email channel is provided", async (t) => {
+    // given
     // @ts-ignore
-    sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+    let sendCodeStub;
+    t.before(() => {
+      // @ts-ignore
+      sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+      // @ts-ignore
+      sendCodeStub.returns(new Promise((resolve) => resolve({ success: true })));
+    });
+    t.teardown(() => {
+      // @ts-ignore
+      sendCodeStub.restore();
+    });
     // @ts-ignore
-    sendCodeStub.returns(new Promise((resolve) => resolve({ success: true })));
-  });
-  t.teardown(() => {
-    // @ts-ignore
-    sendCodeStub.restore();
-  });
-  // @ts-ignore
-  const app = await build(t);
-  const user = await generateHuman(app.db);
+    const app = await build(t);
+    const user = await generateHuman(app.db);
 
-  // when
-  const res = await app.inject().post("/auth/verify").payload({
-    email: user.email,
-    channel: "email",
-  });
-  const body = await res.json();
+    // when
+    const res = await app.inject().post("/auth/verify").payload({
+      email: user.email,
+      channel: "email",
+    });
+    const body = await res.json();
 
-  // then
-  // @ts-ignore
-  t.match(body, { message: "Verification token sent successfully" });
-  t.equal(res.statusCode, 200);
+    // then
+    // @ts-ignore
+    t.match(body, { message: "Verification token sent successfully" });
+    t.equal(res.statusCode, 200);
+  });
+
+  t.test("should ensure that user is sent a verification code if phone channel is provided", async (t) => {
+    // given
+    // @ts-ignore
+    let sendCodeStub;
+    t.before(() => {
+      // @ts-ignore
+      sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+      // @ts-ignore
+      sendCodeStub.returns(new Promise((resolve) => resolve({ success: true })));
+    });
+    t.teardown(() => {
+      // @ts-ignore
+      sendCodeStub.restore();
+    });
+    // @ts-ignore
+    const app = await build(t);
+    const user = await generateHuman(app.db);
+
+    // when
+    const res = await app.inject().post("/auth/verify").payload({
+      phoneNumber: user.mobile,
+      channel: "sms",
+    });
+    const body = await res.json();
+
+    // then
+    // @ts-ignore
+    t.match(body, { message: "Verification token sent successfully" });
+    t.equal(res.statusCode, 200);
+  });
+
+  t.end();
 });
