@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { blacklistToken, human } from "../../schema";
+import { blacklistToken, human } from "../../database/schema";
 import { Type, Static } from "@sinclair/typebox";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode } from "../../lib/auth";
@@ -86,8 +86,6 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   );
 
   fastify.post("/token", async () => {});
-
-  fastify.post("/create-user", async () => {});
 
   fastify.post(
     "/forgotPin",

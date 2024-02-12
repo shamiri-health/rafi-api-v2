@@ -884,12 +884,18 @@ export const userAchievement = pgTable("userAchievement", {
   achLevel10: timestamp("achLevel10", { mode: "string" }),
   gems: integer("gems"),
   streak: integer("streak"),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "date",
+  }).defaultNow(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "date",
+  }).defaultNow(),
   userId: integer("user_id").references(() => user.id),
   streakUpdatedAt: timestamp("streak_updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }),
 });
 

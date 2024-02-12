@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { human } from "../../src/schema";
+import { human } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
 
 export const generateHuman = async (db: database["db"]) => {
