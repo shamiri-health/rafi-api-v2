@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { db } from "../../src/lib/db";
 import { human } from "../../src/schema";
+import { generateDbClient } from "../../src/lib/db";
+
+const { db } = generateDbClient();
 
 export const generateHuman = async () => {
   const result = await db

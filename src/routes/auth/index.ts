@@ -38,7 +38,11 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     async (request) => {
       const { phoneNumber, phone_number, email, channel } = request.body;
 
-      if ((!phoneNumber || !phone_number) && channel === "sms") {
+      // TODO: deprecate this once we use the correct key i.e. phone_number
+      const phoneValue = phoneNumber ?? phone_number;
+      console.log('Value of phone value: ', phoneValue)
+
+      if (!phoneValue && channel === "sms") {
         throw fastify.httpErrors.badRequest(
           "You need to specify either phone_number or phoneNumber if the specified channel is sms",
         );
@@ -48,13 +52,11 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         throw fastify.httpErrors.badRequest("You need to specify the email if channel is email");
       }
 
-      // TODO: deprecate this once we use the correct key i.e. phone_number
-      const phoneValue = phoneNumber ?? phone_number;
-
       const predicate = email
         ? eq(human.email, email)
         // @ts-ignore
         : eq(human.mobile, phoneValue);
+
       const result = await fastify.db.select().from(human).where(predicate);
 
       if (!result.length) {
