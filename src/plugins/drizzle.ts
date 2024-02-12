@@ -2,8 +2,9 @@ import fp from "fastify-plugin";
 import { generateDbClient } from "../lib/db";
 import type { database } from "../lib/db";
 
-const { db, queryClient } = generateDbClient();
 export default fp(async (fastify) => {
+  const { db, queryClient } = generateDbClient();
+
   try {
     if (!fastify.db) {
       fastify.decorate("db", db);
