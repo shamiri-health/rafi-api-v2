@@ -1,15 +1,15 @@
 import fp from "fastify-plugin";
 import { generateDbClient } from "../lib/db";
-import type { database } from "../lib/db";
+// import type { database } from "../lib/db";
 
 export default fp(async (fastify) => {
   const { db, queryClient } = generateDbClient();
 
   try {
     if (!fastify.db) {
-      //@ts-ignore
-      fastify.decorate("db", db);
-      fastify.addHook("onClose", async () => await queryClient.end());
+      fastify.decorate('db', db)
+
+      fastify.addHook("onClose", () => queryClient.end());
     }
   } catch (e) {
     fastify.log.error(
@@ -22,6 +22,6 @@ export default fp(async (fastify) => {
 
 declare module "fastify" {
   export interface FastifyInstance {
-    db: database;
+    db: any;
   }
 }
