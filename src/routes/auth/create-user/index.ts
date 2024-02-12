@@ -7,13 +7,15 @@ import {
   user,
   userRewardHub,
   rewardHubRecord,
-  goals,
   userGoal,
-  referralCodes,
   userService,
   subscription,
+  referralCodes,
 } from "../../../database/schema";
 import subscriptionTypes from "../../../../static/subscription_types.json";
+import { sendVerificationCode } from "../../../lib/auth";
+import client from "../../../lib/stream";
+import { addDays } from "date-fns";
 
 const CreateUserBody = Type.Object({
   email: Type.String({ format: "email" }),
@@ -66,7 +68,7 @@ const createUserRoute: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateUserBody }>(
     "/",
     { schema: { body: CreateUserBody } },
-    async (request, reply) => {
+    async (request, _) => {
       const phoneNumber = request.body.phone_number.trim().toLowerCase();
       const email = request.body.email.trim().toLowerCase();
 
@@ -147,7 +149,8 @@ const createUserRoute: FastifyPluginAsync = async (
             })
             .returning();
 
-          const rewardHubRecordResult = await fastify.db
+          // DEPRECATED: create reward hub record
+          await fastify.db
             .insert(rewardHubRecord)
             .values({
               userRewardHubId: userRewardHubRecordResult[0].id,
@@ -158,17 +161,17 @@ const createUserRoute: FastifyPluginAsync = async (
             })
             .returning();
 
-          const goalRecordResult = await fastify.db.insert(userGoal).values({
+          // DEPRECATED: create UserGoal record not to be confused with the Goals table
+          await fastify.db.insert(userGoal).values({
             userRewardHubId: userRewardHubRecordResult[0].id,
             timestamp: new Date().toISOString(),
           });
 
-          const userAchievementRecordResult = await fastify.db
-            .insert(userAchievement)
-            .values({
-              userRewardHubId: userRewardHubRecordResult[0].id,
-              userId: insertedHumanResult[0].id,
-            });
+          // create user achievement record
+          await fastify.db.insert(userAchievement).values({
+            userRewardHubId: userRewardHubRecordResult[0].id,
+            userId: insertedHumanResult[0].id,
+          });
 
           let userServiceRecord: typeof userService.$inferInsert = {
             userId: insertedHumanResult[0].id,
@@ -177,9 +180,10 @@ const createUserRoute: FastifyPluginAsync = async (
           if (request.body.referral_code) {
             const referralRecord =
               await fastify.db.query.referralCodes.findFirst({
-                where: {
-                  referralCode: request.body.referral_code.trim().toUpperCase(),
-                },
+                where: eq(
+                  referralCodes.referralCode,
+                  request.body.referral_code.trim().toUpperCase(),
+                ),
               });
 
             if (referralRecord) {
@@ -189,9 +193,7 @@ const createUserRoute: FastifyPluginAsync = async (
                   clientId: referralRecord.clientId,
                   referralRecordId: referralRecord.id,
                 })
-                .where({
-                  id: insertedHumanResult[0].id,
-                })
+                .where(eq(user.id, insertedHumanResult[0].id))
                 .returning();
 
               userServiceRecord.assignedTherapistId =
@@ -211,7 +213,7 @@ const createUserRoute: FastifyPluginAsync = async (
               .set({
                 clientId: MORINGA_CLIENT_ID,
               })
-              .where({ id: insertedHumanResult[0].id })
+              .where(eq(user.id, insertedHumanResult[0].id))
               .returning();
 
             userServiceRecord.assignedTherapistId =
@@ -220,7 +222,7 @@ const createUserRoute: FastifyPluginAsync = async (
 
           await fastify.db.insert(userService).values(userServiceRecord);
 
-          if (!insertedUserResult.clientId) {
+          if (!insertedUserResult[0].clientId) {
             const { validity, credit } =
               subscriptionTypes.subscriptionOrder.individualIntroFreemium;
 
@@ -233,13 +235,36 @@ const createUserRoute: FastifyPluginAsync = async (
               remCredit: credit,
             });
           }
+
+          return {
+            ...insertedUserResult[0],
+            name: insertedHumanResult[0].name,
+          };
         } catch (error) {
           await tx.rollback();
           fastify.log.error(error);
           throw error;
         }
       });
-      return { test: "me " };
+
+      if (userResult) {
+        await sendVerificationCode(phoneNumber, "sms");
+        try {
+          // FIXME: might be better to use getOrCreate method here
+          // if we get a user client then we have to scrub that record.
+          await client.user(userResult.id.toString()).create({
+            name: userResult?.name ?? `anonymouse_${userResult.id}`,
+            phoneNumber,
+          });
+        } catch (e) {
+          fastify.log.warn(e);
+          fastify.log.warn(
+            `Could not create stream user for user id: ${userResult.id}`,
+          );
+        }
+      } else {
+        // TODO: best to log it to sentry
+      }
     },
   );
 };

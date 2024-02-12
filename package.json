@@ -32,6 +32,7 @@
     "fastify": "^4.0.0",
     "fastify-cli": "^5.9.0",
     "fastify-plugin": "^4.0.0",
+    "getstream": "^8.4.1",
     "libphonenumber-js": "^1.10.53",
     "postgres": "^3.4.3",
     "twilio": "^4.20.0",
