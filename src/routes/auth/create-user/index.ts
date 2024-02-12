@@ -11,7 +11,9 @@ import {
   userGoal,
   referralCodes,
   userService,
+  subscription,
 } from "../../../database/schema";
+import subscriptionTypes from "../../../../static/subscription_types.json";
 
 const CreateUserBody = Type.Object({
   email: Type.String({ format: "email" }),
@@ -111,6 +113,9 @@ const createUserRoute: FastifyPluginAsync = async (
       const MKU_CLIENT_ID = 20;
       const MORINGA_CLIENT_ID = 18;
 
+      const SYMON_ID = 10;
+      const HELLEN_ID = 205;
+
       const userResult = await fastify.db.transaction(async (tx) => {
         try {
           const insertedHumanResult = await fastify.db
@@ -122,7 +127,7 @@ const createUserRoute: FastifyPluginAsync = async (
             })
             .returning();
 
-          const insertedUserResult = await fastify.db
+          let insertedUserResult = await fastify.db
             .insert(user)
             .values({
               id: insertedHumanResult[0].id,
@@ -165,7 +170,9 @@ const createUserRoute: FastifyPluginAsync = async (
               userId: insertedHumanResult[0].id,
             });
 
-          let userServiceRecord: typeof userService.$inferInsert = {};
+          let userServiceRecord: typeof userService.$inferInsert = {
+            userId: insertedHumanResult[0].id,
+          };
 
           if (request.body.referral_code) {
             const referralRecord =
@@ -176,7 +183,7 @@ const createUserRoute: FastifyPluginAsync = async (
               });
 
             if (referralRecord) {
-              await fastify.db
+              insertedUserResult = await fastify.db
                 .update(user)
                 .set({
                   clientId: referralRecord.clientId,
@@ -184,9 +191,47 @@ const createUserRoute: FastifyPluginAsync = async (
                 })
                 .where({
                   id: insertedHumanResult[0].id,
-                });
-              userServiceRecord.userId;
+                })
+                .returning();
+
+              userServiceRecord.assignedTherapistId =
+                Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+              // TODO: later on we need to toggle if we are using client's own therapists or our own
             }
+          } else if (isMkuUser || TESTING_WHITELIST) {
+            await fastify.db.update(user).set({
+              clientId: MKU_CLIENT_ID,
+            });
+
+            userServiceRecord.assignedTherapistId =
+              Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+          } else if (isMoringaUser) {
+            insertedUserResult = await fastify.db
+              .update(user)
+              .set({
+                clientId: MORINGA_CLIENT_ID,
+              })
+              .where({ id: insertedHumanResult[0].id })
+              .returning();
+
+            userServiceRecord.assignedTherapistId =
+              Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+          }
+
+          await fastify.db.insert(userService).values(userServiceRecord);
+
+          if (!insertedUserResult.clientId) {
+            const { validity, credit } =
+              subscriptionTypes.subscriptionOrder.individualIntroFreemium;
+
+            await fastify.db.insert(subscription).values({
+              userId: insertedHumanResult[0].id,
+              timestamp: new Date(),
+              expireTime: addDays(new Date(), validity),
+              ref: phoneNumber,
+              totalCredit: credit,
+              remCredit: credit,
+            });
           }
         } catch (error) {
           await tx.rollback();
