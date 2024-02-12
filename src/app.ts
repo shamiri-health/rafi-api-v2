@@ -1,6 +1,9 @@
 import { join } from "path";
 import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
 import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import fastifySwagger from "@fastify/swagger";
+import swaggerUI from "@fastify/swagger-ui";
+import fp from "fastify-plugin";
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -13,6 +16,28 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts,
 ): Promise<void> => {
   // Place here your custom code!
+  void fastify.register(fastifySwagger, {});
+  void fastify.register(swaggerUI, {
+    routePrefix: "/documentation",
+    uiConfig: {
+      docExpansion: "full",
+      deepLinking: false,
+    },
+    uiHooks: {
+      onRequest: function (request, reply, next) {
+        next();
+      },
+      preHandler: function (request, reply, next) {
+        next();
+      },
+    },
+    staticCSP: true,
+    transformStaticCSP: (header) => header,
+    transformSpecification: (swaggerObject, request, reply) => {
+      return swaggerObject;
+    },
+    transformSpecificationClone: true,
+  });
 
   // Do not touch the following lines
 
@@ -32,5 +57,5 @@ const app: FastifyPluginAsync<AppOptions> = async (
   });
 };
 
-export default app;
+export default fp(app);
 export { app, options };

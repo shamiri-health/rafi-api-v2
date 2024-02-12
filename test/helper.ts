@@ -24,7 +24,9 @@ async function build(t: Test) {
   const app = await helper.build(argv, await config());
 
   // Tear down our app after we are done
-  t.teardown(() => void app.close());
+  t.teardown(() => {
+    void app.close();
+  });
 
   return app;
 }
