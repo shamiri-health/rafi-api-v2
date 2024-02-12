@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { generateDbClient } from "../lib/db";
-// import type { database } from "../lib/db";
+import type { database } from "../lib/db";
 
 export default fp(async (fastify) => {
   const { db, queryClient } = generateDbClient();
@@ -22,6 +22,6 @@ export default fp(async (fastify) => {
 
 declare module "fastify" {
   export interface FastifyInstance {
-    db: any;
+    db: database['db'];
   }
 }
