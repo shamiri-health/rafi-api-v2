@@ -1,5 +1,6 @@
 import { test } from "tap";
 import { build } from "../helper";
+import request from "request";
 // import { eq } from "drizzle-orm";
 // import { blacklistToken } from "../../src/schema";
 import sinon from "sinon";
@@ -197,7 +198,7 @@ test("/verify", async (t) => {
     sendCodeStub.returns(new Promise((resolve) => resolve({ success: true })));
   });
   t.teardown(() => {
-    console.log('called')
+    console.log("called");
     // @ts-ignore
     sendCodeStub.restore();
   });
@@ -208,13 +209,12 @@ test("/verify", async (t) => {
   // when
   const res = await app.inject().post("/auth/verify").payload({
     email: user.email,
-    channel: 'email'
-  })
+    channel: "email",
+  });
   const body = await res.json();
 
   // then
   // @ts-ignore
-  t.match(body, { message: "Verification token sent successfully" })
-  t.equal(res.statusCode, 200)
-})
-
+  t.match(body, { message: "Verification token sent successfully" });
+  t.equal(res.statusCode, 200);
+});
