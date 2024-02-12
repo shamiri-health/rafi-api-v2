@@ -153,14 +153,14 @@ import { generateHuman } from "../fixtures/users";
 // // test("/verify", (t) => {
 // //   t.test("should send a verification code if channel is email and email is supplied", async (t) => {
 // //     // given
-// //     //@ts-ignore                                                   
+// //     //@ts-ignore
 // //     let sendCodeStub;
 // //     t.before(() => {
-// //       //@ts-ignore                                                 
+// //       //@ts-ignore
 // //       sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
 // //     });
 // //     t.teardown(() => {
-// //       //@ts-ignore                                                 
+// //       //@ts-ignore
 // //       sendCodeStub.restore();
 // //     })
 // //

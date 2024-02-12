@@ -49,13 +49,15 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       }
 
       if (!email && channel === "email") {
-        throw fastify.httpErrors.badRequest("You need to specify the email if channel is email");
+        throw fastify.httpErrors.badRequest(
+          "You need to specify the email if channel is email",
+        );
       }
 
       const predicate = email
         ? eq(human.email, email)
-        // @ts-ignore
-        : eq(human.mobile, phoneValue);
+        : // @ts-ignore
+          eq(human.mobile, phoneValue);
 
       const result = await fastify.db.select().from(human).where(predicate);
 
@@ -67,11 +69,13 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       try {
         if (channel === "sms" && phoneValue) {
+          console.log("got here");
           await sendVerificationCode(phoneValue, "sms");
-        } else if (channel === 'email' && email) { // TODO: revisit typescript complaint
+        } else if (channel === "email" && email) {
+          // TODO: revisit typescript complaint
           await sendVerificationCode(email, "email");
         } else {
-          throw new Error('invalid combination')
+          throw new Error("invalid combination");
         }
         return { message: "Verification token sent successfully" };
       } catch (e) {
@@ -83,9 +87,9 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     },
   );
 
-  fastify.post("/token", async () => { });
+  fastify.post("/token", async () => {});
 
-  fastify.post("/create-user", async () => { });
+  fastify.post("/create-user", async () => {});
 
   fastify.post(
     "/forgotPin",
