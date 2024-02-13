@@ -653,9 +653,9 @@ export const referralCodes = pgTable(
   "referral_codes",
   {
     id: text("id").primaryKey().notNull(),
-    createdAt: timestamp("created_at", { mode: "string" }),
-    updatedAt: timestamp("updated_at", { mode: "string" }),
-    archivedAt: timestamp("archived_at", { mode: "string" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+    archivedAt: timestamp("archived_at", { mode: "date" }),
     email: varchar("email", { length: 100 }),
     referralCode: varchar("referral_code", { length: 100 }),
     clientId: integer("client_id").references(() => client.id),
