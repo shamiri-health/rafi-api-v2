@@ -121,6 +121,70 @@ test("/auth/create-user", async (t) => {
   });
 
   t.test(
+    "should create a user and assign a client given a valid referral code in mIxEd CAse",
+    async (t) => {
+      const code = faker.string.alphanumeric(6);
+      t.before(async () => {
+        await app.db.insert(referralCodes).values({
+          id: randomUUID(),
+          email: faker.internet.email().toLowerCase(),
+          referralCode: code.toUpperCase(),
+          clientId: 20,
+          name: faker.person.fullName(),
+        });
+      });
+
+      // given
+      const payload = {
+        birth_date: "2023-12-29",
+        education_level: "Primary School",
+        email: faker.internet.email().trim().toLowerCase(),
+        gender: "MALE",
+        phone_number: faker.string.numeric({ length: 9 }),
+        profession: "Computer and Mathematical",
+        referral_code: code,
+      };
+
+      // when
+      const res = await app.inject().post("/auth/create-user").payload(payload);
+      const body = await res.json();
+
+      // then
+      t.equal(res.statusCode, 201);
+
+      const newUser = await app.db.query.user.findFirst({
+        where: eq(user.id, body.id),
+      });
+
+      const referralCode = await app.db.query.referralCodes.findFirst({
+        where: eq(referralCodes.referralCode, code.toUpperCase()),
+      });
+
+      const service = await app.db.query.userService.findFirst({
+        where: eq(userService.userId, newUser.id),
+      });
+
+      t.equal(newUser.clientId, 20);
+      t.equal(newUser.referralRecordId, referralCode.id);
+      t.ok([10, 205].includes(service.assignedTherapistId));
+
+      t.teardown(async () => {
+        await app.db.delete(subscription);
+        await app.db.delete(userService);
+        await app.db.delete(userGoal);
+        await app.db.delete(userAchievement);
+        await app.db.delete(rewardHubRecord);
+        await app.db.delete(userRewardHub);
+        await app.db.delete(user).where(eq(user.id, body.id));
+        await app.db
+          .delete(referralCodes)
+          .where(eq(referralCodes.referralCode, code.toUpperCase()));
+        await app.db.delete(human).where(eq(human.id, body.id));
+      });
+    },
+  );
+
+  t.test(
     "should create a user and assign a client given a valid referral code",
     async (t) => {
       t.before(async () => {
