@@ -9,6 +9,7 @@
   "scripts": {
     "test": "yarn build:ts && tsc -p test/tsconfig.json && tap --jobs=1 --ts \"test/**/*.test.ts\"",
     "start": "yarn build:ts && fastify start -l info dist/src/app.js",
+    "prod:start": "fastify start -l info dist/src/app.js",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
     "typecheck": "tsc --noEmit",
