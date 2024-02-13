@@ -248,8 +248,8 @@ const createUserRoute: FastifyPluginAsync = async (
             name: insertedHumanResult[0].name,
           };
         } catch (error) {
-          await tx.rollback();
           fastify.log.error(error);
+          await tx.rollback();
           throw error;
         }
       });

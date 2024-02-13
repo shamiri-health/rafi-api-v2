@@ -48,13 +48,32 @@ test("/auth/create-user", (t) => {
     t.equal(res.statusCode, 400)
   })
 
-  t.skip("should return a 400 error if a user with supplied phonenumber already exists", async (t) => {
+  t.test("should return a 400 error if a user with supplied phonenumber already exists", async (t) => {
     // given
+    const app = await build(t);
+    const existingHuman = await generateHuman(app.db)
+
+    t.teardown(async () => {
+      await app.db.delete(human).where(eq(human.id, existingHuman.id))
+    })
+
+    const body = {
+      birth_date: "2023-12-29",
+      education_level: "Primary School",
+      email: faker.internet.email().trim().toLowerCase(),
+      gender: "MALE",
+      phone_number: existingHuman.mobile,
+      profession: "Computer and Mathematical",
+      referral_code: "CHRX9N"
+    }
 
     // when
+    const res = await app.inject().post('/auth/create-user').payload(body)
+    const resBody = await res.json()
 
     // then
-
+    t.equal(resBody.message, 'A user exists with the supplied phone')
+    t.equal(res.statusCode, 400)
   })
 
   t.end()
