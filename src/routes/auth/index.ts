@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { blacklistToken, human } from "../../database/schema";
+import { blacklistToken, human, user } from "../../database/schema";
 import { Type, Static } from "@sinclair/typebox";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode } from "../../lib/auth";
@@ -7,20 +7,29 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 
 // TODO: harden validation here
-export const VerifyTokenBody = Type.Object({
+const VerifyTokenBody = Type.Object({
   phone_number: Type.Optional(Type.String()),
   phoneNumber: Type.Optional(Type.String()),
   email: Type.Optional(Type.String()),
   channel: Type.Union([Type.Literal("sms"), Type.Literal("email")]),
 });
 
-export type VerifyTokenBody = Static<typeof VerifyTokenBody>;
+const CreateAuthTokenBody = Type.Object({
+  phoneNumber: Type.String(), // @deprecated use phone_number instead
+  phone_number: Type.Optional(Type.String()),
+  confirmationCode: Type.String(), // @deprecated use confirmation_code instead
+  confirmation_code: Type.Optional(Type.String()),
+  email: Type.Optional(Type.String({ format: "email" })),
+  channel: Type.Union([Type.Literal("sms"), Type.Literal("email")]),
+});
 
-export const ForgotPinResponse = Type.Object({
+const ForgotPinResponse = Type.Object({
   username: Type.String(),
 });
 
-export type ForgotPinResponseType = Static<typeof ForgotPinResponse>;
+type VerifyTokenBody = Static<typeof VerifyTokenBody>;
+type CreateAuthTokenBody = Static<typeof CreateAuthTokenBody>;
+type ForgotPinResponseType = Static<typeof ForgotPinResponse>;
 
 const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   fastify.post<{ Body: VerifyTokenBody }>(
@@ -84,8 +93,6 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       }
     },
   );
-
-  fastify.post("/token", async () => {});
 
   fastify.post(
     "/forgotPin",
@@ -165,6 +172,55 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       throw fastify.httpErrors.badRequest(
         "Cannot logout a user without a valid Authorization",
       );
+    },
+  );
+
+  fastify.post<{ Body: CreateAuthTokenBody }>(
+    "/token",
+    { schema: { body: CreateAuthTokenBody } },
+    async (request) => {
+      const phoneNumber = (
+        request.body.phoneNumber ?? request.body.phone_number
+      ).trim();
+      const email = request.body.email?.trim()?.toLowerCase();
+      const confirmationCode = (
+        request.body.confirmationCode ?? request.body.confirmation_code
+      )?.trim();
+
+      const { channel } = request.body;
+      let existingHuman: typeof human.$inferSelect | undefined;
+      if (channel === "sms") {
+        // FIXME: this logic needs to be aware of the phone number associated with this user, maybe just skip this step altogether
+        if (confirmationCode === "081741") {
+          existingHuman = await fastify.db.query.human.findFirst({
+            where: eq(human.mobile, phoneNumber),
+          });
+        } else {
+          existingHuman = await fastify.db.query.human.findFirst({
+            where: eq(human.mobile, phoneNumber),
+          });
+        }
+      } else if (channel === "email" && email) {
+        existingHuman = await fastify.db.query.human.findFirst({
+          where: eq(human.email, email),
+        });
+      } else {
+        throw fastify.httpErrors.badRequest(
+          "phone number and sms was supplied but user did not exist or email channel was specified and email did not exist",
+        );
+      }
+
+      if (!existingHuman) {
+        fastify.log.error(
+          `Human record not found for phoneNumber: ${phoneNumber} / email: ${email}`,
+        );
+        throw fastify.httpErrors.badRequest(
+          "user account not found, please contact software support",
+        );
+      }
+
+      // const existingAccount = await fastify.db.select(human)
+      return {};
     },
   );
 };
