@@ -119,6 +119,8 @@ const createUserRoute: FastifyPluginAsync = async (
       const HELLEN_ID = 205;
 
       const userResult = await fastify.db.transaction(async (tx) => {
+        // @ts-ignore
+        const now: Date = new Date();
         try {
           const insertedHumanResult = await fastify.db
             .insert(human)
@@ -134,9 +136,12 @@ const createUserRoute: FastifyPluginAsync = async (
             .values({
               id: insertedHumanResult[0].id,
               dateOfBirth: request.body.birth_date,
-              educationLevel: request.body.education_level,
+              educationalLevel: request.body.education_level,
+              pinH: Buffer.from(
+                "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
+              ),
               profession: request.body.profession,
-              registeredOn: new Date(),
+              registeredOn: now.toISOString(),
             })
             .returning();
 
@@ -156,7 +161,7 @@ const createUserRoute: FastifyPluginAsync = async (
               userRewardHubId: userRewardHubRecordResult[0].id,
               level: 1,
               gemsHave: 5,
-              timestamp: new Date().toISOString(),
+              timestamp: now.toISOString(),
               streak: 0,
             })
             .returning();
@@ -164,7 +169,7 @@ const createUserRoute: FastifyPluginAsync = async (
           // DEPRECATED: create UserGoal record not to be confused with the Goals table
           await fastify.db.insert(userGoal).values({
             userRewardHubId: userRewardHubRecordResult[0].id,
-            timestamp: new Date().toISOString(),
+            timestamp: now.toISOString(),
           });
 
           // create user achievement record
@@ -223,13 +228,15 @@ const createUserRoute: FastifyPluginAsync = async (
           await fastify.db.insert(userService).values(userServiceRecord);
 
           if (!insertedUserResult[0].clientId) {
-            const { validity, credit } =
+            const { validity, credit, subscriptionType } =
               subscriptionTypes.subscriptionOrder.individualIntroFreemium;
 
+            const expireTime = addDays(now, validity);
             await fastify.db.insert(subscription).values({
               userId: insertedHumanResult[0].id,
-              timestamp: new Date(),
-              expireTime: addDays(new Date(), validity),
+              type: subscriptionType,
+              timestamp: now,
+              expireTime,
               ref: phoneNumber,
               totalCredit: credit,
               remCredit: credit,
@@ -253,7 +260,7 @@ const createUserRoute: FastifyPluginAsync = async (
           // FIXME: might be better to use getOrCreate method here
           // if we get a user client then we have to scrub that record.
           await client.user(userResult.id.toString()).create({
-            name: userResult?.name ?? `anonymouse_${userResult.id}`,
+            name: userResult?.name ?? `anonymous_${userResult.id}`,
             phoneNumber,
           });
         } catch (e) {

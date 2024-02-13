@@ -1,10 +1,10 @@
 import { test } from "tap";
-import { build } from "../helper";
+import { build } from "../../helper";
 import { eq } from "drizzle-orm";
-import { blacklistToken } from "../../src/schema";
+import { blacklistToken } from "../../../src/database/schema";
 import sinon from "sinon";
-import * as authCode from "../../src/lib/auth";
-import { generateHuman } from "../fixtures/users";
+import * as authCode from "../../../src/lib/auth";
+import { generateHuman } from "../../fixtures/users";
 
 test("/logout", (t) => {
   t.test(
