@@ -14,7 +14,7 @@ import {
 } from "../../../database/schema";
 import subscriptionTypes from "../../../../static/subscription_types.json";
 import { sendVerificationCode } from "../../../lib/auth";
-import client from "../../../lib/stream";
+import { addUserToStream } from "../../../lib/stream";
 import { addDays } from "date-fns";
 
 const CreateUserBody = Type.Object({
@@ -59,6 +59,20 @@ const CreateUserBody = Type.Object({
   ]),
 });
 
+const UserResponse = Type.Object({
+  id: Type.Number(),
+  registeredOn: Type.String({ format: "date-time" }),
+  alias: Type.Optional(Type.String()),
+  dateOfBirth: Type.String({ format: "date" }),
+  avatarId: Type.Optional(Type.Number()),
+  clientId: Type.Optional(Type.Number()),
+  gender2: Type.Optional(Type.String()),
+  maritalStatus: Type.Optional(Type.String()),
+  organizationalLevel: Type.Optional(Type.String()),
+  educationalLevel: Type.Optional(Type.String()),
+  profession: Type.Optional(Type.String()),
+});
+
 type CreateUserBody = Static<typeof CreateUserBody>;
 
 const createUserRoute: FastifyPluginAsync = async (
@@ -67,7 +81,14 @@ const createUserRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.post<{ Body: CreateUserBody }>(
     "/",
-    { schema: { body: CreateUserBody } },
+    {
+      schema: {
+        body: CreateUserBody,
+        response: {
+          201: UserResponse,
+        },
+      },
+    },
     async (request, _) => {
       const phoneNumber = request.body.phone_number.trim().toLowerCase();
       const email = request.body.email.trim().toLowerCase();
@@ -140,6 +161,7 @@ const createUserRoute: FastifyPluginAsync = async (
               pinH: Buffer.from(
                 "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
               ),
+              gender2: request.body.gender,
               profession: request.body.profession,
               registeredOn: now.toISOString(),
             })
@@ -259,10 +281,12 @@ const createUserRoute: FastifyPluginAsync = async (
         try {
           // FIXME: might be better to use getOrCreate method here
           // if we get a user client then we have to scrub that record.
-          await client.user(userResult.id.toString()).create({
-            name: userResult?.name ?? `anonymous_${userResult.id}`,
+          const t = await addUserToStream(
+            userResult.id.toString(),
+            userResult?.name ?? `anonymous_${userResult.id}`,
             phoneNumber,
-          });
+          );
+          console.log("Response from t: ", t);
         } catch (e) {
           fastify.log.warn(e);
           fastify.log.warn(
@@ -272,6 +296,8 @@ const createUserRoute: FastifyPluginAsync = async (
       } else {
         // TODO: best to log it to sentry
       }
+
+      return userResult;
     },
   );
 };
