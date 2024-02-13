@@ -37,27 +37,33 @@ test("/auth/create-user", async (t) => {
 
     // given
     const emails = [faker.internet.email(), faker.internet.email()];
-    await app.db.insert(human).values([
-      {
-        id: 205,
-        mobile: faker.phone.number(),
-        email: emails[0],
-      },
-      {
-        id: 10,
-        mobile: faker.phone.number(),
-        email: emails[1],
-      },
-    ]);
+    await app.db
+      .insert(human)
+      .values([
+        {
+          id: 205,
+          mobile: faker.phone.number(),
+          email: emails[0],
+        },
+        {
+          id: 10,
+          mobile: faker.phone.number(),
+          email: emails[1],
+        },
+      ])
+      .onConflictDoNothing({ target: human.id });
 
-    await app.db.insert(therapist).values([
-      {
-        id: 205,
-        gmail: emails[0],
-        dateOfBirth: new Date(),
-      },
-      { id: 10, gmail: emails[1], dateOfBirth: new Date() },
-    ]);
+    await app.db
+      .insert(therapist)
+      .values([
+        {
+          id: 205,
+          gmail: emails[0],
+          dateOfBirth: new Date(),
+        },
+        { id: 10, gmail: emails[1], dateOfBirth: new Date() },
+      ])
+      .onConflictDoNothing({ target: therapist.id });
   });
 
   t.teardown(async () => {

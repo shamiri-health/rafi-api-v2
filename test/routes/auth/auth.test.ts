@@ -1,7 +1,7 @@
 import { test } from "tap";
 import { build } from "../../helper";
 import { eq } from "drizzle-orm";
-import { blacklistToken } from "../../../src/database/schema";
+import { blacklistToken, human } from "../../../src/database/schema";
 import sinon from "sinon";
 import * as authCode from "../../../src/lib/auth";
 import { generateHuman } from "../../fixtures/users";
@@ -174,6 +174,10 @@ test("/auth/verify", (t) => {
       const app = await build(t);
       const user = await generateHuman(app.db);
 
+      t.teardown(() => {
+        app.db.delete(human).where(eq(human.id, user.id));
+      });
+
       // when
       const res = await app.inject().post("/auth/verify").payload({
         email: user.email,
@@ -210,6 +214,10 @@ test("/auth/verify", (t) => {
       const app = await build(t);
       const user = await generateHuman(app.db);
 
+      t.teardown(() => {
+        app.db.delete(human).where(eq(human.id, user.id));
+      });
+
       // when
       const res = await app.inject().post("/auth/verify").payload({
         phone_number: user.mobile,
@@ -242,6 +250,10 @@ test("/auth/verify", (t) => {
       // @ts-ignore
       const app = await build(t);
       const user = await generateHuman(app.db);
+
+      t.teardown(async () => {
+        await app.db.delete(human).where(eq(human.id, user.id));
+      });
 
       // when
       const res = await app.inject().post("/auth/verify").payload({
