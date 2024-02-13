@@ -8,8 +8,8 @@ export const generateHuman = async (db: database["db"]) => {
     .values({
       name: faker.person.fullName(),
       role: "user",
-      email: faker.internet.email(),
-      mobile: faker.helpers.fromRegExp("254[1-9]{9}"),
+      email: faker.internet.email().trim().toLowerCase(),
+      mobile: faker.helpers.fromRegExp("254[1-9]{9}").toLowerCase(),
       lastLogin: faker.date.anytime().toISOString(),
     })
     .returning();
