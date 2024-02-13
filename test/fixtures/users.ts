@@ -6,6 +6,7 @@ export const generateHuman = async (db: database["db"]) => {
   const result = await db
     .insert(human)
     .values({
+      id: faker.number.int({ min: 300, max: 6000 }),
       name: faker.person.fullName(),
       role: "user",
       email: faker.internet.email().trim().toLowerCase(),
@@ -16,3 +17,16 @@ export const generateHuman = async (db: database["db"]) => {
 
   return result[0];
 };
+
+// export const generateSymonTherapist = async (db: database["db"]) => {
+//   const client = await db.insert(client).
+//   const therapistHuman = await db
+//     .insert(human)
+//     .values({
+//       id: 20,
+//       name: faker.person.fullName(),
+//       role: "therapist",
+//       email: faker.internet.email().trim().toLowerCase(),
+//       mobile: faker.phone.number(),
+//     })
+// }
