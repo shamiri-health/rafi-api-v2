@@ -75,10 +75,7 @@ const UserResponse = Type.Object({
 
 type CreateUserBody = Static<typeof CreateUserBody>;
 
-const createUserRoute: FastifyPluginAsync = async (
-  fastify,
-  _,
-): Promise<void> => {
+const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post<{ Body: CreateUserBody }>(
     "/",
     {
@@ -160,6 +157,7 @@ const createUserRoute: FastifyPluginAsync = async (
               pinH: Buffer.from(
                 "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
               ),
+              clientId: null,
               avatarId: 1,
               gender2: request.body.gender,
               profession: request.body.profession,
@@ -279,8 +277,9 @@ const createUserRoute: FastifyPluginAsync = async (
       });
 
       if (userResult) {
-        await sendVerificationCode(phoneNumber, "sms");
         try {
+          await sendVerificationCode(phoneNumber, "sms");
+
           // FIXME: might be better to use getOrCreate method here
           // if we get a user client then we have to scrub that record.
           const t = await addUserToStream(
@@ -291,9 +290,6 @@ const createUserRoute: FastifyPluginAsync = async (
           console.log("Response from t: ", t);
         } catch (e) {
           fastify.log.warn(e);
-          fastify.log.warn(
-            `Could not create stream user for user id: ${userResult.id}`,
-          );
         }
       } else {
         // TODO: best to log it to sentry
