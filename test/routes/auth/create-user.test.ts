@@ -20,12 +20,13 @@ import * as verificationClient from "../../../src/lib/auth";
 import * as streamClient from "../../../src/lib/stream";
 
 test("/auth/create-user", async (t) => {
+  // given
   const app = await build(t);
   // @ts-ignore
   let streamStub;
   // @ts-ignore
   let sendCodeStub;
-  t.before(() => {
+  t.before(async () => {
     sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
     streamStub = sinon.stub(streamClient, "addUserToStream");
 
@@ -33,17 +34,7 @@ test("/auth/create-user", async (t) => {
     sendCodeStub.returns(Promise.resolve({ success: true }));
     // @ts-ignore
     streamStub.returns(Promise.resolve({ success: true }));
-  });
 
-  t.teardown(async () => {
-
-    // @ts-ignore
-    sendCodeStub.restore();
-    // @ts-ignore
-    streamStub.restore();
-  });
-
-  t.test("should create user given valid request body", async (t) => {
     // given
     const emails = [faker.internet.email(), faker.internet.email()];
     await app.db.insert(human).values([
@@ -67,6 +58,18 @@ test("/auth/create-user", async (t) => {
       },
       { id: 10, gmail: emails[1], dateOfBirth: new Date() },
     ]);
+  });
+
+  t.teardown(async () => {
+    // @ts-ignore
+    sendCodeStub.restore();
+    // @ts-ignore
+    streamStub.restore();
+    await app.db.delete(therapist).where(inArray(therapist.id, [10, 205]));
+  });
+
+  t.test("should create user given valid request body", async (t) => {
+    // given
 
     const payload = {
       birth_date: "2023-12-29",
@@ -90,15 +93,14 @@ test("/auth/create-user", async (t) => {
     // 4. assert that user was "added" to stream
 
     t.teardown(async () => {
-      await app.db.delete(subscription)
-      await app.db.delete(userService)
-      await app.db.delete(userGoal)
-      await app.db.delete(userAchievement)
-      await app.db.delete(rewardHubRecord)
-      await app.db.delete(userRewardHub)
-      await app.db.delete(user).where(eq(user.id, body.id))
-      await app.db.delete(therapist).where(inArray(therapist.id, [10, 205]))
-      await app.db.delete(human).where(inArray(human.id, [10, 205, body.id]))
+      await app.db.delete(subscription);
+      await app.db.delete(userService);
+      await app.db.delete(userGoal);
+      await app.db.delete(userAchievement);
+      await app.db.delete(rewardHubRecord);
+      await app.db.delete(userRewardHub);
+      await app.db.delete(user).where(eq(user.id, body.id));
+      await app.db.delete(human).where(eq(human.id, body.id));
     });
   });
 
