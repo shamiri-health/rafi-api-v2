@@ -501,7 +501,7 @@ CREATE TABLE IF NOT EXISTS "systemResponse" (
 	"social" boolean,
 	"motivation" boolean,
 	"purpose" boolean,
-	"rewardHubActions" json[]
+	"rewardHubActions" json
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "teamAdmin" (

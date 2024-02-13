@@ -1,10 +1,11 @@
 import { test } from "tap";
-import { build } from "../helper";
+import { build } from "../../helper";
 import { eq } from "drizzle-orm";
-import { blacklistToken } from "../../src/schema";
+import { blacklistToken, human } from "../../../src/database/schema";
 import sinon from "sinon";
-import * as authCode from "../../src/lib/auth";
-import { generateHuman } from "../fixtures/users";
+import * as authCode from "../../../src/lib/auth";
+import { generateHuman } from "../../fixtures/users";
+import { faker } from "@faker-js/faker";
 
 test("/logout", (t) => {
   t.test(
@@ -173,6 +174,10 @@ test("/auth/verify", (t) => {
       const app = await build(t);
       const user = await generateHuman(app.db);
 
+      t.teardown(() => {
+        app.db.delete(human).where(eq(human.id, user.id));
+      });
+
       // when
       const res = await app.inject().post("/auth/verify").payload({
         email: user.email,
@@ -209,6 +214,10 @@ test("/auth/verify", (t) => {
       const app = await build(t);
       const user = await generateHuman(app.db);
 
+      t.teardown(() => {
+        app.db.delete(human).where(eq(human.id, user.id));
+      });
+
       // when
       const res = await app.inject().post("/auth/verify").payload({
         phone_number: user.mobile,
@@ -237,13 +246,14 @@ test("/auth/verify", (t) => {
           new Promise((resolve) => resolve({ success: true })),
         );
       });
-      t.teardown(() => {
-        // @ts-ignore
-        sendCodeStub.restore();
-      });
+
       // @ts-ignore
       const app = await build(t);
       const user = await generateHuman(app.db);
+
+      t.teardown(async () => {
+        await app.db.delete(human).where(eq(human.id, user.id));
+      });
 
       // when
       const res = await app.inject().post("/auth/verify").payload({
@@ -262,11 +272,10 @@ test("/auth/verify", (t) => {
   t.test("should fail if channel is not specified", async (t) => {
     // given
     const app = await build(t);
-    const user = await generateHuman(app.db);
 
     // when
     const res = await app.inject().post("/auth/verify").payload({
-      phoneNumber: user.mobile,
+      phoneNumber: faker.phone.number(),
     });
 
     // then

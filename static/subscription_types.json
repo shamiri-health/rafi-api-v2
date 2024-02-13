@@ -1,0 +1,115 @@
+{
+  "subscriptionOrder": {
+    "individualIntroFreemium": {
+      "subscriptionType": "individualIntroFreemium",
+      "price": {
+        "KES": 0,
+        "USD": 0
+      },
+      "validity": 30,
+      "credit": 5,
+      "name": "Free One-Month Trial",
+      "details": [
+        "<b> Unlimited access to check-ins </b> and our digital self-help exercises",
+        "Apply your credits towards one intake session with our expert care navigator or 5 group sessions!"
+      ],
+      "backgroundColors": ["rgba(37, 178, 250, 1)", "rgba(80, 82, 201, 1)"]
+    },
+    "individualIntro": {
+      "subscriptionType": "individualIntro",
+      "price": {
+        "KES": 600,
+        "USD": 5
+      },
+      "validity": 30,
+      "credit": 5,
+      "name": "Individual Introductory",
+      "details": [
+        "<b> Unlimited access to check-ins </b> and our digital self-help exercises",
+        "Apply your credits towards one intake session with our expert care navigator,or 5 group sessions!"
+      ],
+      "backgroundColors": ["rgba(83, 160, 140, 1)", "rgba(83, 160, 140, 1)"]
+    },
+    "individualBasic": {
+      "subscriptionType": "individualBasic",
+      "price": {
+        "KES": 2000,
+        "USD": 18
+      },
+      "validity": 30,
+      "credit": 15,
+      "name": "Individual Basic",
+      "details": [
+        "<b> Unlimited access to check-ins </b> and our digital self-help exercises",
+        "Apply your credits towards two private sessions with our licensed counselors or 15 group sessions!"
+      ],
+      "backgroundColors": ["rgba(255, 165, 70, 1)", "rgba(255, 72, 140, 1)"]
+    },
+    "individualPremium": {
+      "subscriptionType": "individualBasic",
+      "price": {
+        "KES": 3000,
+        "USD": 30
+      },
+      "validity": 30,
+      "credit": 30,
+      "name": "Individual Premium",
+      "details": [
+        "<b> Unlimited access to check-ins </b> and our digital self-help exercises",
+        "Apply your credits towards up to 5 private sessions with our licensed counselors or 15 group sessions!"
+      ],
+      "backgroundColors": ["rgba(255, 165, 70, 1)", "rgba(255, 72, 140, 1)"]
+    }
+  },
+  "teletherapyOrder": {
+    "price": {
+      "KES": 1000,
+      "USD": 10
+    }
+  },
+  "alacarteOrder": {
+    "rafiOnsite": {
+      "deposit": {
+        "price": {
+          "KES": 500,
+          "USD": 3
+        },
+        "insuranceEligible": true
+      },
+      "fileFee": {
+        "price": {
+          "KES": 500,
+          "USD": 3
+        },
+        "insuranceEligible": false
+      },
+      "intakeFee": {
+        "price": {
+          "KES": 2500,
+          "USD": 20
+        }
+      },
+      "sessionFee": {
+        "price": {
+          "KES": 3000,
+          "USD": 25
+        }
+      }
+    }
+  },
+  "groupPlan": {
+    "packageA": {
+      "price": {
+        "KES": 110000,
+        "USD": 80000
+      },
+      "validity": 365,
+      "credits": {
+        "phoneEvents": 80,
+        "onsiteEvents": 0,
+        "groupEvents": 100
+      },
+      "name": "Package A"
+    }
+  }
+}

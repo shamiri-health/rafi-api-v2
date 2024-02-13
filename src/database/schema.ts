@@ -653,9 +653,9 @@ export const referralCodes = pgTable(
   "referral_codes",
   {
     id: text("id").primaryKey().notNull(),
-    createdAt: timestamp("created_at", { mode: "string" }),
-    updatedAt: timestamp("updated_at", { mode: "string" }),
-    archivedAt: timestamp("archived_at", { mode: "string" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+    archivedAt: timestamp("archived_at", { mode: "date" }),
     email: varchar("email", { length: 100 }),
     referralCode: varchar("referral_code", { length: 100 }),
     clientId: integer("client_id").references(() => client.id),
@@ -698,8 +698,8 @@ export const subscription = pgTable("subscription", {
   id: serial("id").primaryKey().notNull(),
   userId: integer("userId").references(() => user.id),
   type: varchar("type").notNull(),
-  timestamp: timestamp("timestamp", { mode: "string" }).notNull(),
-  expireTime: timestamp("expireTime", { mode: "string" }).notNull(),
+  timestamp: timestamp("timestamp", { mode: "date" }).notNull(),
+  expireTime: timestamp("expireTime", { mode: "date" }).notNull(),
   totalCredit: integer("totalCredit"),
   remCredit: integer("remCredit"),
   ref: varchar("ref", { length: 100 }),
@@ -884,12 +884,18 @@ export const userAchievement = pgTable("userAchievement", {
   achLevel10: timestamp("achLevel10", { mode: "string" }),
   gems: integer("gems"),
   streak: integer("streak"),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "date",
+  }).defaultNow(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "date",
+  }).defaultNow(),
   userId: integer("user_id").references(() => user.id),
   streakUpdatedAt: timestamp("streak_updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }),
 });
 
