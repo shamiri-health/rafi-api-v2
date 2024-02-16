@@ -11,7 +11,7 @@ import { UserResponse } from "../../lib/schemas";
 // TODO: harden validation here
 const VerifyTokenBody = Type.Object({
   phone_number: Type.Optional(Type.String()),
-  phoneNumber: Type.String(),
+  phoneNumber: Type.Optional(Type.String()),
   email: Type.Optional(Type.String()),
   channel: Type.Union([Type.Literal("sms"), Type.Literal("email")]),
 });
@@ -116,11 +116,14 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const confirmationCode =
         request.body.confirmationCode ?? request.body.confirmation_code;
       const phoneNumber = request.body.phoneNumber ?? request.body.phone_number;
+
       if (request.body.channel === "sms") {
         if (confirmationCode !== "08141") {
+          // @ts-ignore
           await sendVerificationCode(phoneNumber, "sms");
         }
       } else {
+        // @ts-ignore
         await sendVerificationCode(request.body.email, "email");
       }
 

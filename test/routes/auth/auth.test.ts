@@ -1,10 +1,10 @@
 import { test } from "tap";
 import { build } from "../../helper";
 import { eq } from "drizzle-orm";
-import { blacklistToken, human } from "../../../src/database/schema";
+import { blacklistToken, human, user } from "../../../src/database/schema";
 import sinon from "sinon";
 import * as authCode from "../../../src/lib/auth";
-import { generateHuman } from "../../fixtures/users";
+import { generateHuman, generateUser } from "../../fixtures/users";
 import { faker } from "@faker-js/faker";
 
 test("POST /auth/logout", (t) => {
@@ -344,5 +344,43 @@ test("POST /auth/verify", (t) => {
   });
   */
 
+  t.end();
+});
+
+test("POST /auth/token", (t) => {
+  t.test("should generate token if user exists in the database", async (t) => {
+    // given
+    const app = await build(t);
+    const newHuman = await generateHuman(app.db);
+    await generateUser(app.db, newHuman.id);
+
+    // when
+    const res = await app
+      .inject()
+      .post("/auth/token")
+      .payload({
+        phoneNumber: newHuman.mobile,
+        channel: "sms",
+        confirmationCode: faker.string.alphanumeric({
+          length: 6,
+          casing: "upper",
+        }),
+      });
+    const body = await res.json();
+
+    // then
+    t.equal(res.statusCode, 200);
+    t.hasProps(body, ["token", "user", "authType"]);
+
+    t.teardown(async () => {
+      await app.db.delete(user).where(eq(user.id, newHuman.id));
+      await app.db.delete(human).where(eq(human.id, newHuman.id));
+    });
+  });
+
+  t.test(
+    "should return 404 error if user does not exist in the database",
+    async (t) => {},
+  );
   t.end();
 });

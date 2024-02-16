@@ -23,7 +23,7 @@ export const generateUser = async (
   id: number | undefined,
 ) => {
   let data: Partial<typeof user.$inferInsert> = {
-    dateOfBirth: faker.date.birthdate().toString(),
+    dateOfBirth: faker.date.birthdate().toISOString(),
     educationalLevel: "College",
     pinH: Buffer.from(
       "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
@@ -31,7 +31,7 @@ export const generateUser = async (
     clientId: null,
     avatarId: 1,
     gender2: faker.helpers.arrayElement(["MALE", "FEMALE", "OTHER"]),
-    profession: "something randomg",
+    profession: "something random",
     registeredOn: new Date().toISOString(),
   };
 
