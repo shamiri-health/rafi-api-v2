@@ -347,12 +347,19 @@ test("POST /auth/verify", (t) => {
   t.end();
 });
 
-test("POST /auth/token", (t) => {
+test("POST /auth/token", async (t) => {
+  // given
+  const app = await build(t);
+
   t.test("should generate token if user exists in the database", async (t) => {
     // given
-    const app = await build(t);
     const newHuman = await generateHuman(app.db);
     await generateUser(app.db, newHuman.id);
+
+    t.teardown(async () => {
+      await app.db.delete(user).where(eq(user.id, newHuman.id));
+      await app.db.delete(human).where(eq(human.id, newHuman.id));
+    });
 
     // when
     const res = await app
@@ -371,11 +378,6 @@ test("POST /auth/token", (t) => {
     // then
     t.equal(res.statusCode, 200);
     t.hasProps(body, ["token", "user", "authType"]);
-
-    t.teardown(async () => {
-      await app.db.delete(user).where(eq(user.id, newHuman.id));
-      await app.db.delete(human).where(eq(human.id, newHuman.id));
-    });
   });
 
   t.test(
