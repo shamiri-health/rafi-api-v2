@@ -7,7 +7,7 @@ import * as authCode from "../../../src/lib/auth";
 import { generateHuman } from "../../fixtures/users";
 import { faker } from "@faker-js/faker";
 
-test("/logout", (t) => {
+test("POST /auth/logout", (t) => {
   t.test(
     "should be able to logout a user given a token in req.headers.authorization",
     async (t) => {
@@ -39,7 +39,7 @@ test("/logout", (t) => {
   t.end();
 });
 
-test("/forgotPin", (t) => {
+test("POST /auth/forgotPin", (t) => {
   t.test(
     "should be redirect the user from /forgotPin to /forgot-pin",
     async (t) => {
@@ -57,7 +57,7 @@ test("/forgotPin", (t) => {
 });
 
 // TODO: tighten the stubs
-test("/forgot-pin", (t) => {
+test("POST /auth/forgot-pin", (t) => {
   t.test(
     "should ensure that user is sent a verification code if sent via email",
     async (t) => {
@@ -151,7 +151,7 @@ test("/forgot-pin", (t) => {
   t.end();
 });
 
-test("/auth/verify", (t) => {
+test("POST /auth/verify", (t) => {
   t.test(
     "should ensure that user is sent a verification code if email channel is provided",
     async (t) => {

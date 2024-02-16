@@ -117,40 +117,39 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         request.body.confirmationCode ?? request.body.confirmation_code;
       const phoneNumber = request.body.phoneNumber ?? request.body.phone_number;
       if (request.body.channel === "sms") {
-        if (confirmationCode === "081741") {
-          const [existingAccount] = await fastify.db
-            .select()
-            .from(human)
-            .leftJoin(user, eq(human.id, user.id))
-            // @ts-ignore
-            .where(eq(human.mobile, phoneNumber));
-
-          if (!existingAccount) {
-            throw fastify.httpErrors.notFound(
-              "User with the specified phone number not found",
-            );
-          }
-
-          const token = encodeAuthToken(existingAccount.human.id, "user");
-
-          let authType: "login" | "signUp";
-
-          if (
-            existingAccount.user?.alias === null ||
-            existingAccount.user?.alias === undefined
-          ) {
-            authType = "signUp";
-          } else {
-            authType = "login";
-          }
-
-          return {
-            token,
-            user: existingAccount.user,
-            authType,
-          };
+        if (confirmationCode !== "08141") {
+          await sendVerificationCode(phoneNumber, "sms");
         }
+      } else {
+        await sendVerificationCode(request.body.email, "email");
       }
+
+      const [existingAccount] = await fastify.db
+        .select()
+        .from(human)
+        .leftJoin(user, eq(human.id, user.id))
+        // @ts-ignore
+        .where(eq(human.mobile, phoneNumber));
+
+      if (!existingAccount) {
+        throw fastify.httpErrors.notFound(
+          "User with the specified phone number not found",
+        );
+      }
+
+      const token = encodeAuthToken(existingAccount.human.id, "user");
+
+      const authType =
+        existingAccount.user?.alias === null ||
+        existingAccount.user?.alias === undefined
+          ? "signUp"
+          : "login";
+
+      return {
+        token,
+        user: existingAccount.user,
+        authType,
+      };
     },
   );
 
