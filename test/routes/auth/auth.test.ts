@@ -3,7 +3,7 @@ import { build } from "../../helper";
 import { eq } from "drizzle-orm";
 import { blacklistToken, human, user } from "../../../src/database/schema";
 import sinon from "sinon";
-import * as authCode from "../../../src/lib/auth";
+import * as verificationClient from "../../../src/lib/auth";
 import { generateHuman, generateUser } from "../../fixtures/users";
 import { faker } from "@faker-js/faker";
 
@@ -66,7 +66,7 @@ test("POST /auth/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -95,7 +95,7 @@ test("POST /auth/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -124,7 +124,7 @@ test("POST /auth/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -160,7 +160,7 @@ test("POST /auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -200,7 +200,7 @@ test("POST /auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -240,7 +240,7 @@ test("POST /auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -351,6 +351,19 @@ test("POST /auth/token", async (t) => {
   // given
   const app = await build(t);
 
+  // @ts-ignore
+  let sendCodeStub;
+  t.before(() => {
+    sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
+    // @ts-ignore
+    sendCodeStub.returns(Promise.resolve({ success: true }));
+  });
+
+  t.teardown(() => {
+    // @ts-ignore
+    sendCodeStub.restore();
+  });
+
   t.test("should generate token if user exists in the database", async (t) => {
     // given
     const newHuman = await generateHuman(app.db);
@@ -382,7 +395,19 @@ test("POST /auth/token", async (t) => {
 
   t.test(
     "should return 404 error if user does not exist in the database",
-    async (t) => {},
+    async (t) => {
+      // when
+      const res = await app
+        .inject()
+        .post("/auth/token")
+        .payload({
+          phoneNumber: faker.phone.number(),
+          confirmationCode: "sms",
+        });
+
+      // then
+      t.equal(res.statusCode, 404);
+    },
   );
   t.end();
 });
