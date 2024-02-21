@@ -1,13 +1,13 @@
 import { test } from "tap";
 import { build } from "../../helper";
 import { eq } from "drizzle-orm";
-import { blacklistToken, human } from "../../../src/database/schema";
+import { blacklistToken, human, user } from "../../../src/database/schema";
 import sinon from "sinon";
-import * as authCode from "../../../src/lib/auth";
-import { generateHuman } from "../../fixtures/users";
+import * as verificationClient from "../../../src/lib/auth";
+import { generateHuman, generateUser } from "../../fixtures/users";
 import { faker } from "@faker-js/faker";
 
-test("/logout", (t) => {
+test("POST /auth/logout", (t) => {
   t.test(
     "should be able to logout a user given a token in req.headers.authorization",
     async (t) => {
@@ -39,7 +39,7 @@ test("/logout", (t) => {
   t.end();
 });
 
-test("/forgotPin", (t) => {
+test("POST /auth/forgotPin", (t) => {
   t.test(
     "should be redirect the user from /forgotPin to /forgot-pin",
     async (t) => {
@@ -57,7 +57,7 @@ test("/forgotPin", (t) => {
 });
 
 // TODO: tighten the stubs
-test("/forgot-pin", (t) => {
+test("POST /auth/forgot-pin", (t) => {
   t.test(
     "should ensure that user is sent a verification code if sent via email",
     async (t) => {
@@ -66,7 +66,7 @@ test("/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -95,7 +95,7 @@ test("/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -124,7 +124,7 @@ test("/forgot-pin", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
       });
       t.teardown(() => {
         // @ts-ignore
@@ -151,7 +151,7 @@ test("/forgot-pin", (t) => {
   t.end();
 });
 
-test("/auth/verify", (t) => {
+test("POST /auth/verify", (t) => {
   t.test(
     "should ensure that user is sent a verification code if email channel is provided",
     async (t) => {
@@ -160,7 +160,7 @@ test("/auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -200,7 +200,7 @@ test("/auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -240,7 +240,7 @@ test("/auth/verify", (t) => {
       let sendCodeStub;
       t.before(() => {
         // @ts-ignore
-        sendCodeStub = sinon.stub(authCode, "sendVerificationCode");
+        sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
         sendCodeStub.returns(
           // @ts-ignore
           new Promise((resolve) => resolve({ success: true })),
@@ -344,5 +344,70 @@ test("/auth/verify", (t) => {
   });
   */
 
+  t.end();
+});
+
+test("POST /auth/token", async (t) => {
+  // given
+  const app = await build(t);
+
+  // @ts-ignore
+  let sendCodeStub;
+  t.before(() => {
+    sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
+    // @ts-ignore
+    sendCodeStub.returns(Promise.resolve({ success: true }));
+  });
+
+  t.teardown(() => {
+    // @ts-ignore
+    sendCodeStub.restore();
+  });
+
+  t.test("should generate token if user exists in the database", async (t) => {
+    // given
+    const newHuman = await generateHuman(app.db);
+    await generateUser(app.db, newHuman.id);
+
+    t.teardown(async () => {
+      await app.db.delete(user).where(eq(user.id, newHuman.id));
+      await app.db.delete(human).where(eq(human.id, newHuman.id));
+    });
+
+    // when
+    const res = await app
+      .inject()
+      .post("/auth/token")
+      .payload({
+        phoneNumber: newHuman.mobile,
+        channel: "sms",
+        confirmationCode: faker.string.alphanumeric({
+          length: 6,
+          casing: "upper",
+        }),
+      });
+    const body = await res.json();
+
+    // then
+    t.equal(res.statusCode, 200);
+    t.hasProps(body, ["token", "user", "authType"]);
+  });
+
+  t.test(
+    "should return 404 error if user does not exist in the database",
+    async (t) => {
+      // when
+      const res = await app
+        .inject()
+        .post("/auth/token")
+        .payload({
+          phoneNumber: faker.phone.number(),
+          confirmationCode: "sms",
+        });
+
+      // then
+      t.equal(res.statusCode, 404);
+    },
+  );
   t.end();
 });

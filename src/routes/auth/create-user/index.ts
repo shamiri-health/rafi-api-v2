@@ -16,6 +16,7 @@ import subscriptionTypes from "../../../../static/subscription_types.json";
 import { sendVerificationCode } from "../../../lib/auth";
 import { addUserToStream } from "../../../lib/stream";
 import { addDays } from "date-fns";
+import { UserResponse } from "../../../lib/schemas";
 
 const CreateUserBody = Type.Object({
   email: Type.String({ format: "email" }),
@@ -57,20 +58,6 @@ const CreateUserBody = Type.Object({
     Type.Literal("Sales and Related"),
     Type.Literal("Transportation and Materials Moving"),
   ]),
-});
-
-const UserResponse = Type.Object({
-  id: Type.Number(),
-  registeredOn: Type.String({ format: "date-time" }),
-  alias: Type.Optional(Type.String()),
-  dateOfBirth: Type.String({ format: "date" }),
-  avatarId: Type.Optional(Type.Number()),
-  clientId: Type.Optional(Type.Number()),
-  gender2: Type.Optional(Type.String()),
-  maritalStatus: Type.Optional(Type.String()),
-  organizationalLevel: Type.Optional(Type.String()),
-  educationalLevel: Type.Optional(Type.String()),
-  profession: Type.Optional(Type.String()),
 });
 
 type CreateUserBody = Static<typeof CreateUserBody>;

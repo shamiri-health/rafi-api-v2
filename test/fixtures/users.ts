@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { human } from "../../src/database/schema";
+import { human, user } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
 
 export const generateHuman = async (db: database["db"]) => {
@@ -16,6 +16,37 @@ export const generateHuman = async (db: database["db"]) => {
     .returning();
 
   return result[0];
+};
+
+export const generateUser = async (
+  db: database["db"],
+  id: number | undefined,
+) => {
+  let data: Partial<typeof user.$inferInsert> = {
+    dateOfBirth: faker.date.birthdate().toISOString(),
+    educationalLevel: "College",
+    pinH: Buffer.from(
+      "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
+    ),
+    clientId: null,
+    avatarId: 1,
+    gender2: faker.helpers.arrayElement(["MALE", "FEMALE", "OTHER"]),
+    profession: "something random",
+    registeredOn: new Date().toISOString(),
+  };
+
+  if (id) {
+    data.id = id;
+  } else {
+    const newHuman = await generateHuman(db);
+    data.id = newHuman.id;
+  }
+
+  const [result] = await db
+    .insert(user)
+    .values(data as typeof user.$inferSelect)
+    .returning();
+  return result;
 };
 
 // export const generateSymonTherapist = async (db: database["db"]) => {
