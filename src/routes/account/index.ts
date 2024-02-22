@@ -3,7 +3,7 @@ import { FastifyPluginAsync } from "fastify";
 import { user } from "../../database/schema";
 import { eq } from "drizzle-orm";
 import { UserResponse } from "../../lib/schemas";
-import { hash } from "@node-rs/bcrypt";
+// import { hash } from "@node-rs/bcrypt";
 
 const ProfileUpdateRequest = Type.Object({
   alias: Type.Optional(Type.String()),
@@ -11,15 +11,12 @@ const ProfileUpdateRequest = Type.Object({
   avatar_id: Type.Optional(Type.Number()),
 });
 
-const ChangePinQueryString = Type.Object({
-  pin: Type.String({ maxLength: 4, minLength: 4 }),
-});
-
-const ChangePinRequestBody = Type.Optional(ChangePinQueryString);
+// const ChangePinQueryString = Type.Object({
+//   pin: Type.String({ maxLength: 4, minLength: 4 }),
+// });
 
 type ProfileUpdateRequest = Static<typeof ProfileUpdateRequest>;
-type ChangePinRequest = Static<typeof ChangePinQueryString>;
-type ChangePinRequestBody = Static<typeof ChangePinRequestBody>;
+// type ChangePinRequest = Static<typeof ChangePinQueryString>;
 
 const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
   // @ts-ignore
@@ -36,7 +33,8 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       },
     },
     async (request) => {
-      const { alias, avatarId } = request.body;
+      const { alias } = request.body;
+      const avatarId = request.body.avatarId ?? request.body.avatar_id;
 
       let payload: Partial<typeof user.$inferInsert> = {};
 
@@ -69,19 +67,18 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
     },
   );
 
-  fastify.put<{ Querystring: ChangePinRequest; Body: ChangePinRequestBody }>(
+  /* TODO: uncomment when frontend starts sending the pin in the request body instead of querystring
+  fastify.put<{ Querystring: ChangePinRequest }>(
     "/changePin",
     {
       schema: {
         querystring: ChangePinQueryString,
-        body: ChangePinRequestBody,
       },
     },
     async (request) => {
       // @ts-ignore
       const id = request.user.sub;
-      const pin = request.query.pin ?? request.body.pin;
-      const newPin = await hash(pin);
+      const newPin = await hash(request.query.pin);
       const pinBuffer = Buffer.from(newPin);
 
       const [updatedUser] = await fastify.db
@@ -92,6 +89,7 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       return updatedUser;
     },
   );
+  */
 };
 
 export default accountRouter;
