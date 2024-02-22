@@ -3,6 +3,7 @@ import { FastifyPluginAsync } from "fastify";
 import { user } from "../../database/schema";
 import { eq } from "drizzle-orm";
 import { UserResponse } from "../../lib/schemas";
+import { hash } from "@node-rs/bcrypt";
 
 const ProfileUpdateRequest = Type.Object({
   alias: Type.Optional(Type.String()),
@@ -10,14 +11,23 @@ const ProfileUpdateRequest = Type.Object({
   avatar_id: Type.Optional(Type.Number()),
 });
 
+const ChangePinQueryString = Type.Object({
+  pin: Type.String({ maxLength: 4, minLength: 4 }),
+});
+
+const ChangePinRequestBody = Type.Optional(ChangePinQueryString);
+
 type ProfileUpdateRequest = Static<typeof ProfileUpdateRequest>;
+type ChangePinRequest = Static<typeof ChangePinQueryString>;
+type ChangePinRequestBody = Static<typeof ChangePinRequestBody>;
 
 const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
+  // @ts-ignore
+  fastify.addHook("onRequest", fastify.authenticate);
+
   fastify.put<{ Body: ProfileUpdateRequest }>(
     "/profile",
     {
-      // @ts-ignore
-      onRequest: [fastify.authenticate],
       schema: {
         body: ProfileUpdateRequest,
         response: {
@@ -55,6 +65,30 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         .where(eq(user.id, request.user.sub))
         .returning();
 
+      return updatedUser;
+    },
+  );
+
+  fastify.put<{ Querystring: ChangePinRequest; Body: ChangePinRequestBody }>(
+    "/changePin",
+    {
+      schema: {
+        querystring: ChangePinQueryString,
+        body: ChangePinRequestBody,
+      },
+    },
+    async (request) => {
+      // @ts-ignore
+      const id = request.user.sub;
+      const pin = request.query.pin ?? request.body.pin;
+      const newPin = await hash(pin);
+      const pinBuffer = Buffer.from(newPin);
+
+      const [updatedUser] = await fastify.db
+        .update(user)
+        .set({ pinH: pinBuffer })
+        .where(eq(user.id, id))
+        .returning();
       return updatedUser;
     },
   );
