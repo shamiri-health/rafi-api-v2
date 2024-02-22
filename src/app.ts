@@ -4,6 +4,7 @@ import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import swaggerUI from "@fastify/swagger-ui";
 import fp from "fastify-plugin";
+import { FastifyJwtNamespace } from "@fastify/jwt";
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -39,6 +40,10 @@ const app: FastifyPluginAsync<AppOptions> = async (
     transformSpecificationClone: true,
   });
 
+  void fastify.register(require("@fastify/jwt"), {
+    secret: process.env.JWT_SECRET,
+  });
+
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
@@ -59,3 +64,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
 export default fp(app);
 export { app, options };
+
+declare module "fastify" {
+  interface FastifyInstance
+    extends FastifyJwtNamespace<{ namespace: "security" }> {}
+}

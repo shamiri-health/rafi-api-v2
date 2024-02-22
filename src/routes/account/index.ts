@@ -13,16 +13,19 @@ const ProfileUpdateRequest = Type.Object({
 type ProfileUpdateRequest = Static<typeof ProfileUpdateRequest>;
 
 const accountRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
-  fastify.route<{ Body: ProfileUpdateRequest }>({
-    method: ["PUT", "POST"],
-    url: "/profile",
-    schema: {
-      body: ProfileUpdateRequest,
-      response: {
-        200: UserResponse,
+  fastify.put<{ Body: ProfileUpdateRequest }>(
+    "/profile",
+    {
+      // @ts-ignore
+      onRequest: [fastify.authenticate],
+      schema: {
+        body: ProfileUpdateRequest,
+        response: {
+          200: UserResponse,
+        },
       },
     },
-    handler: async (request) => {
+    async (request) => {
       const { alias, avatarId } = request.body;
 
       let payload: Partial<typeof user.$inferInsert> = {};
@@ -45,15 +48,16 @@ const accountRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       }
 
       // TODO: FETCH THIS FROM JWT TOKEN
-      const updatedUser = await fastify.db
+      const [updatedUser] = await fastify.db
         .update(user)
         .set(payload)
-        .where(eq(user.id, 1))
+        // @ts-ignore
+        .where(eq(user.id, request.user.sub))
         .returning();
 
       return updatedUser;
     },
-  });
+  );
 };
 
 export default accountRouter;
