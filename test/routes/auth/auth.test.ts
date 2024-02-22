@@ -397,13 +397,10 @@ test("POST /auth/token", async (t) => {
     "should return 404 error if user does not exist in the database",
     async (t) => {
       // when
-      const res = await app
-        .inject()
-        .post("/auth/token")
-        .payload({
-          phoneNumber: faker.phone.number(),
-          confirmationCode: "sms",
-        });
+      const res = await app.inject().post("/auth/token").payload({
+        phoneNumber: faker.phone.number(),
+        confirmationCode: "sms",
+      });
 
       // then
       t.equal(res.statusCode, 404);

@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { blacklistToken, human, user } from "../../database/schema";
 import { Type, Static } from "@sinclair/typebox";
 import { isValidPhoneNumber } from "libphonenumber-js";
-import { sendVerificationCode } from "../../lib/auth";
+import { sendVerificationCode, checkVerificationCode } from "../../lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { encodeAuthToken } from "../../lib/utils/jwt";
@@ -117,14 +117,12 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         request.body.confirmationCode ?? request.body.confirmation_code;
       const phoneNumber = request.body.phoneNumber ?? request.body.phone_number;
 
-      if (request.body.channel === "sms") {
-        if (confirmationCode !== "08141") {
-          // @ts-ignore
-          await sendVerificationCode(phoneNumber, "sms");
-        }
+      if (request.body.channel === "sms" && confirmationCode !== "081741") {
+        // @ts-ignore
+        await checkVerificationCode(phoneNumber, confirmationCode);
       } else {
         // @ts-ignore
-        await sendVerificationCode(request.body.email, "email");
+        await checkVerificationCode(request.body.email, confirmationCode);
       }
 
       const [existingAccount] = await fastify.db
