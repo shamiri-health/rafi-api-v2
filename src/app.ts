@@ -42,6 +42,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   void fastify.register(require("@fastify/jwt"), {
     secret: process.env.JWT_SECRET,
+    sign: {
+      algorithm: "HS256",
+    },
   });
 
   // Do not touch the following lines
