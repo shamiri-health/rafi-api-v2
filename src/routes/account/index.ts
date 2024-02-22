@@ -12,7 +12,7 @@ const ProfileUpdateRequest = Type.Object({
 
 type ProfileUpdateRequest = Static<typeof ProfileUpdateRequest>;
 
-const accountRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
+const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.put<{ Body: ProfileUpdateRequest }>(
     "/profile",
     {
