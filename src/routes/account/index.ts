@@ -55,7 +55,6 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         payload.avatarId = avatarId;
       }
 
-      // TODO: FETCH THIS FROM JWT TOKEN
       const [updatedUser] = await fastify.db
         .update(user)
         .set(payload)

@@ -16,7 +16,8 @@
     "format": "prettier . --write",
     "dev": "yarn build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"yarn:watch:ts\" \"yarn:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/src/app.js",
-    "generate": "drizzle-kit generate:pg"
+    "generate": "drizzle-kit generate:pg",
+    "migrate": "drizzle-kit push:pg"
   },
   "keywords": [],
   "author": "",

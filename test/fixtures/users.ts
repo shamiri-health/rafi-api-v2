@@ -30,6 +30,7 @@ export const generateUser = async (
     ),
     clientId: null,
     avatarId: 1,
+    alias: faker.internet.userName(),
     gender2: faker.helpers.arrayElement(["MALE", "FEMALE", "OTHER"]),
     profession: "something random",
     registeredOn: new Date().toISOString(),
