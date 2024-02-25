@@ -3,10 +3,10 @@ import { generateDbClient } from "../lib/db";
 import type { database } from "../lib/db";
 
 export default fp(async (fastify) => {
-  const { db, queryClient } = generateDbClient();
-
   try {
     if (!fastify.db) {
+      const { db, queryClient } = generateDbClient();
+
       fastify.decorate("db", db);
 
       fastify.addHook("onClose", (_, done) => {

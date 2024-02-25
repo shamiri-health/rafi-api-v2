@@ -5,7 +5,6 @@ import { isValidPhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode, checkVerificationCode } from "../../lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { encodeAuthToken } from "../../lib/utils/jwt";
 import { UserResponse } from "../../lib/schemas";
 
 // TODO: harden validation here
@@ -112,7 +111,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         },
       },
     },
-    async (request) => {
+    async (request, reply) => {
       const confirmationCode =
         request.body.confirmationCode ?? request.body.confirmation_code;
       const phoneNumber = request.body.phoneNumber ?? request.body.phone_number;
@@ -138,7 +137,13 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
       }
 
-      const token = encodeAuthToken(existingAccount.human.id, "user");
+      const token = await reply.jwtSign(
+        {
+          access: "user",
+          sub: existingAccount.human.id,
+        },
+        { expiresIn: "60 days", algorithm: "HS256" },
+      );
 
       const authType =
         existingAccount.user?.alias === null ||
