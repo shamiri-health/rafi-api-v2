@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { blacklistToken, human, user } from "../../database/schema";
 import { Type, Static } from "@sinclair/typebox";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode, checkVerificationCode } from "../../lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -190,7 +190,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         return { message: "successfuly sent code via email" };
       }
 
-      if (isValidPhoneNumber(username, "KE")) {
+      if (isPossiblePhoneNumber(username)) {
         await sendVerificationCode(username, "sms");
         return { message: "successfuly sent code via sms" };
       }

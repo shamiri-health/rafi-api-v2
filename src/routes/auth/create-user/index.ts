@@ -135,11 +135,14 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             })
             .returning();
 
+          // TODO: we need to remove this/make it cleaner
+          const [year, month, date] = request.body.birth_date.split("/");
+          const dateOfBirth = `${year}-${month}-${date}`;
           let insertedUserResult = await tx
             .insert(user)
             .values({
               id: insertedHumanResult[0].id,
-              dateOfBirth: request.body.birth_date,
+              dateOfBirth,
               educationalLevel: request.body.education_level,
               pinH: Buffer.from(
                 "$2b$12$geh5R2I.08scNPuug5JnRuf/XXS1JsUKKwXAmz9FWb2BrnA/4Pj5G",
@@ -274,7 +277,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             userResult?.name ?? `anonymous_${userResult.id}`,
             phoneNumber,
           );
-          fastify.log.info(`Response from t: ${t}`)
+          fastify.log.info(`Response from t: ${t}`);
         } catch (e) {
           fastify.log.warn(e);
         }
