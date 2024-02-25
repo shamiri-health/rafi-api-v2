@@ -31,7 +31,7 @@ const TokenBody = Type.Object({
 const TokenResponse = Type.Object({
   token: Type.String(),
   user: UserResponse,
-  authType: Type.Union([Type.Literal("login"), Type.Literal("signUp")]),
+  authType: Type.Union([Type.Literal("logIn"), Type.Literal("signUp")]),
 });
 
 type VerifyTokenBody = Static<typeof VerifyTokenBody>;
@@ -147,9 +147,9 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       const authType =
         existingAccount.user?.alias === null ||
-        existingAccount.user?.alias === undefined
+          existingAccount.user?.alias === undefined
           ? "signUp"
-          : "login";
+          : "logIn";
 
       return {
         token,
