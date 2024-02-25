@@ -19,9 +19,9 @@ import { addDays } from "date-fns";
 import { UserResponse } from "../../../lib/schemas";
 
 const CreateUserBody = Type.Object({
-  email: Type.String({ format: "email" }),
+  email: Type.String(), // FIXME: tighten this to use 'email format'
   phone_number: Type.String(),
-  birth_date: Type.String({ format: "date" }),
+  birth_date: Type.String(), // FIXME: tighten this to use the 'date format'
   gender: Type.Union([
     Type.Literal("MALE"),
     Type.Literal("FEMALE"),
