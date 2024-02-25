@@ -10,7 +10,7 @@ export default fp(async (fastify) => {
       fastify.decorate("db", db);
 
       fastify.addHook("onClose", (_, done) => {
-        queryClient.end({ timeout: 5 });
+        queryClient.end();
         done();
       });
     }
