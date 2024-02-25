@@ -274,7 +274,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             userResult?.name ?? `anonymous_${userResult.id}`,
             phoneNumber,
           );
-          console.log("Response from t: ", t);
+          fastify.log.info(`Response from t: ${t}`)
         } catch (e) {
           fastify.log.warn(e);
         }

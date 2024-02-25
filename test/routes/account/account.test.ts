@@ -11,7 +11,6 @@ test('PUT /account/profile', async (t) => {
   const token = encodeAuthToken(sampleUser.id, 'user')
 
   t.teardown(async () => {
-    console.log('already being called')
     await app.db.delete(user).where(eq(user.id, sampleUser.id))
     await app.db.delete(human).where(eq(human.id, sampleUser.id))
   })
@@ -39,11 +38,8 @@ test('PUT /account/profile', async (t) => {
       alias: sampleUser.alias,
     };
 
-    console.log(sampleUser)
-    console.log(payload)
     // when
     const res = await app.inject().put("/account/profile").headers({ authorization: `Bearer ${token}` }).payload(payload);
-    console.log('done testing this thing')
 
     // then
     t.equal(res.statusCode, 400)
