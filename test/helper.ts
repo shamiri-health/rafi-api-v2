@@ -61,9 +61,9 @@ async function build(t: Test) {
   // fastify-plugin ensures that all decorators
   // are exposed for testing purposes, this is
   // different from the production setup
-  // @ts-ignore
   const app = await helper.build(
     argv,
+    // @ts-ignore
     await config(global.database, global.queryClient),
   );
 

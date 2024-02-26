@@ -7,18 +7,19 @@ import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 
 test("PUT /account/profile", async (t) => {
   const app = await build(t);
-  const sampleUser = await generateUser(app.db);
-  const token = encodeAuthToken(sampleUser.id, "user");
-
-  t.teardown(async () => {
-    await app.db.delete(user).where(eq(user.id, sampleUser.id));
-    await app.db.delete(human).where(eq(human.id, sampleUser.id));
-  });
 
   t.test(
     "PUT /account/profile should update the user's profile given a correct payload",
     async (t) => {
       // given
+      const sampleUser = await generateUser(app.db);
+      const token = encodeAuthToken(sampleUser.id, "user");
+
+      t.teardown(async () => {
+        await app.db.delete(user).where(eq(user.id, sampleUser.id));
+        await app.db.delete(human).where(eq(human.id, sampleUser.id));
+      });
+
       const payload = {
         alias: "something random",
         avatarId: 1,
@@ -43,6 +44,14 @@ test("PUT /account/profile", async (t) => {
     "PUT /account/profile should not update the user's profile if the alias is taken",
     async (t) => {
       // given
+      const sampleUser = await generateUser(app.db);
+      const token = encodeAuthToken(sampleUser.id, "user");
+
+      t.teardown(async () => {
+        await app.db.delete(user).where(eq(user.id, sampleUser.id));
+        await app.db.delete(human).where(eq(human.id, sampleUser.id));
+      });
+
       const payload = {
         alias: sampleUser.alias,
       };

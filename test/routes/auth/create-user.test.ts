@@ -19,7 +19,6 @@ import { eq, inArray } from "drizzle-orm";
 import sinon from "sinon";
 import { randomUUID } from "crypto";
 
-import * as verificationClient from "../../../src/lib/auth";
 import * as streamClient from "../../../src/lib/stream";
 
 test("/auth/create-user", async (t) => {
@@ -28,13 +27,9 @@ test("/auth/create-user", async (t) => {
   // @ts-ignore
   let streamStub;
   // @ts-ignore
-  let sendCodeStub;
   t.before(async () => {
-    sendCodeStub = sinon.stub(verificationClient, "sendVerificationCode");
     streamStub = sinon.stub(streamClient, "addUserToStream");
 
-    // @ts-ignore
-    sendCodeStub.returns(Promise.resolve({ success: true }));
     // @ts-ignore
     streamStub.returns(Promise.resolve({ success: true }));
 
@@ -80,8 +75,6 @@ test("/auth/create-user", async (t) => {
 
   t.teardown(async () => {
     // @ts-ignore
-    sendCodeStub.restore();
-    // @ts-ignore
     streamStub.restore();
     await app.db.delete(therapist).where(inArray(therapist.id, [10, 205]));
   });
@@ -89,7 +82,7 @@ test("/auth/create-user", async (t) => {
   t.test("should create user given valid request body", async (t) => {
     // given
     const payload = {
-      birth_date: "2023-12-29",
+      birth_date: "2023/12/29",
       education_level: "Primary School",
       email: faker.internet.email().trim().toLowerCase(),
       gender: "MALE",
@@ -136,7 +129,7 @@ test("/auth/create-user", async (t) => {
 
       // given
       const payload = {
-        birth_date: "2023-12-29",
+        birth_date: "2023/12/29",
         education_level: "Primary School",
         email: faker.internet.email().trim().toLowerCase(),
         gender: "MALE",
@@ -199,7 +192,7 @@ test("/auth/create-user", async (t) => {
 
       // given
       const payload = {
-        birth_date: "2023-12-29",
+        birth_date: "2023/12/29",
         education_level: "Primary School",
         email: faker.internet.email().trim().toLowerCase(),
         gender: "MALE",
@@ -252,7 +245,7 @@ test("/auth/create-user", async (t) => {
     async (t) => {
       // given
       const payload = {
-        birth_date: "2023-12-29",
+        birth_date: "2023/12/29",
         education_level: "Primary School",
         email: "test-mku-user@mylife.mku.ac.ke",
         gender: "MALE",
@@ -301,7 +294,7 @@ test("/auth/create-user", async (t) => {
       });
 
       const body = {
-        birth_date: "2023-12-29",
+        birth_date: "2023/12/29",
         education_level: "Primary School",
         email: existingHuman.email,
         gender: "MALE",
@@ -331,7 +324,7 @@ test("/auth/create-user", async (t) => {
       });
 
       const body = {
-        birth_date: "2023-12-29",
+        birth_date: "2023/12/29",
         education_level: "Primary School",
         email: faker.internet.email().trim().toLowerCase(),
         gender: "MALE",
