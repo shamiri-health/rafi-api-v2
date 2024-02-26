@@ -1,7 +1,7 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import { therapist, user, userService } from "../../database/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { UserResponse } from "../../lib/schemas";
 // import { hash } from "@node-rs/bcrypt";
 
@@ -37,8 +37,14 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
     const assignedTherapist = await fastify.db
       .select()
       .from(therapist)
-      // @ts-ignore
-      .leftJoin(userService, eq(userService.userId, request.user.sub));
+      .leftJoin(
+        userService,
+        and(
+          // @ts-ignore
+          eq(userService.userId, request.user.sub),
+          eq(userService.assignedTherapistId, therapist.id),
+        ),
+      );
 
     return {
       ...userProfile,
