@@ -147,7 +147,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       const authType =
         existingAccount.user?.alias === null ||
-          existingAccount.user?.alias === undefined
+        existingAccount.user?.alias === undefined
           ? "signUp"
           : "logIn";
 

@@ -1,6 +1,6 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
-import { user } from "../../database/schema";
+import { therapist, user, userService } from "../../database/schema";
 import { eq } from "drizzle-orm";
 import { UserResponse } from "../../lib/schemas";
 // import { hash } from "@node-rs/bcrypt";
@@ -21,6 +21,30 @@ type ProfileUpdateRequest = Static<typeof ProfileUpdateRequest>;
 const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
   // @ts-ignore
   fastify.addHook("onRequest", fastify.authenticate);
+
+  fastify.get("/profile", async (request) => {
+    const userProfile = await fastify.db.query.user.findFirst({
+      // @ts-ignore
+      where: eq(user.id, parseInt(request.user.sub)),
+    });
+
+    if (!userProfile) {
+      throw fastify.httpErrors.notFound(
+        "User associated with the security token not found. Kindly contact support",
+      );
+    }
+
+    //@ts-ignore
+    const assignedTherapist = await fastify.db
+      .select()
+      .from(therapist)
+      .leftJoin(userService, eq(userService.userId, request.user.sub));
+
+    return {
+      ...userProfile,
+      assignedTherapist: assignedTherapist[0]?.therapist,
+    };
+  });
 
   fastify.put<{ Body: ProfileUpdateRequest }>(
     "/profile",
