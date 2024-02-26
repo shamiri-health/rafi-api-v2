@@ -123,10 +123,10 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const SYMON_ID = 10;
       const HELLEN_ID = 205;
 
-      const userResult = await fastify.db.transaction(async (tx) => {
+      const userResult = await fastify.db.transaction(async (trx) => {
         const now = new Date();
         try {
-          const insertedHumanResult = await tx
+          const insertedHumanResult = await trx
             .insert(human)
             .values({
               mobile: phoneNumber,
@@ -138,7 +138,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
           // TODO: we need to remove this/make it cleaner
           const [year, month, date] = request.body.birth_date.split("/");
           const dateOfBirth = `${year}-${month}-${date}`;
-          let insertedUserResult = await tx
+          let insertedUserResult = await trx
             .insert(user)
             .values({
               id: insertedHumanResult[0].id,
@@ -155,7 +155,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             })
             .returning();
 
-          const userRewardHubRecordResult = await tx
+          const userRewardHubRecordResult = await trx
             .insert(userRewardHub)
             .values({
               userId: insertedHumanResult[0].id,
@@ -165,7 +165,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             .returning();
 
           // DEPRECATED: create reward hub record
-          await tx
+          await trx
             .insert(rewardHubRecord)
             .values({
               userRewardHubId: userRewardHubRecordResult[0].id,
@@ -177,13 +177,13 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             .returning();
 
           // DEPRECATED: create UserGoal record not to be confused with the Goals table
-          await tx.insert(userGoal).values({
+          await trx.insert(userGoal).values({
             userRewardHubId: userRewardHubRecordResult[0].id,
             timestamp: now.toISOString(),
           });
 
           // create user achievement record
-          await tx.insert(userAchievement).values({
+          await trx.insert(userAchievement).values({
             userRewardHubId: userRewardHubRecordResult[0].id,
             userId: insertedHumanResult[0].id,
           });
@@ -193,8 +193,8 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
           };
 
           if (request.body.referral_code) {
-            fastify.log.info("REferral code provided");
-            const referralRecord = await tx.query.referralCodes.findFirst({
+            fastify.log.info("Referral code provided");
+            const referralRecord = await trx.query.referralCodes.findFirst({
               where: eq(
                 referralCodes.referralCode,
                 request.body.referral_code.trim().toUpperCase(),
@@ -202,7 +202,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             });
 
             if (referralRecord) {
-              insertedUserResult = await tx
+              insertedUserResult = await trx
                 .update(user)
                 .set({
                   clientId: referralRecord.clientId,
@@ -217,7 +217,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
             }
           } else if (isMkuUser || TESTING_WHITELIST.includes(email)) {
             fastify.log.info("MKU user identified");
-            await tx.update(user).set({
+            await trx.update(user).set({
               clientId: MKU_CLIENT_ID,
             });
 
@@ -225,7 +225,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
           } else if (isMoringaUser) {
             fastify.log.info("MORINGA USER INDENTIFIED");
-            insertedUserResult = await tx
+            insertedUserResult = await trx
               .update(user)
               .set({
                 clientId: MORINGA_CLIENT_ID,
@@ -237,14 +237,14 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
           }
 
-          await tx.insert(userService).values(userServiceRecord);
+          await trx.insert(userService).values(userServiceRecord);
 
           if (!insertedUserResult[0].clientId) {
             const { validity, credit, subscriptionType } =
               subscriptionTypes.subscriptionOrder.individualIntroFreemium;
 
             const expireTime = addDays(now, validity);
-            await tx.insert(subscription).values({
+            await trx.insert(subscription).values({
               userId: insertedHumanResult[0].id,
               type: subscriptionType,
               timestamp: now,
@@ -261,7 +261,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
           };
         } catch (error) {
           fastify.log.error(error);
-          await tx.rollback();
+          await trx.rollback();
           throw error;
         }
       });
