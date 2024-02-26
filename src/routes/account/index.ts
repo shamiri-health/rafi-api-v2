@@ -37,7 +37,7 @@ const accountRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
     const assignedTherapist = await fastify.db
       .select()
       .from(therapist)
-      .leftJoin(
+      .innerJoin(
         userService,
         and(
           // @ts-ignore
