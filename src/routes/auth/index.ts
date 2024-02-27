@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { blacklistToken, human, user } from "../../database/schema";
 import { Type, Static } from "@sinclair/typebox";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+// FIXME: consider removing the twilio verify service
 import { sendVerificationCode } from "../../lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
