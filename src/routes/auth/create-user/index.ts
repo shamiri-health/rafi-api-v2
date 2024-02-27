@@ -195,7 +195,9 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
           };
 
           if (request.body.referral_code) {
-            fastify.log.info("Referral code provided");
+            fastify.log.info(
+              `Referral code provided: ${request.body.referral_code}`,
+            );
             const referralRecord = await trx.query.referralCodes.findFirst({
               where: eq(
                 referralCodes.referralCode,
@@ -216,17 +218,28 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               userServiceRecord.assignedTherapistId =
                 Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
               // TODO: later on we need to toggle if we are using client's own therapists or our own
+            } else {
+              fastify.log.warn(
+                `No referral record found for: ${request.body.referral_code}`,
+              );
             }
           } else if (isMkuUser || TESTING_WHITELIST.includes(email)) {
             fastify.log.info("MKU user identified");
-            await trx.update(user).set({
-              clientId: MKU_CLIENT_ID,
-            });
+            insertedUserResult = await trx
+              .update(user)
+              .set({
+                clientId: MKU_CLIENT_ID,
+              })
+              .where(eq(user.id, insertedHumanResult[0].id))
+              .returning();
 
             userServiceRecord.assignedTherapistId =
               Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
           } else if (isMoringaUser) {
             fastify.log.info("MORINGA USER INDENTIFIED");
+            if (request.body.referral_code) {
+              fastify.log.info("REFERRAL RECORD ALSO DETECTED");
+            }
             insertedUserResult = await trx
               .update(user)
               .set({
