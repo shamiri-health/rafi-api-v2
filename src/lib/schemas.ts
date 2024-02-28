@@ -13,3 +13,27 @@ export const UserResponse = Type.Object({
   educationalLevel: Type.Optional(Type.String()),
   profession: Type.Optional(Type.String()),
 });
+
+export const ResourceRequest = Type.Object({
+  resourceType: Type.Union([
+    Type.Literal("subscriptions"),
+    Type.Literal("alacarte"),
+    Type.Literal("renewal"),
+  ]),
+  resource_type: Type.Optional(
+    Type.Union([
+      Type.Literal("subscriptions"),
+      Type.Literal("alacarte"),
+      Type.Literal("renewal"),
+    ]),
+  ),
+  resource: Type.Union([
+    Type.Literal("digitalEvent"),
+    Type.Literal("onsiteEvent"),
+    Type.Literal("phoneEvent"),
+    Type.Literal("groupEvent"),
+    Type.Literal("phoneEventIntake"),
+  ]),
+  resourceId: Type.Number(),
+  resource_id: Type.Optional(Type.Number()),
+});
