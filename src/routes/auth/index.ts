@@ -6,7 +6,7 @@ import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { sendVerificationCode } from "../../lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { UserResponse } from "../../lib/schemas";
+import { TokenResponse } from "../../lib/schemas";
 
 // TODO: harden validation here
 const VerifyTokenBody = Type.Object({
@@ -27,12 +27,6 @@ const TokenBody = Type.Object({
   confirmation_code: Type.Optional(Type.String()),
   email: Type.Optional(Type.String({ format: "email" })),
   channel: Type.Union([Type.Literal("sms"), Type.Literal("email")]),
-});
-
-const TokenResponse = Type.Object({
-  token: Type.String(),
-  user: UserResponse,
-  authType: Type.Union([Type.Literal("logIn"), Type.Literal("signUp")]),
 });
 
 type VerifyTokenBody = Static<typeof VerifyTokenBody>;

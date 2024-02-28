@@ -14,6 +14,16 @@ export const UserResponse = Type.Object({
   profession: Type.Optional(Type.String()),
 });
 
+export const TokenResponse = Type.Object({
+  token: Type.String(),
+  user: UserResponse,
+  authType: Type.Union([
+    Type.Literal("logIn"),
+    Type.Literal("signUp"),
+    Type.Literal("payment"),
+  ]),
+});
+
 export const ResourceRequest = Type.Object({
   resourceType: Type.Union([
     Type.Literal("subscriptions"),
