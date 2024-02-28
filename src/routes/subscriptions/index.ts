@@ -1,6 +1,8 @@
 import { Static } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import { ResourceRequest, TokenResponse } from "../../lib/schemas";
+import { eq } from "drizzle-orm";
+import { user } from "../../database/schema";
 
 type DigitalEventRequestBody = Static<typeof ResourceRequest>;
 
@@ -12,12 +14,13 @@ const subscriptionsRouter: FastifyPluginAsync = async (
     "/digital-event",
     {
       schema: { body: ResourceRequest, response: { 200: TokenResponse } },
+      // @ts-ignore
       onRequest: fastify.authenticate,
     },
     async (request, reply) => {
       if (request.body.resource !== "digitalEvent") {
         throw fastify.httpErrors.badRequest(
-          'The only accepted value for resource is "digitalEvent"',
+          'The only accepted value for resource field in the request body is "digitalEvent"',
         );
       }
 
@@ -32,11 +35,18 @@ const subscriptionsRouter: FastifyPluginAsync = async (
         { expiresIn: "60 days", algorithm: "HS256" },
       );
 
+      const foundUser = await fastify.db.query.user.findFirst({
+        // @ts-ignore
+        where: eq(user.id, request.user.sub),
+      });
+
       return {
         token,
-        user: null,
+        user: foundUser,
         authType: "payment",
       };
     },
   );
 };
+
+export default subscriptionsRouter;
