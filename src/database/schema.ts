@@ -783,7 +783,7 @@ export const systemResponse = pgTable("systemResponse", {
   social: boolean("social"),
   motivation: boolean("motivation"),
   purpose: boolean("purpose"),
-  rewardHubActions: json("rewardHubActions").array()
+  rewardHubActions: json("rewardHubActions").array(),
 });
 
 export const coachingSession = pgTable("coachingSession", {

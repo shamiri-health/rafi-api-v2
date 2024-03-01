@@ -153,7 +153,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               avatarId: 1,
               gender2: request.body.gender,
               profession: request.body.profession,
-              registeredOn: now.toISOString(),
+              registeredOn: now,
             })
             .returning();
 
@@ -173,7 +173,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               userRewardHubId: userRewardHubRecordResult[0].id,
               level: 1,
               gemsHave: 5,
-              timestamp: now.toISOString(),
+              timestamp: now,
               streak: 0,
             })
             .returning();
@@ -181,7 +181,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
           // DEPRECATED: create UserGoal record not to be confused with the Goals table
           await trx.insert(userGoal).values({
             userRewardHubId: userRewardHubRecordResult[0].id,
-            timestamp: now.toISOString(),
+            timestamp: now,
           });
 
           // create user achievement record

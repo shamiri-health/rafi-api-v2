@@ -11,7 +11,7 @@ export const generateHuman = async (db: database["db"]) => {
       role: "user",
       email: faker.internet.email().trim().toLowerCase(),
       mobile: faker.helpers.fromRegExp("254[1-9]{9}").toLowerCase(),
-      lastLogin: faker.date.anytime().toISOString(),
+      lastLogin: faker.date.anytime(),
     })
     .returning();
 
@@ -33,7 +33,7 @@ export const generateUser = async (
     alias: faker.internet.userName(),
     gender2: faker.helpers.arrayElement(["MALE", "FEMALE", "OTHER"]),
     profession: "something random",
-    registeredOn: new Date().toISOString(),
+    registeredOn: new Date(),
   };
 
   if (id) {
