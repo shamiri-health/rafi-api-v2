@@ -180,7 +180,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         },
       },
     },
-    async (request, _) => {
+    async (request) => {
       const { username } = request.body;
 
       const emailSchema = z.string().email();
@@ -211,7 +211,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         },
       },
     },
-    async (request, _) => {
+    async (request) => {
       const authorizationHeader = (request.headers.authorization ||
         request.headers.Authorization) as string;
       if (authorizationHeader) {
@@ -224,7 +224,7 @@ const authRouther: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
           await fastify.db.insert(blacklistToken).values({
             token: token.trim(),
-            blacklistedOn: new Date().toISOString(),
+            blacklistedOn: new Date(),
           });
 
           return { message: "successfully logged out user" };
