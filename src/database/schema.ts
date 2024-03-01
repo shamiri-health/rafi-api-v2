@@ -24,8 +24,8 @@ const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
 
 export const affirmationOfTheDay = pgTable("affirmation_of_the_day", {
   id: dbText("id").primaryKey().notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
   category: dbText("category"),
   subCategory: dbText("sub_category"),
   affirmation: dbText("affirmation"),
@@ -38,13 +38,13 @@ export const affirmationReminder = pgTable("affirmation_reminder", {
   id: dbText("id"),
   createdAt: timestamp("created_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
-  deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
   category: dbText("category"),
   name: dbText("name"),
   frequency: dbText("frequency"),
@@ -80,7 +80,7 @@ export const blacklistToken = pgTable(
   {
     id: serial("id").primaryKey().notNull(),
     token: varchar("token", { length: 500 }).notNull(),
-    blacklistedOn: timestamp("blacklistedOn", { mode: "string" }).notNull(),
+    blacklistedOn: timestamp("blacklistedOn", { mode: "date" }).notNull(),
   },
   (table) => {
     return {
@@ -127,9 +127,9 @@ export const admin = pgTable("admin", {
 
 export const affirmation = pgTable("affirmation", {
   id: varchar("id", { length: 120 }),
-  createdAt: timestamp("createdAt", { mode: "string" }),
-  updatedAt: timestamp("updatedAt", { mode: "string" }),
-  deletedAt: timestamp("deletedAt", { mode: "string" }),
+  createdAt: timestamp("createdAt", { mode: "date" }),
+  updatedAt: timestamp("updatedAt", { mode: "date" }),
+  deletedAt: timestamp("deletedAt", { mode: "date" }),
   content: dbText("content"),
   category: dbText("category"),
   userId: integer("userId").references(() => user.id),
@@ -142,11 +142,11 @@ export const answers = pgTable("answers", {
   questionId: varchar("questionId").references(() => questions.id),
   createdAt: timestamp("created_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
 });
 
@@ -168,7 +168,7 @@ export const cbtCourse = pgTable("cbtCourse", {
 
 export const chat = pgTable("chat", {
   id: serial("id").primaryKey().notNull(),
-  datetime: timestamp("datetime", { mode: "string" }),
+  datetime: timestamp("datetime", { mode: "date" }),
   userId: integer("userId")
     .notNull()
     .references(() => user.id),
@@ -192,8 +192,8 @@ export const chatEvent = pgTable("chatEvent", {
     .references(() => therapySession.id, { onDelete: "cascade" }),
   therapistId: integer("therapistId").references(() => therapist.id),
   timeZone: varchar("timeZone", { length: 40 }),
-  startTime: timestamp("startTime", { mode: "string" }),
-  endTime: timestamp("endTime", { mode: "string" }),
+  startTime: timestamp("startTime", { mode: "date" }),
+  endTime: timestamp("endTime", { mode: "date" }),
   mobile: varchar("mobile", { length: 13 }),
   dataPrivacyString: varchar("dataPrivacyString", { length: 100 }),
 });
@@ -224,8 +224,8 @@ export const discountCode = pgTable("discountCode", {
   id: varchar("id", { length: 15 }).primaryKey().notNull(),
   channel: varchar("channel", { length: 20 }),
   channelAgentRef: varchar("channelAgentRef", { length: 20 }),
-  timeStamp: timestamp("timeStamp", { mode: "string" }),
-  completeDateTime: timestamp("completeDateTime", { mode: "string" }),
+  timeStamp: timestamp("timeStamp", { mode: "date" }),
+  completeDateTime: timestamp("completeDateTime", { mode: "date" }),
   orderId: integer("orderId").references(() => order.id),
   discount: integer("discount"),
   ref: varchar("ref", { length: 100 }),
@@ -240,8 +240,8 @@ export const fitnessClass = pgTable("fitnessClass", {
 
 export const dailyCheckIn = pgTable("daily_check_in", {
   id: dbText("id"),
-  createdAt: timestamp("created_at", { mode: "string" }),
-  updatedAt: timestamp("updated_at", { mode: "string" }),
+  createdAt: timestamp("created_at", { mode: "date" }),
+  updatedAt: timestamp("updated_at", { mode: "date" }),
   howAreYouFeeling: dbText("how_are_you_feeling"),
   moodDescription: dbText("mood_description"),
   moodDescriptionCauseCategory1: dbText("mood_description_cause_category_1"),
@@ -263,9 +263,9 @@ export const enterpriseStandard = pgTable("enterpriseStandard", {
 
 export const favouritedAffirmation = pgTable("favourited_affirmation", {
   id: dbText("id").primaryKey().notNull(),
-  createdAt: timestamp("created_at", { mode: "string" }),
-  updatedAt: timestamp("updated_at", { mode: "string" }),
-  removedAt: timestamp("removed_at", { mode: "string" }),
+  createdAt: timestamp("created_at", { mode: "date" }),
+  updatedAt: timestamp("updated_at", { mode: "date" }),
+  removedAt: timestamp("removed_at", { mode: "date" }),
   category: dbText("category"),
   userId: integer("user_id").references(() => user.id),
 });
@@ -277,21 +277,21 @@ export const goals = pgTable(
     userId: integer("user_id").references(() => user.id),
     createdAt: timestamp("created_at", {
       withTimezone: true,
-      mode: "string",
+      mode: "date",
     }).notNull(),
     updatedAt: timestamp("updated_at", {
       withTimezone: true,
-      mode: "string",
+      mode: "date",
     }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
     description: dbText("description").notNull(),
     durationStart: timestamp("duration_start", {
       withTimezone: true,
-      mode: "string",
+      mode: "date",
     }),
     durationEnd: timestamp("duration_end", {
       withTimezone: true,
-      mode: "string",
+      mode: "date",
     }),
     timeOfDay: varchar("time_of_day", { length: 50 }),
     weeklyFrequency: integer("weekly_frequency"),
@@ -338,8 +338,8 @@ export const groupTopic = pgTable("groupTopic", {
 
 export const groupSession = pgTable("groupSession", {
   id: serial("id").primaryKey().notNull(),
-  startTime: timestamp("startTime", { mode: "string" }),
-  endTime: timestamp("endTime", { mode: "string" }),
+  startTime: timestamp("startTime", { mode: "date" }),
+  endTime: timestamp("endTime", { mode: "date" }),
   therapistId: integer("therapistId")
     .default(8)
     .notNull()
@@ -349,21 +349,21 @@ export const groupSession = pgTable("groupSession", {
   capacity: integer("capacity").default(15),
   createdAt: timestamp("created_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
-  archivedAt: timestamp("archived_at", { withTimezone: true, mode: "string" }),
+  archivedAt: timestamp("archived_at", { withTimezone: true, mode: "date" }),
   dayOfWeek: integer("day_of_week"),
 });
 
 export const goalCategory = pgTable("goal_category", {
   id: dbText("id").primaryKey().notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
-  deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
   title: varchar("title", { length: 255 }),
   backgroundImageColour: varchar("background_image_colour", { length: 100 }),
   userId: integer("user_id").references(() => user.id, {
@@ -377,8 +377,8 @@ export const groupPlan = pgTable("groupPlan", {
   phoneEventCredits: integer("phoneEventCredits"),
   groupEventCredits: integer("groupEventCredits"),
   onsiteEventCredits: integer("onsiteEventCredits"),
-  timestamp: timestamp("timestamp", { mode: "string" }).notNull(),
-  expireTime: timestamp("expireTime", { mode: "string" }).notNull(),
+  timestamp: timestamp("timestamp", { mode: "date" }).notNull(),
+  expireTime: timestamp("expireTime", { mode: "date" }).notNull(),
   clientId: integer("clientId").references(() => client.id),
 });
 
@@ -414,7 +414,7 @@ export const human = pgTable(
     name: varchar("name", { length: 80 }),
     email: varchar("email", { length: 400 }),
     mobile: varchar("mobile", { length: 120 }),
-    lastLogin: timestamp("lastLogin", { mode: "string" }),
+    lastLogin: timestamp("lastLogin", { mode: "date" }),
   },
   (table) => {
     return {
@@ -453,10 +453,10 @@ export const joinShamiri = pgTable("joinShamiri", {
 
 export const journal = pgTable("journal", {
   id: varchar("id", { length: 100 }).primaryKey().notNull(),
-  createdAt: timestamp("createdAt", { mode: "string" }),
+  createdAt: timestamp("createdAt", { mode: "date" }),
   userId: integer("userId").references(() => user.id),
-  deletedAt: timestamp("deletedAt", { mode: "string" }),
-  updatedAt: timestamp("updatedAt", { mode: "string" }),
+  deletedAt: timestamp("deletedAt", { mode: "date" }),
+  updatedAt: timestamp("updatedAt", { mode: "date" }),
   question1: dbText("question_1").notNull(),
   content1: dbText("content_1").notNull(),
   question2: dbText("question_2"),
@@ -472,8 +472,8 @@ export const onsiteEvent = pgTable("onsiteEvent", {
     .notNull()
     .references(() => therapySession.id, { onDelete: "cascade" }),
   summary: varchar("summary", { length: 500 }),
-  startTime: timestamp("startTime", { mode: "string" }),
-  endTime: timestamp("endTime", { mode: "string" }),
+  startTime: timestamp("startTime", { mode: "date" }),
+  endTime: timestamp("endTime", { mode: "date" }),
   dataPrivacyString: varchar("dataPrivacyString", { length: 100 }),
   therapistId: integer("therapistId").references(() => therapist.id),
 });
@@ -493,8 +493,8 @@ export const phoneEvent = pgTable(
     timeZone: varchar("timeZone", { length: 40 }).default(
       sql`'Africa/Nairobi'::character varying`,
     ),
-    startTime: timestamp("startTime", { mode: "string" }),
-    endTime: timestamp("endTime", { mode: "string" }),
+    startTime: timestamp("startTime", { mode: "date" }),
+    endTime: timestamp("endTime", { mode: "date" }),
     mobile: varchar("mobile", { length: 13 }),
     dataPrivacyString: varchar("dataPrivacyString", { length: 100 }),
   },
@@ -542,9 +542,9 @@ export const referralCodes = pgTable(
   "referral_codes",
   {
     id: dbText("id").primaryKey().notNull(),
-    createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
-    updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
-    archivedAt: timestamp("archived_at", { mode: "string" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+    archivedAt: timestamp("archived_at", { mode: "date" }),
     email: varchar("email", { length: 100 }),
     referralCode: varchar("referral_code", { length: 100 }),
     clientId: integer("client_id").references(() => client.id),
@@ -565,7 +565,7 @@ export const referralCodes = pgTable(
 
 export const message = pgTable("message", {
   id: serial("id").primaryKey().notNull(),
-  datetime: timestamp("datetime", { mode: "string" }),
+  datetime: timestamp("datetime", { mode: "date" }),
   text: varchar("text", { length: 1000 }),
   chatId: integer("chatId")
     .notNull()
@@ -577,8 +577,8 @@ export const message = pgTable("message", {
 
 export const providerSession = pgTable("providerSession", {
   id: serial("id").primaryKey().notNull(),
-  startTime: timestamp("startTime", { mode: "string" }),
-  endTime: timestamp("endTime", { mode: "string" }),
+  startTime: timestamp("startTime", { mode: "date" }),
+  endTime: timestamp("endTime", { mode: "date" }),
   providerId: integer("providerId").references(() => provider.id),
   capacity: integer("capacity"),
   summary: varchar("summary", { length: 200 }),
@@ -595,8 +595,8 @@ export const order = pgTable(
     quantity: integer("quantity"),
     unitPrice: integer("unitPrice"),
     currency: varchar("currency", { length: 20 }),
-    timestamp: timestamp("timestamp", { mode: "string" }),
-    completeTimestamp: timestamp("completeTimestamp", { mode: "string" }),
+    timestamp: timestamp("timestamp", { mode: "date" }),
+    completeTimestamp: timestamp("completeTimestamp", { mode: "date" }),
     paymentMethod: varchar("paymentMethod", { length: 15 }),
     paymentRef: varchar("paymentRef", { length: 50 }),
     paymentNote: varchar("paymentNote", { length: 100 }),
@@ -618,11 +618,11 @@ export const questions = pgTable("questions", {
   therapistId: integer("therapistId").references(() => therapist.id),
   createdAt: timestamp("created_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).notNull(),
 });
 
@@ -636,7 +636,7 @@ export const rewardHubRecord = pgTable("rewardHubRecord", {
   streak: integer("streak"),
   gemsHave: integer("gemsHave"),
   gemsNextLevel: integer("gemsNextLevel"),
-  timestamp: timestamp("timestamp", { mode: "string" }),
+  timestamp: timestamp("timestamp", { mode: "date" }),
 });
 
 export const text = pgTable("text", {
@@ -651,8 +651,8 @@ export const subscription = pgTable("subscription", {
   id: serial("id").primaryKey().notNull(),
   userId: integer("userId").references(() => user.id),
   type: varchar("type").notNull(),
-  timestamp: timestamp("timestamp", { mode: "string" }).notNull(),
-  expireTime: timestamp("expireTime", { mode: "string" }).notNull(),
+  timestamp: timestamp("timestamp", { mode: "date" }).notNull(),
+  expireTime: timestamp("expireTime", { mode: "date" }).notNull(),
   totalCredit: integer("totalCredit"),
   remCredit: integer("remCredit"),
   ref: varchar("ref", { length: 100 }),
@@ -665,7 +665,7 @@ export const tip = pgTable(
     name: varchar("name", { length: 10 }),
     text: varchar("text", { length: 4000 }),
     summary: varchar("summary", { length: 500 }),
-    modifyDatetime: timestamp("modifyDatetime", { mode: "string" }),
+    modifyDatetime: timestamp("modifyDatetime", { mode: "date" }),
     frequency: doublePrecision("frequency"),
     relatedGoal1: integer("relatedGoal1"),
     relatedGoal2: integer("relatedGoal2"),
@@ -685,9 +685,9 @@ export const therapySession = pgTable("therapySession", {
   type: varchar("type", { length: 80 }),
   clinicalLevel: integer("clinicalLevel"),
   relatedDomains: varchar("relatedDomains", { length: 100 }),
-  recommendDatetime: timestamp("recommendDatetime", { mode: "string" }),
-  completeDatetime: timestamp("completeDatetime", { mode: "string" }),
-  enrollDatetime: timestamp("enrollDatetime", { mode: "string" }),
+  recommendDatetime: timestamp("recommendDatetime", { mode: "date" }),
+  completeDatetime: timestamp("completeDatetime", { mode: "date" }),
+  enrollDatetime: timestamp("enrollDatetime", { mode: "date" }),
   credit: integer("credit"),
   userRecordId: integer("userRecordId").references(() => userRecord.id),
 });
@@ -798,42 +798,42 @@ export const userAchievement = pgTable("userAchievement", {
   userRewardHubId: integer("userRewardHubId").references(
     () => userRewardHub.id,
   ),
-  achStreak1: timestamp("achStreak1", { mode: "string" }),
-  achStreak2: timestamp("achStreak2", { mode: "string" }),
-  achStreak3: timestamp("achStreak3", { mode: "string" }),
-  achStreak4: timestamp("achStreak4", { mode: "string" }),
-  achStreak5: timestamp("achStreak5", { mode: "string" }),
-  achStreak6: timestamp("achStreak6", { mode: "string" }),
-  achCheckin1: timestamp("achCheckin1", { mode: "string" }),
-  achCheckin2: timestamp("achCheckin2", { mode: "string" }),
-  achCheckin3: timestamp("achCheckin3", { mode: "string" }),
-  achCheckin4: timestamp("achCheckin4", { mode: "string" }),
-  achCheckin5: timestamp("achCheckin5", { mode: "string" }),
-  achCheckin6: timestamp("achCheckin6", { mode: "string" }),
-  achLevel1: timestamp("achLevel1", { mode: "string" }),
-  achLevel2: timestamp("achLevel2", { mode: "string" }),
-  achLevel3: timestamp("achLevel3", { mode: "string" }),
-  achLevel4: timestamp("achLevel4", { mode: "string" }),
-  achLevel5: timestamp("achLevel5", { mode: "string" }),
-  achLevel6: timestamp("achLevel6", { mode: "string" }),
-  achLevel7: timestamp("achLevel7", { mode: "string" }),
-  achLevel8: timestamp("achLevel8", { mode: "string" }),
-  achLevel9: timestamp("achLevel9", { mode: "string" }),
-  achLevel10: timestamp("achLevel10", { mode: "string" }),
+  achStreak1: timestamp("achStreak1", { mode: "date" }),
+  achStreak2: timestamp("achStreak2", { mode: "date" }),
+  achStreak3: timestamp("achStreak3", { mode: "date" }),
+  achStreak4: timestamp("achStreak4", { mode: "date" }),
+  achStreak5: timestamp("achStreak5", { mode: "date" }),
+  achStreak6: timestamp("achStreak6", { mode: "date" }),
+  achCheckin1: timestamp("achCheckin1", { mode: "date" }),
+  achCheckin2: timestamp("achCheckin2", { mode: "date" }),
+  achCheckin3: timestamp("achCheckin3", { mode: "date" }),
+  achCheckin4: timestamp("achCheckin4", { mode: "date" }),
+  achCheckin5: timestamp("achCheckin5", { mode: "date" }),
+  achCheckin6: timestamp("achCheckin6", { mode: "date" }),
+  achLevel1: timestamp("achLevel1", { mode: "date" }),
+  achLevel2: timestamp("achLevel2", { mode: "date" }),
+  achLevel3: timestamp("achLevel3", { mode: "date" }),
+  achLevel4: timestamp("achLevel4", { mode: "date" }),
+  achLevel5: timestamp("achLevel5", { mode: "date" }),
+  achLevel6: timestamp("achLevel6", { mode: "date" }),
+  achLevel7: timestamp("achLevel7", { mode: "date" }),
+  achLevel8: timestamp("achLevel8", { mode: "date" }),
+  achLevel9: timestamp("achLevel9", { mode: "date" }),
+  achLevel10: timestamp("achLevel10", { mode: "date" }),
   gems: integer("gems"),
   streak: integer("streak"),
   createdAt: timestamp("created_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).defaultNow(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }).defaultNow(),
   userId: integer("user_id").references(() => user.id),
   streakUpdatedAt: timestamp("streak_updated_at", {
     withTimezone: true,
-    mode: "string",
+    mode: "date",
   }),
 });
 
@@ -852,7 +852,7 @@ export const user = pgTable(
       .primaryKey()
       .notNull()
       .references(() => human.id),
-    registeredOn: timestamp("registeredOn", { mode: "string" }),
+    registeredOn: timestamp("registeredOn", { mode: "date" }),
     alias: varchar("alias", { length: 120 }),
     dateOfBirth: date("dateOfBirth"),
     avatarId: integer("avatarId"),
@@ -902,7 +902,7 @@ export const userDisplay = pgTable(
     social: integer("social").notNull(),
     motivation: integer("motivation").notNull(),
     purpose: integer("purpose").notNull(),
-    dateTime: timestamp("dateTime", { mode: "string" }).notNull(),
+    dateTime: timestamp("dateTime", { mode: "date" }).notNull(),
     userRecordId: integer("userRecordId").references(() => userRecord.id),
     dalleRef: varchar("dalleRef", { length: 50 }),
     streamId: varchar("streamId", { length: 50 }),
@@ -926,10 +926,10 @@ export const userRecord = pgTable("userRecord", {
     .notNull()
     .references(() => user.id),
   flow: varchar("flow", { length: 60 }),
-  completeTimestamp: timestamp("completeTimestamp", { mode: "string" }),
+  completeTimestamp: timestamp("completeTimestamp", { mode: "date" }),
   tags: varchar("tags", { length: 200 }),
   goals: varchar("goals", { length: 200 }),
-  timestamp: timestamp("timestamp", { mode: "string" }),
+  timestamp: timestamp("timestamp", { mode: "date" }),
   stateId: varchar("stateId").default("intake"),
 });
 
@@ -1035,7 +1035,7 @@ export const userGoal = pgTable("userGoal", {
   goal1Scale: integer("goal1Scale"),
   goal2Timeframe: integer("goal2Timeframe"),
   goal2Scale: integer("goal2Scale"),
-  timestamp: timestamp("timestamp", { mode: "string" }).notNull(),
+  timestamp: timestamp("timestamp", { mode: "date" }).notNull(),
   goal1Baseline: doublePrecision("goal1Baseline"),
   goal2Baseline: doublePrecision("goal2Baseline"),
 });
@@ -1059,16 +1059,16 @@ export const wellnessEvent = pgTable("wellnessEvent", {
   userId: integer("userId").notNull(),
   type: varchar("type", { length: 80 }),
   providerId: integer("providerId").references(() => provider.id),
-  recommendDatetime: timestamp("recommendDatetime", { mode: "string" }),
-  completeDatetime: timestamp("completeDatetime", { mode: "string" }),
-  enrollDatetime: timestamp("enrollDatetime", { mode: "string" }),
+  recommendDatetime: timestamp("recommendDatetime", { mode: "date" }),
+  completeDatetime: timestamp("completeDatetime", { mode: "date" }),
+  enrollDatetime: timestamp("enrollDatetime", { mode: "date" }),
   providerSessionId: integer("providerSessionId").notNull(),
 });
 
 export const goalProgress = pgTable("goal_progress", {
   id: dbText("id").primaryKey().notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
   goalId: dbText("goal_id").references(() => goals.id, {
     onDelete: "set null",
   }),
@@ -1103,8 +1103,8 @@ export const friendRequest = pgTable(
     targetId: integer("targetId")
       .notNull()
       .references(() => user.id),
-    createdAt: timestamp("createdAt", { mode: "string" }),
-    updatedAt: timestamp("updatedAt", { mode: "string" }),
+    createdAt: timestamp("createdAt", { mode: "date" }),
+    updatedAt: timestamp("updatedAt", { mode: "date" }),
   },
   (table) => {
     return {
@@ -1125,8 +1125,8 @@ export const friendship = pgTable(
     rightId: integer("rightId")
       .notNull()
       .references(() => user.id),
-    createdAt: timestamp("createdAt", { mode: "string" }),
-    updatedAt: timestamp("updatedAt", { mode: "string" }),
+    createdAt: timestamp("createdAt", { mode: "date" }),
+    updatedAt: timestamp("updatedAt", { mode: "date" }),
   },
   (table) => {
     return {
