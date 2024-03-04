@@ -143,11 +143,11 @@ export const answers = pgTable("answers", {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull(),
+  }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull(),
+  }).notNull().defaultNow(),
 });
 
 export const cbtCourse = pgTable("cbtCourse", {
