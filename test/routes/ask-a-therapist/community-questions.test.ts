@@ -10,6 +10,7 @@ test("GET /ask-a-therapist/community-questions should return a set of 5 question
   const body = await res.json();
 
   // then
+  t.equal(res.statusCode, 200);
   t.equal(body.length, 5);
   t.hasProps(body[0], ["question", "answer", "category"]);
 });

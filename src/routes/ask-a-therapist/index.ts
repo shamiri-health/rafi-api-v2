@@ -9,8 +9,6 @@ import sample from "lodash/sample";
 
 const QuestionBody = Type.Object({
   question: Type.String(),
-  therapistId: Type.Number(),
-  therapist_id: Type.Optional(Type.Number()),
 });
 
 const AnswerBody = Type.Object({
@@ -32,6 +30,16 @@ const CommunityQuestionResponse = Type.Array(
   }),
 );
 
+const NewQuestionResponse = Type.Object({
+  id: Type.String(),
+  question: Type.String(),
+  user_id: Type.Integer(),
+  created_at: Type.String({ format: "date-time" }),
+  updated_at: Type.String({ format: "date-time" }),
+  // TODO: don't merge until you get the correct type for answers
+  // answers: Type.Optional(Type.Array(Type.Number()))
+});
+
 const QuestionUpdateBody = Type.Pick(QuestionBody, ["question"]);
 
 type QuestionBody = Static<typeof QuestionBody>;
@@ -39,6 +47,7 @@ type AnswerBody = Static<typeof AnswerBody>;
 type QuestionFetchParams = Static<typeof QuestionFetchParams>;
 type QuestionUpdateBody = Static<typeof QuestionUpdateBody>;
 type CommunityQuestionResponse = Static<typeof CommunityQuestionResponse>;
+type NewQuestionResponse = Static<typeof NewQuestionResponse>;
 
 const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
@@ -54,9 +63,17 @@ const askATherapistRouter: FastifyPluginAsync = async (
 
   fastify.post<{ Body: QuestionBody }>(
     "/question",
-    // @ts-ignore
-    { onRequest: fastify.authenticate, schema: { body: QuestionBody } },
-    async (request) => {
+    {
+      // @ts-ignore
+      onRequest: fastify.authenticate,
+      schema: {
+        body: QuestionBody,
+        response: {
+          201: NewQuestionResponse,
+        },
+      },
+    },
+    async (request, reply) => {
       const id = randomUUID() as string;
       const [newQuestion] = await fastify.db
         .insert(questions)
@@ -65,12 +82,18 @@ const askATherapistRouter: FastifyPluginAsync = async (
           id,
           // @ts-ignore
           userId: request.user.sub,
-          therapistId: request.body.therapistId ?? request.body.therapist_id,
           question: request.body.question,
         })
         .returning();
 
-      return newQuestion;
+      const output = {
+        ...newQuestion,
+        created_at: newQuestion.createdAt,
+        updated_at: newQuestion.updatedAt,
+        user_id: newQuestion.userId,
+      };
+
+      return reply.code(201).send(output);
     },
   );
 
