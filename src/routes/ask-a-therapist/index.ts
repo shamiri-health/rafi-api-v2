@@ -13,9 +13,8 @@ const QuestionBody = Type.Object({
 
 const AnswerBody = Type.Object({
   answer: Type.String(),
-  therapist_id: Type.Optional(Type.Number()),
-  questionId: Type.String(),
-  question_id: Type.Optional(Type.String()),
+  therapist_id: Type.Number(),
+  question_id: Type.String(),
 });
 
 const QuestionFetchParams = Type.Object({
@@ -38,6 +37,15 @@ const NewQuestionResponse = Type.Object({
   updated_at: Type.String({ format: "date-time" }),
   // TODO: don't merge until you get the correct type for answers
   // answers: Type.Optional(Type.Array(Type.Number()))
+});
+
+const NewAnswerResponse = Type.Object({
+  id: Type.String(),
+  answer: Type.String(),
+  question_id: Type.String(),
+  therapist_id: Type.Optional(Type.String()),
+  created_at: Type.String({ format: "date-time" }),
+  updated_at: Type.String({ format: "date-time" }),
 });
 
 const QuestionUpdateBody = Type.Pick(QuestionBody, ["question"]);
@@ -98,19 +106,27 @@ const askATherapistRouter: FastifyPluginAsync = async (
   );
 
   // TODO: also add the therapist ID to track who answered the question
+  // FIXME: we should have a way of authenticating requests from bubble/noloco/our own thing
   fastify.post<{ Body: AnswerBody }>(
     "/answer",
-    // @ts-ignore
-    { onRequest: fastify.authenticate, schema: { body: AnswerBody } },
-    async (request) => {
+    { schema: { body: AnswerBody, response: { 201: NewAnswerResponse } } },
+    async (request, reply) => {
       const id = randomUUID() as string;
-      const [postedAnswer] = await fastify.db.insert(answers).values({
-        id,
-        answer: request.body.answer,
-        questionId: request.body.questionId ?? request.body.question_id,
-      });
+      const [postedAnswer] = await fastify.db
+        .insert(answers)
+        .values({
+          id,
+          answer: request.body.answer,
+          questionId: request.body.question_id,
+        })
+        .returning();
 
-      return postedAnswer;
+      return reply.code(201).send({
+        ...postedAnswer,
+        created_at: postedAnswer.createdAt,
+        updated_at: postedAnswer.updatedAt,
+        question_id: postedAnswer.questionId,
+      });
     },
   );
 
