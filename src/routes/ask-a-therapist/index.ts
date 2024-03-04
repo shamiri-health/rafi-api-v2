@@ -3,6 +3,9 @@ import { FastifyPluginAsync } from "fastify";
 import { answers, questions } from "../../database/schema";
 import { Static, Type } from "@sinclair/typebox";
 import { randomUUID } from "node:crypto";
+import QuestionBank from "../../../static/ask_a_therapist_question_bank.json";
+import sampleSize from "lodash/sampleSize";
+import sample from "lodash/sample";
 
 const QuestionBody = Type.Object({
   question: Type.String(),
@@ -21,12 +24,23 @@ const QuestionFetchParams = Type.Object({
   question_id: Type.String(),
 });
 
+const CommunityQuestionResponse = Type.Object({
+  200: Type.Array(
+    Type.Object({
+      question: Type.String(),
+      answer: Type.String(),
+      category: Type.String(),
+    }),
+  ),
+});
+
 const QuestionUpdateBody = Type.Pick(QuestionBody, ["question"]);
 
 type QuestionBody = Static<typeof QuestionBody>;
 type AnswerBody = Static<typeof AnswerBody>;
 type QuestionFetchParams = Static<typeof QuestionFetchParams>;
 type QuestionUpdateBody = Static<typeof QuestionUpdateBody>;
+type CommunityQuestionResponse = Static<typeof CommunityQuestionResponse>;
 
 const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
@@ -82,8 +96,8 @@ const askATherapistRouter: FastifyPluginAsync = async (
   // FIXME: should also return the answer
   fastify.get<{ Params: QuestionFetchParams }>(
     "/question/:question_id",
-    // @ts-ignore
     {
+      // @ts-ignore
       onRequest: fastify.authenticate,
       schema: { params: QuestionFetchParams },
     },
@@ -109,6 +123,7 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify.put<{ Params: QuestionFetchParams; Body: QuestionUpdateBody }>(
     "/question/:question_id",
     {
+      // @ts-ignore
       onRequest: fastify.authenticate,
       schema: { body: QuestionUpdateBody, params: QuestionFetchParams },
     },
@@ -121,6 +136,7 @@ const askATherapistRouter: FastifyPluginAsync = async (
         .where(
           and(
             eq(questions.id, request.params.question_id),
+            // @ts-ignore
             eq(questions.userId, request.user.sub),
           ),
         )
@@ -139,20 +155,20 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify.delete<{ Params: QuestionFetchParams }>(
     "/question/:question_id",
     {
+      // @ts-ignore
       onRequest: fastify.authenticate,
       schema: { params: QuestionFetchParams },
     },
     async (request) => {
       try {
         // @ts-ignore
-        await fastify.db
-          .delete(questions)
-          .where(
-            and(
-              eq(questions.id, request.params.question_id),
-              eq(questions.userId, request.user.sub),
-            ),
-          );
+        await fastify.db.delete(questions).where(
+          and(
+            eq(questions.id, request.params.question_id),
+            // @ts-ignore
+            eq(questions.userId, request.user.sub),
+          ),
+        );
         fastify.log.info("Successfully deleted question");
       } catch (e) {
         fastify.log.error("Could not deleter");
@@ -162,7 +178,27 @@ const askATherapistRouter: FastifyPluginAsync = async (
     },
   );
 
-  fastify.get("/community-questions", async (request) => {});
+  fastify.get<{ Reply: CommunityQuestionResponse }>(
+    "/community-questions",
+    { schema: { response: CommunityQuestionResponse } },
+    async (_, reply) => {
+      const randomFiveQuestions = sampleSize(Object.keys(QuestionBank), 5);
+
+      const out = [];
+      for (let [category, questionAnswerPairs] of randomFiveQuestions) {
+        const [question, answer] = sample(
+          Object.entries(questionAnswerPairs),
+        ) as [string, string];
+        out.push({
+          category,
+          question,
+          answer,
+        });
+      }
+
+      return reply.code(200).send(out);
+    },
+  );
 };
 
 export default askATherapistRouter;
