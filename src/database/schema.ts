@@ -139,15 +139,21 @@ export const affirmation = pgTable("affirmation", {
 export const answers = pgTable("answers", {
   id: varchar("id", { length: 100 }).primaryKey().notNull(),
   answer: varchar("answer", { length: 1000 }),
-  questionId: varchar("questionId").references(() => questions.id),
+  questionId: varchar("questionId").references(() => questions.id, {
+    onDelete: "cascade",
+  }),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull().defaultNow(),
+  })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull().defaultNow(),
+  })
+    .notNull()
+    .defaultNow(),
 });
 
 export const cbtCourse = pgTable("cbtCourse", {
@@ -619,11 +625,15 @@ export const questions = pgTable("questions", {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull().defaultNow(),
+  })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull().defaultNow(),
+  })
+    .notNull()
+    .defaultNow(),
 });
 
 export const rewardHubRecord = pgTable("rewardHubRecord", {
