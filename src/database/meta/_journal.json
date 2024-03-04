@@ -15,6 +15,13 @@
       "when": 1709542430100,
       "tag": "0001_crazy_turbo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709542622488,
+      "tag": "0002_far_bruce_banner",
+      "breakpoints": true
     }
   ]
 }
