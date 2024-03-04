@@ -21,12 +21,8 @@
           "name": "admin_id_human_id_fk",
           "tableFrom": "admin",
           "tableTo": "human",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -93,12 +89,8 @@
           "name": "affirmation_userId_user_id_fk",
           "tableFrom": "affirmation",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -159,12 +151,8 @@
           "name": "affirmation_of_the_day_user_id_user_id_fk",
           "tableFrom": "affirmation_of_the_day",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -237,12 +225,8 @@
           "name": "affirmation_reminder_user_id_user_id_fk",
           "tableFrom": "affirmation_reminder",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -279,12 +263,8 @@
           "name": "alacarteOrder_id_order_id_fk",
           "tableFrom": "alacarteOrder",
           "tableTo": "order",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -292,12 +272,8 @@
           "name": "alacarteOrder_userId_user_id_fk",
           "tableFrom": "alacarteOrder",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -305,12 +281,8 @@
           "name": "alacarteOrder_insuranceId_insurance_id_fk",
           "tableFrom": "alacarteOrder",
           "tableTo": "insurance",
-          "columnsFrom": [
-            "insuranceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["insuranceId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -377,12 +349,8 @@
           "name": "answers_questionId_questions_id_fk",
           "tableFrom": "answers",
           "tableTo": "questions",
-          "columnsFrom": [
-            "questionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["questionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -420,9 +388,7 @@
         "blacklistToken_token_key": {
           "name": "blacklistToken_token_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       }
     },
@@ -475,9 +441,7 @@
         "calendar_googleId_key": {
           "name": "calendar_googleId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "googleId"
-          ]
+          "columns": ["googleId"]
         }
       }
     },
@@ -582,12 +546,8 @@
           "name": "cbtEvent_id_therapySession_id_fk",
           "tableFrom": "cbtEvent",
           "tableTo": "therapySession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -595,12 +555,8 @@
           "name": "cbtEvent_cbtCourseId_cbtCourse_id_fk",
           "tableFrom": "cbtEvent",
           "tableTo": "cbtCourse",
-          "columnsFrom": [
-            "cbtCourseId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cbtCourseId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -649,12 +605,8 @@
           "name": "cbtModule_cbtCourseId_cbtCourse_id_fk",
           "tableFrom": "cbtModule",
           "tableTo": "cbtCourse",
-          "columnsFrom": [
-            "cbtCourseId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cbtCourseId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -709,12 +661,8 @@
           "name": "cbtTopic_cbtModuleId_cbtModule_id_fk",
           "tableFrom": "cbtTopic",
           "tableTo": "cbtModule",
-          "columnsFrom": [
-            "cbtModuleId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cbtModuleId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -751,12 +699,8 @@
           "name": "chat_userId_user_id_fk",
           "tableFrom": "chat",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -817,12 +761,8 @@
           "name": "chatEvent_id_therapySession_id_fk",
           "tableFrom": "chatEvent",
           "tableTo": "therapySession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -830,12 +770,8 @@
           "name": "chatEvent_therapistId_therapist_id_fk",
           "tableFrom": "chatEvent",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -897,23 +833,17 @@
         "client_companyName_key": {
           "name": "client_companyName_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "companyName"
-          ]
+          "columns": ["companyName"]
         },
         "client_label_key": {
           "name": "client_label_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "label"
-          ]
+          "columns": ["label"]
         },
         "client_KRAPin_key": {
           "name": "client_KRAPin_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "KRAPin"
-          ]
+          "columns": ["KRAPin"]
         }
       }
     },
@@ -934,12 +864,8 @@
           "name": "coachingSession_id_providerSession_id_fk",
           "tableFrom": "coachingSession",
           "tableTo": "providerSession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1030,12 +956,8 @@
           "name": "daily_check_in_user_id_user_id_fk",
           "tableFrom": "daily_check_in",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1102,12 +1024,8 @@
           "name": "discountCode_orderId_order_id_fk",
           "tableFrom": "discountCode",
           "tableTo": "order",
-          "columnsFrom": [
-            "orderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["orderId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1138,12 +1056,8 @@
           "name": "enterpriseStandard_id_subscription_id_fk",
           "tableFrom": "enterpriseStandard",
           "tableTo": "subscription",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1151,12 +1065,8 @@
           "name": "enterpriseStandard_clientId_client_id_fk",
           "tableFrom": "enterpriseStandard",
           "tableTo": "client",
-          "columnsFrom": [
-            "clientId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["clientId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1211,12 +1121,8 @@
           "name": "favourited_affirmation_user_id_user_id_fk",
           "tableFrom": "favourited_affirmation",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1241,12 +1147,8 @@
           "name": "fitnessClass_id_providerSession_id_fk",
           "tableFrom": "fitnessClass",
           "tableTo": "providerSession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1289,12 +1191,8 @@
           "name": "friendRequest_initiatorId_user_id_fk",
           "tableFrom": "friendRequest",
           "tableTo": "user",
-          "columnsFrom": [
-            "initiatorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["initiatorId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1302,12 +1200,8 @@
           "name": "friendRequest_targetId_user_id_fk",
           "tableFrom": "friendRequest",
           "tableTo": "user",
-          "columnsFrom": [
-            "targetId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["targetId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1315,10 +1209,7 @@
       "compositePrimaryKeys": {
         "friendRequest_pkey": {
           "name": "friendRequest_pkey",
-          "columns": [
-            "initiatorId",
-            "targetId"
-          ]
+          "columns": ["initiatorId", "targetId"]
         }
       },
       "uniqueConstraints": {}
@@ -1358,12 +1249,8 @@
           "name": "friendship_leftId_user_id_fk",
           "tableFrom": "friendship",
           "tableTo": "user",
-          "columnsFrom": [
-            "leftId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["leftId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1371,12 +1258,8 @@
           "name": "friendship_rightId_user_id_fk",
           "tableFrom": "friendship",
           "tableTo": "user",
-          "columnsFrom": [
-            "rightId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["rightId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1384,10 +1267,7 @@
       "compositePrimaryKeys": {
         "friendship_pkey": {
           "name": "friendship_pkey",
-          "columns": [
-            "leftId",
-            "rightId"
-          ]
+          "columns": ["leftId", "rightId"]
         }
       },
       "uniqueConstraints": {}
@@ -1451,12 +1331,8 @@
           "name": "goal_category_user_id_user_id_fk",
           "tableFrom": "goal_category",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1499,12 +1375,8 @@
           "name": "goal_progress_goal_id_goals_id_fk",
           "tableFrom": "goal_progress",
           "tableTo": "goals",
-          "columnsFrom": [
-            "goal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["goal_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1601,12 +1473,8 @@
           "name": "goals_user_id_user_id_fk",
           "tableFrom": "goals",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1614,12 +1482,8 @@
           "name": "goals_goal_category_id_goal_category_id_fk",
           "tableFrom": "goals",
           "tableTo": "goal_category",
-          "columnsFrom": [
-            "goal_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["goal_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1627,12 +1491,8 @@
           "name": "goals_parent_goal_id_fkey",
           "tableFrom": "goals",
           "tableTo": "goals",
-          "columnsFrom": [
-            "parent_goal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_goal_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1676,12 +1536,8 @@
           "name": "groupEvent_id_therapySession_id_fk",
           "tableFrom": "groupEvent",
           "tableTo": "therapySession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1689,12 +1545,8 @@
           "name": "groupEvent_groupTopicId_groupTopic_id_fk",
           "tableFrom": "groupEvent",
           "tableTo": "groupTopic",
-          "columnsFrom": [
-            "groupTopicId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["groupTopicId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1702,12 +1554,8 @@
           "name": "groupEvent_groupSessionId_groupSession_id_fk",
           "tableFrom": "groupEvent",
           "tableTo": "groupSession",
-          "columnsFrom": [
-            "groupSessionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["groupSessionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1768,12 +1616,8 @@
           "name": "groupPlan_clientId_client_id_fk",
           "tableFrom": "groupPlan",
           "tableTo": "client",
-          "columnsFrom": [
-            "clientId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["clientId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1810,12 +1654,8 @@
           "name": "groupPlanOrder_id_order_id_fk",
           "tableFrom": "groupPlanOrder",
           "tableTo": "order",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1823,12 +1663,8 @@
           "name": "groupPlanOrder_groupPlanId_groupPlan_id_fk",
           "tableFrom": "groupPlanOrder",
           "tableTo": "groupPlan",
-          "columnsFrom": [
-            "groupPlanId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["groupPlanId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1836,12 +1672,8 @@
           "name": "groupPlanOrder_userId_user_id_fk",
           "tableFrom": "groupPlanOrder",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1928,12 +1760,8 @@
           "name": "groupSession_therapistId_therapist_id_fk",
           "tableFrom": "groupSession",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1941,12 +1769,8 @@
           "name": "groupSession_groupTopicId_groupTopic_id_fk",
           "tableFrom": "groupSession",
           "tableTo": "groupTopic",
-          "columnsFrom": [
-            "groupTopicId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["groupTopicId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2029,12 +1853,8 @@
           "name": "gymPass_id_providerSession_id_fk",
           "tableFrom": "gymPass",
           "tableTo": "providerSession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2090,16 +1910,12 @@
         "human_email_key": {
           "name": "human_email_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "mobile_unique": {
           "name": "mobile_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "mobile"
-          ]
+          "columns": ["mobile"]
         }
       }
     },
@@ -2126,12 +1942,8 @@
           "name": "individualBasic_id_subscription_id_fk",
           "tableFrom": "individualBasic",
           "tableTo": "subscription",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2186,12 +1998,8 @@
           "name": "insurance_userId_user_id_fk",
           "tableFrom": "insurance",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2201,9 +2009,7 @@
         "insurance_userId_key": {
           "name": "insurance_userId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "userId"
-          ]
+          "columns": ["userId"]
         }
       }
     },
@@ -2342,12 +2148,8 @@
           "name": "journal_userId_user_id_fk",
           "tableFrom": "journal",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2397,12 +2199,8 @@
           "name": "message_chatId_chat_id_fk",
           "tableFrom": "message",
           "tableTo": "chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2457,12 +2255,8 @@
           "name": "onsiteEvent_id_therapySession_id_fk",
           "tableFrom": "onsiteEvent",
           "tableTo": "therapySession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2470,12 +2264,8 @@
           "name": "onsiteEvent_therapistId_therapist_id_fk",
           "tableFrom": "onsiteEvent",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2562,9 +2352,7 @@
         "order_paymentRef_key": {
           "name": "order_paymentRef_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "paymentRef"
-          ]
+          "columns": ["paymentRef"]
         }
       }
     },
@@ -2616,23 +2404,17 @@
         "organization_email_key": {
           "name": "organization_email_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "organization_phone_key": {
           "name": "organization_phone_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "phone"
-          ]
+          "columns": ["phone"]
         },
         "organization_location_key": {
           "name": "organization_location_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "location"
-          ]
+          "columns": ["location"]
         }
       }
     },
@@ -2703,12 +2485,8 @@
           "name": "phoneEvent_id_therapySession_id_fk",
           "tableFrom": "phoneEvent",
           "tableTo": "therapySession",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2716,12 +2494,8 @@
           "name": "phoneEvent_therapistId_therapist_id_fk",
           "tableFrom": "phoneEvent",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2731,9 +2505,7 @@
         "phoneEvent_googleTherapistEventId_key": {
           "name": "phoneEvent_googleTherapistEventId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "googleTherapistEventId"
-          ]
+          "columns": ["googleTherapistEventId"]
         }
       }
     },
@@ -2796,12 +2568,8 @@
           "name": "provider_id_organization_id_fk",
           "tableFrom": "provider",
           "tableTo": "organization",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2874,12 +2642,8 @@
           "name": "providerSession_providerId_provider_id_fk",
           "tableFrom": "providerSession",
           "tableTo": "provider",
-          "columnsFrom": [
-            "providerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["providerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2936,12 +2700,8 @@
           "name": "questions_therapistId_therapist_id_fk",
           "tableFrom": "questions",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2984,12 +2744,8 @@
           "name": "quickReplies_id_userResponse_id_fk",
           "tableFrom": "quickReplies",
           "tableTo": "userResponse",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3058,12 +2814,8 @@
           "name": "referral_codes_client_id_client_id_fk",
           "tableFrom": "referral_codes",
           "tableTo": "client",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3073,24 +2825,17 @@
         "referral_codes_email_key": {
           "name": "referral_codes_email_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "unique_email_referral_code_combination": {
           "name": "unique_email_referral_code_combination",
           "nullsNotDistinct": false,
-          "columns": [
-            "email",
-            "referral_code"
-          ]
+          "columns": ["email", "referral_code"]
         },
         "referral_codes_referral_code_key": {
           "name": "referral_codes_referral_code_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "referral_code"
-          ]
+          "columns": ["referral_code"]
         }
       }
     },
@@ -3153,12 +2898,8 @@
           "name": "rewardHubRecord_userRewardHubId_userRewardHub_id_fk",
           "tableFrom": "rewardHubRecord",
           "tableTo": "userRewardHub",
-          "columnsFrom": [
-            "userRewardHubId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userRewardHubId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3201,12 +2942,8 @@
           "name": "shamiriScore_userDisplayId_userDisplay_id_fk",
           "tableFrom": "shamiriScore",
           "tableTo": "userDisplay",
-          "columnsFrom": [
-            "userDisplayId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userDisplayId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3273,12 +3010,8 @@
           "name": "subscription_userId_user_id_fk",
           "tableFrom": "subscription",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3333,12 +3066,8 @@
           "name": "subscriptionOrder_id_order_id_fk",
           "tableFrom": "subscriptionOrder",
           "tableTo": "order",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3346,12 +3075,8 @@
           "name": "subscriptionOrder_userId_user_id_fk",
           "tableFrom": "subscriptionOrder",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3359,12 +3084,8 @@
           "name": "subscriptionOrder_subscriptionId_subscription_id_fk",
           "tableFrom": "subscriptionOrder",
           "tableTo": "subscription",
-          "columnsFrom": [
-            "subscriptionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subscriptionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3507,12 +3228,8 @@
           "name": "teamAdmin_id_human_id_fk",
           "tableFrom": "teamAdmin",
           "tableTo": "human",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3520,12 +3237,8 @@
           "name": "teamAdmin_clientId_client_id_fk",
           "tableFrom": "teamAdmin",
           "tableTo": "client",
-          "columnsFrom": [
-            "clientId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["clientId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3563,12 +3276,8 @@
           "name": "teletherapyOrder_id_order_id_fk",
           "tableFrom": "teletherapyOrder",
           "tableTo": "order",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3576,12 +3285,8 @@
           "name": "teletherapyOrder_userId_user_id_fk",
           "tableFrom": "teletherapyOrder",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3612,12 +3317,8 @@
           "name": "text_id_userResponse_id_fk",
           "tableFrom": "text",
           "tableTo": "userResponse",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3720,12 +3421,8 @@
           "name": "therapist_id_human_id_fk",
           "tableFrom": "therapist",
           "tableTo": "human",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3733,12 +3430,8 @@
           "name": "therapist_client_id_client_id_fk",
           "tableFrom": "therapist",
           "tableTo": "client",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3769,12 +3462,8 @@
           "name": "therapistCal_id_calendar_id_fk",
           "tableFrom": "therapistCal",
           "tableTo": "calendar",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3782,12 +3471,8 @@
           "name": "therapistCal_therapistId_therapist_id_fk",
           "tableFrom": "therapistCal",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "therapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["therapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3797,9 +3482,7 @@
         "therapistCal_therapistId_key": {
           "name": "therapistCal_therapistId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "therapistId"
-          ]
+          "columns": ["therapistId"]
         }
       }
     },
@@ -3874,12 +3557,8 @@
           "name": "therapySession_userRecordId_userRecord_id_fk",
           "tableFrom": "therapySession",
           "tableTo": "userRecord",
-          "columnsFrom": [
-            "userRecordId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userRecordId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3947,23 +3626,17 @@
         "Tip_name_key": {
           "name": "Tip_name_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         },
         "Tip_text_key": {
           "name": "Tip_text_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "text"
-          ]
+          "columns": ["text"]
         },
         "Tip_summary_key": {
           "name": "Tip_summary_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "summary"
-          ]
+          "columns": ["summary"]
         }
       }
     },
@@ -4111,12 +3784,8 @@
           "name": "user_id_human_id_fk",
           "tableFrom": "user",
           "tableTo": "human",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4124,12 +3793,8 @@
           "name": "user_clientId_client_id_fk",
           "tableFrom": "user",
           "tableTo": "client",
-          "columnsFrom": [
-            "clientId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["clientId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4137,12 +3802,8 @@
           "name": "user_referral_record_id_referral_codes_id_fk",
           "tableFrom": "user",
           "tableTo": "referral_codes",
-          "columnsFrom": [
-            "referral_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referral_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4152,9 +3813,7 @@
         "user_alias_key": {
           "name": "user_alias_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "alias"
-          ]
+          "columns": ["alias"]
         }
       }
     },
@@ -4351,12 +4010,8 @@
           "name": "userAchievement_userRewardHubId_userRewardHub_id_fk",
           "tableFrom": "userAchievement",
           "tableTo": "userRewardHub",
-          "columnsFrom": [
-            "userRewardHubId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userRewardHubId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4364,12 +4019,8 @@
           "name": "userAchievement_user_id_user_id_fk",
           "tableFrom": "userAchievement",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4586,12 +4237,8 @@
           "name": "userBaselineRecord_id_userRecord_id_fk",
           "tableFrom": "userBaselineRecord",
           "tableTo": "userRecord",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4886,12 +4533,8 @@
           "name": "userCheckinRecord_id_userRecord_id_fk",
           "tableFrom": "userCheckinRecord",
           "tableTo": "userRecord",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4982,12 +4625,8 @@
           "name": "userDisplay_userId_user_id_fk",
           "tableFrom": "userDisplay",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4995,12 +4634,8 @@
           "name": "userDisplay_userRecordId_userRecord_id_fk",
           "tableFrom": "userDisplay",
           "tableTo": "userRecord",
-          "columnsFrom": [
-            "userRecordId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userRecordId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5010,16 +4645,12 @@
         "userDisplay_streamId_key": {
           "name": "userDisplay_streamId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "streamId"
-          ]
+          "columns": ["streamId"]
         },
         "userDisplay_discoverStreamId_key": {
           "name": "userDisplay_discoverStreamId_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "discoverStreamId"
-          ]
+          "columns": ["discoverStreamId"]
         }
       }
     },
@@ -5100,12 +4731,8 @@
           "name": "userGoal_userRewardHubId_userRewardHub_id_fk",
           "tableFrom": "userGoal",
           "tableTo": "userRewardHub",
-          "columnsFrom": [
-            "userRewardHubId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userRewardHubId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5173,12 +4800,8 @@
           "name": "userRecord_userId_user_id_fk",
           "tableFrom": "userRecord",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5249,12 +4872,8 @@
           "name": "userRewardHub_userId_user_id_fk",
           "tableFrom": "userRewardHub",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5320,12 +4939,8 @@
           "name": "userService_userId_user_id_fk",
           "tableFrom": "userService",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5333,12 +4948,8 @@
           "name": "userService_assignedTherapistId_therapist_id_fk",
           "tableFrom": "userService",
           "tableTo": "therapist",
-          "columnsFrom": [
-            "assignedTherapistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assignedTherapistId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5375,12 +4986,8 @@
           "name": "userSystemResponse_systemResponse_id_systemResponse_id_fk",
           "tableFrom": "userSystemResponse",
           "tableTo": "systemResponse",
-          "columnsFrom": [
-            "systemResponse_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["systemResponse_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5388,12 +4995,8 @@
           "name": "userSystemResponse_userResponse_id_userResponse_id_fk",
           "tableFrom": "userSystemResponse",
           "tableTo": "userResponse",
-          "columnsFrom": [
-            "userResponse_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userResponse_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5460,12 +5063,8 @@
           "name": "wellnessEvent_providerId_provider_id_fk",
           "tableFrom": "wellnessEvent",
           "tableTo": "provider",
-          "columnsFrom": [
-            "providerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["providerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
