@@ -13,7 +13,7 @@ import { eq } from "lodash";
 import { inArray } from "drizzle-orm";
 import { generateQuestionForUser } from "../../fixtures/questions";
 
-test("POST /ask-a-therapist/question should create a question", async (t) => {
+test("POST /ask-a-therapist/answer should answer a question given the question_id", async (t) => {
   // given
   const app = await build(t);
   const newTherapist = await generateTherapist(app.db);
@@ -52,7 +52,7 @@ test("POST /ask-a-therapist/question should create a question", async (t) => {
 });
 
 // TODO: uncomment this out once we add authentication logic
-// test("POST /ask-a-therapist/question should 401 status code if user is not authenticated", async (t) => {
+// test("POST /ask-a-therapist/answer should return 401 status code if therapist is not authenticated", async (t) => {
 //   // given
 //   const app = await build(t);
 //

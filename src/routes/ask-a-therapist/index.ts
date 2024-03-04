@@ -162,12 +162,19 @@ const askATherapistRouter: FastifyPluginAsync = async (
     {
       // @ts-ignore
       onRequest: fastify.authenticate,
-      schema: { body: QuestionUpdateBody, params: QuestionFetchParams },
+      schema: {
+        body: QuestionUpdateBody,
+        params: QuestionFetchParams,
+        response: {
+          200: NewQuestionResponse,
+        },
+      },
     },
     async (request) => {
       const [updatedQuestion] = await fastify.db
         .update(questions)
         .set({
+          updatedAt: new Date(),
           question: request.body.question,
         })
         .where(
@@ -185,7 +192,12 @@ const askATherapistRouter: FastifyPluginAsync = async (
         );
       }
 
-      return updatedQuestion;
+      return {
+        ...updatedQuestion,
+        created_at: updatedQuestion.createdAt,
+        updated_at: updatedQuestion.updatedAt,
+        user_id: updatedQuestion.userId,
+      };
     },
   );
 
