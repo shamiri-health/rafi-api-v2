@@ -24,15 +24,13 @@ const QuestionFetchParams = Type.Object({
   question_id: Type.String(),
 });
 
-const CommunityQuestionResponse = Type.Object({
-  200: Type.Array(
-    Type.Object({
-      question: Type.String(),
-      answer: Type.String(),
-      category: Type.String(),
-    }),
-  ),
-});
+const CommunityQuestionResponse = Type.Array(
+  Type.Object({
+    question: Type.String(),
+    answer: Type.String(),
+    category: Type.String(),
+  }),
+);
 
 const QuestionUpdateBody = Type.Pick(QuestionBody, ["question"]);
 
@@ -178,25 +176,31 @@ const askATherapistRouter: FastifyPluginAsync = async (
     },
   );
 
-  fastify.get<{ Reply: CommunityQuestionResponse }>(
+  fastify.get(
     "/community-questions",
-    { schema: { response: CommunityQuestionResponse } },
-    async (_, reply) => {
-      const randomFiveQuestions = sampleSize(Object.keys(QuestionBank), 5);
+    {
+      schema: {
+        response: {
+          200: CommunityQuestionResponse,
+        },
+      },
+    },
+    async () => {
+      const randomFiveQuestions = sampleSize(Object.entries(QuestionBank), 5);
 
-      const out = [];
-      for (let [category, questionAnswerPairs] of randomFiveQuestions) {
+      const out = randomFiveQuestions.map(([category, questionAnswerPairs]) => {
         const [question, answer] = sample(
           Object.entries(questionAnswerPairs),
         ) as [string, string];
-        out.push({
+
+        return {
           category,
           question,
           answer,
-        });
-      }
+        };
+      });
 
-      return reply.code(200).send(out);
+      return out;
     },
   );
 };
