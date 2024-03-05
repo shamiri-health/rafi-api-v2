@@ -24,24 +24,35 @@ const JournalEntry = Type.Object({
     content2: Type.Optional(Type.String()),
     question3: Type.Optional(Type.String()),
     content3: Type.Optional(Type.String())
-})
+});
+
+const JournalCategories = Type.Array(Type.String());
 
 const CreateJournalEntry = Type.Object({
     question_1: Type.String(),
-    content1: Type.String(),
+    content_1: Type.String(),
     tag: Type.Optional(Type.Array(Type.String())),
     question_2: Type.Optional(Type.String()),
     content_2: Type.Optional(Type.String()),
     question_3: Type.Optional(Type.String()),
     content_3: Type.Optional(Type.String())
-})
+});
 
 const JournalEntryParams = Type.Object({
     journal_id: Type.String(),
+});
+
+const RecommendedJournal = Type.Object({
+    category: Type.String(),
+    sub_category: Type.String(),
+    prompts: Type.Array(Type.String())
 })
 
+type RecommendedJournal = Static<typeof RecommendedJournal>;
 type JournalEntryParams = Static<typeof JournalEntryParams>;
 type CreateJournalEntry = Static<typeof CreateJournalEntry>;
+type JournalCategories = Static<typeof JournalCategories>;
+type JournalEntry = Static<typeof JournalEntry>;
 
 const journalCategories = Object.keys(JOURNAL_QUESTION_BANK);
 const QUESTION_BANK: Journal = JOURNAL_QUESTION_BANK;
@@ -53,12 +64,8 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     fastify.get("/categories", {
             schema: {
                 response: { 
-                    200: {
-                        type: "array",
-                        items: { 
-                            type: "string"
-                        }
-                }}
+                    200: JournalCategories,
+                }
             }
         },
         async () => journalCategories
@@ -83,13 +90,19 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     )
 
     fastify.get("/recommended-for-you", 
+        {
+            schema: {
+                response: {
+                    200: Type.Array(RecommendedJournal)
+                }
+            }
+        },
         async (request) => {
             const today = new Date();
             // @ts-ignore
             const seed = `${request.user.sub} ${today.getDay()} ${today.getMonth()} ${today.getFullYear()}`;
             const top_three_categories = shuffleJournals(journalCategories, seed);
             const recommendedJournals = [];
-            console.log("seed", seed)
 
             for (const category of top_three_categories) {
                 const subCategory = shuffleJournals(Object.keys(QUESTION_BANK[category]), seed);
@@ -147,7 +160,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
                     userId: request.user.sub,
                     updatedAt: now,
                     question1: request.body.question_1,
-                    content1: request.body.content1,
+                    content1: request.body.content_1,
                     question2: request.body.question_2,
                     content2: request.body.content_2,
                     question3: request.body.question_3,
@@ -162,76 +175,104 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }
     )
 
-    fastify.put<{ Body: CreateJournalEntry }>(
+    fastify.get<{ Params: JournalEntryParams }>(
         "/:journal_id", 
         {
             schema: {
-                // body: CreateJournalEntry,
                 params: JournalEntryParams,
                 response: {
-                    // 200: JournalEntry
+                    200: JournalEntry
                 }
             }
         }, 
         async (request) => {
-            return "hello"
-        // const { journal_id } = request.params;
-        // const [updatedJournalEntry] = await fastify.db
-        // .update(journal)
-        // .set({
-        //     // @ts-ignore
-        //     updatedAt: new Date(),
-        //     question1: request.body.question_1,
-        //     content1: request.body.content1,
-        //     question2: request.body.question_2,
-        //     content2: request.body.content_2,
-        //     question3: request.body.content_3,
-        //     content3: request.body.content_3
-        // })
-        // .where(
-        //     and(
-        //         eq(journal.id, journal_id),
-        //         // @ts-ignore
-        //         eq(journal.userId, request.user.sub)
-        //     )
-        // ).returning()
+            const { journal_id } = request.params;
+            const journalEntry = await fastify.db.query.journal.findFirst({
+                where: and(
+                    eq(journal.id, journal_id),
+                    // @ts-ignore
+                    eq(journal.userId, request.user.sub)
+                )
+            })
 
-        // if (!updatedJournalEntry) {
-        //     throw fastify.httpErrors.notFound(
-        //         `Journal with the id ${journal_id} is not found.`
-        //     )
-        // }
-        
-        // return updatedJournalEntry;
+            if (!journalEntry) {
+                throw fastify.httpErrors.notFound(
+                    `Journal with id ${journal_id} not found.`
+                )
+            }
+
+            return journalEntry;
+        }
+    )
+
+    fastify.put<{ Params: JournalEntryParams, Body: CreateJournalEntry }>(
+        "/:journal_id", 
+        {
+            schema: {
+                body: CreateJournalEntry,
+                params: JournalEntryParams,
+                response: {
+                    200: JournalEntry
+                }
+            }
+        }, 
+        async (request) => {
+            const { journal_id } = request.params;
+            const [updatedJournalEntry] = await fastify.db
+            .update(journal)
+            .set({
+                // @ts-ignore
+                updatedAt: new Date(),
+                question1: request.body.question_1,
+                content1: request.body.content_1,
+                question2: request.body.question_2,
+                content2: request.body.content_2,
+                question3: request.body.content_3,
+                content3: request.body.content_3
+            })
+            .where(
+                and(
+                    eq(journal.id, journal_id),
+                    // @ts-ignore
+                    eq(journal.userId, request.user.sub)
+                )
+            ).returning()
+
+            if (!updatedJournalEntry) {
+                throw fastify.httpErrors.notFound(
+                    `Journal with the id ${journal_id} not found.`
+                )
+            }
+            
+            return updatedJournalEntry;
+    })
+
+    fastify.delete<{ Params: JournalEntryParams }>(
+        "/:journal_id", 
+        async (request) => {
+            const { journal_id } = request.params;
+            const journalEntry = await fastify.db
+            .delete(journal)
+            .where(
+                and(
+                    eq(journal.id, journal_id),
+                    // @ts-ignore
+                    eq(journal.userId, request.user.sub)
+                )
+            )
+            .returning()
+
+            if (!journalEntry) {
+                throw fastify.httpErrors.notFound(
+                    `Journal with the id ${journal_id} not found.`
+                )
+            }
+
+            return {}
     })
 } 
 
 export default journalRouter;
-// @router.put("/{journal_id}", response_model=schemas.JournalEntry)
-// async def update_journal_entry(
-//     journal_id: str,
-//     request: schemas.JournalEntryCreate,
-//     db: Session = Depends(database.get_db),
-// ):
-//     journal_entry = db.query(models.JournalEntry).get(journal_id)
-
-//     if not journal_entry:
-//         raise HTTPException(
-//             status_code=status.HTTP_404_NOT_FOUND, detail="Journal entry not found"
-//         )
-
-//     journal_entry.question_1 = request.question_1
-//     journal_entry.content_1 = request.content_1
-//     journal_entry.question_2 = request.question_2
-//     journal_entry.content_2 = request.content_2
-//     journal_entry.question_3 = request.question_3
-//     journal_entry.content_3 = request.content_3
-//     journal_entry.updatedAt = datetime.utcnow()
-
-//     db.commit()
-//     db.refresh(journal_entry)
-
-//     return journal_entry
 
 const shuffleJournals = (array: string [], seed: string) => {
     const rng = seedrandom(seed)
