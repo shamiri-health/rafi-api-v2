@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { database } from "../../src/lib/db";
-import { questions } from "../../src/database/schema";
+import { answers, questions } from "../../src/database/schema";
 import { randomUUID } from "node:crypto";
 
 export const generateQuestionForUser = async (
@@ -17,4 +17,21 @@ export const generateQuestionForUser = async (
     .returning();
 
   return createdQuestion;
+};
+
+export const generateAnswerForQuestionAndTherapist = async (
+  db: database["db"],
+  questionId: string,
+  therapist: string | null = null,
+) => {
+  const [answer] = await db
+    .insert(answers)
+    .values({
+      answer: faker.lorem.sentence(),
+      id: randomUUID(),
+      questionId,
+    })
+    .returning();
+
+  return answer;
 };

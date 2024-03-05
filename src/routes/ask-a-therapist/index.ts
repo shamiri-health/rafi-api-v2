@@ -209,18 +209,19 @@ const askATherapistRouter: FastifyPluginAsync = async (
       schema: { params: QuestionFetchParams },
     },
     async (request) => {
-      try {
-        // @ts-ignore
-        await fastify.db.delete(questions).where(
+      const [deletedQuestion] = await fastify.db
+        .delete(questions)
+        .where(
           and(
             eq(questions.id, request.params.question_id),
             // @ts-ignore
             eq(questions.userId, request.user.sub),
           ),
-        );
-        fastify.log.info("Successfully deleted question");
-      } catch (e) {
-        fastify.log.error("Could not deleter");
+        )
+        .returning();
+
+      if (!deletedQuestion) {
+        throw fastify.httpErrors.notFound(`Question not found for the user`);
       }
 
       return {};
