@@ -65,7 +65,7 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify.get("/", { onRequest: fastify.authenticate }, async (request) => {
     return await fastify.db.query.questions.findMany({
       // @ts-ignore
-      where: eq(questions.id, request.user.sub),
+      where: eq(questions.userId, request.user.sub),
     });
   });
 
