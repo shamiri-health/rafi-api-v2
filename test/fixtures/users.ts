@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { human, user } from "../../src/database/schema";
+import { human, therapist, user } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
+import { formatISO } from "date-fns";
 
 export const generateHuman = async (db: database["db"]) => {
   const result = await db
@@ -48,6 +49,33 @@ export const generateUser = async (
     .values(data as typeof user.$inferSelect)
     .returning();
   return result;
+};
+
+export const generateTherapist = async (
+  db: database["db"],
+  id: number | null = null,
+  clientId: number | null = null,
+) => {
+  let data: Partial<typeof therapist.$inferInsert> = {
+    about: faker.lorem.words(10),
+    gmail: faker.internet.email({ provider: "shamirihealth.com" }),
+    dateOfBirth: formatISO(faker.date.anytime(), { representation: "date" }),
+    clientId,
+  };
+
+  if (id) {
+    data.id = id;
+  } else {
+    const newHuman = await generateHuman(db);
+    data.id = newHuman.id;
+  }
+
+  const [newTherapist] = await db
+    .insert(therapist)
+    .values(data as typeof therapist.$inferInsert)
+    .returning();
+
+  return newTherapist;
 };
 
 // export const generateSymonTherapist = async (db: database["db"]) => {
