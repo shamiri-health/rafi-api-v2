@@ -65,14 +65,19 @@ export const alembicVersion = pgTable("alembic_version", {
   versionNum: varchar("version_num", { length: 32 }).primaryKey().notNull(),
 });
 
-export const cbtEvent = pgTable("cbtEvent", {
-  id: varchar("id", { length: 64 })
-    .primaryKey()
-    .notNull()
-    .references(() => therapySession.id, { onDelete: "cascade" }),
-  userModule: integer("userModule"),
-  cbtCourseId: integer("cbtCourseId").references(() => cbtCourse.id),
-  userProgress: varchar("userProgress", { length: 10 }),
+export const answers = pgTable("answers", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  answer: varchar("answer", { length: 1000 }),
+  questionId: varchar("questionId").references(() => questions.id),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  }).notNull(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "string",
+  }).notNull(),
+  therapist_id: integer("therapist_id").references(() => therapist.id)
 });
 
 export const blacklistToken = pgTable(
@@ -134,26 +139,6 @@ export const affirmation = pgTable("affirmation", {
   category: dbText("category"),
   userId: integer("userId").references(() => user.id),
   backgroundFileName: dbText("background_file_name"),
-});
-
-export const answers = pgTable("answers", {
-  id: varchar("id", { length: 100 }).primaryKey().notNull(),
-  answer: varchar("answer", { length: 1000 }),
-  questionId: varchar("questionId").references(() => questions.id, {
-    onDelete: "cascade",
-  }),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "date",
-  })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", {
-    withTimezone: true,
-    mode: "date",
-  })
-    .notNull()
-    .defaultNow(),
 });
 
 export const cbtCourse = pgTable("cbtCourse", {
