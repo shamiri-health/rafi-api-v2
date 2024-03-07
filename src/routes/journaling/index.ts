@@ -70,7 +70,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         },
       },
     },
-    async () => journalCategories,
+    (_, reply) => reply.send(journalCategories),
   );
 
   fastify.get("/all", async () => {
@@ -264,9 +264,14 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
   fastify.delete<{ Params: JournalEntryParams }>(
     "/:journal_id",
+    { 
+      schema: {
+        params: JournalEntryParams
+      }
+    },
     async (request) => {
       const { journal_id } = request.params;
-      const journalEntry = await fastify.db
+      const [journalEntry] = await fastify.db
         .delete(journal)
         .where(
           and(
@@ -276,7 +281,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
           ),
         )
         .returning();
-
+      
       if (!journalEntry) {
         throw fastify.httpErrors.notFound(
           `Journal with the id ${journal_id} not found.`,
