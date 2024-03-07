@@ -100,8 +100,8 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     },
     async (request) => {
       const today = new Date();
-      // @ts-ignore
       const seed = `${
+        // @ts-ignore
         request.user.sub
       } ${today.getDay()} ${today.getMonth()} ${today.getFullYear()}`;
       const top_three_categories = shuffleJournals(journalCategories, seed);
