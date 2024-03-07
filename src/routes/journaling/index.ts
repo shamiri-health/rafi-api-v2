@@ -104,10 +104,10 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         // @ts-ignore
         request.user.sub
       } ${today.getDay()} ${today.getMonth()} ${today.getFullYear()}`;
-      const top_three_categories = shuffleJournals(journalCategories, seed);
+      const topThreeCategories = shuffleJournals(journalCategories, seed);
       const recommendedJournals = [];
 
-      for (const category of top_three_categories) {
+      for (const category of topThreeCategories) {
         const subCategory = shuffleJournals(
           Object.keys(QUESTION_BANK[category]),
           seed,
