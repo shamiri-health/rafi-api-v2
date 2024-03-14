@@ -264,10 +264,10 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
   fastify.delete<{ Params: JournalEntryParams }>(
     "/:journal_id",
-    { 
+    {
       schema: {
-        params: JournalEntryParams
-      }
+        params: JournalEntryParams,
+      },
     },
     async (request) => {
       const { journal_id } = request.params;
@@ -281,7 +281,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
           ),
         )
         .returning();
-      
+
       if (!journalEntry) {
         throw fastify.httpErrors.notFound(
           `Journal with the id ${journal_id} not found.`,

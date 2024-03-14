@@ -1,0 +1,11 @@
+version: "3"
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: shamiri
+      POSTGRES_PASSWORD: shamiri
+      POSTGRES_DB: rafi_db
+    ports:
+      - 5432:5432
+    command: postgres -c log_destination=stderr -c log_min_duration_statement=0
