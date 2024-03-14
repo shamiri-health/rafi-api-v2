@@ -42,7 +42,9 @@ test("PUT /journaling/:journal_id should update the current journal entry", asyn
     
     t.equal(response.statusCode, 200);
     t.ok(updatedJournalEntry);
- })
+    t.equal(updatedJournalEntry.question1, payload.question_1);
+    t.equal(updatedJournalEntry.content1, payload.content_1);
+})
 
  test("PUT /journaling/:journal_id should 401 if the user is not authenticated", async (t) => {
     // given
