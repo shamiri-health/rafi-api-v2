@@ -4,7 +4,7 @@ import { shuffle } from "lodash";
 import { randomUUID } from "crypto";
 import { Static, Type } from "@sinclair/typebox";
 import Affirmations from "../../../static/affirmations.json";
-import { affirmation, affirmationOfTheDay } from "../../schema";
+import { affirmation, affirmationOfTheDay } from "../../database/schema";
 
 const CATEGORIES = Object.keys(Affirmations);
 const AFFIRMATIONBANK: AffirmationObj = Affirmations;
