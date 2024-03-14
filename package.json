@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "yarn build:ts && tsc -p test/tsconfig.json && tap --jobs=1 --ts \"test/**/*.test.ts\"",
+    "test": "DATABASE_URL=postgresql://shamiri:shamiri@localhost:5432/rafi_db yarn build:ts && tsc -p test/tsconfig.json && tap --jobs=1 --ts \"test/**/*.test.ts\"",
     "start": "yarn build:ts && fastify start -l info dist/src/app.js",
     "prod:start": "fastify start -l info dist/src/app.js",
     "build:ts": "tsc",
@@ -41,6 +41,7 @@
     "libphonenumber-js": "^1.10.53",
     "lodash": "^4.17.21",
     "postgres": "^3.4.3",
+    "seedrandom": "^3.0.5",
     "twilio": "^4.20.0",
     "zod": "^3.22.4"
   },
@@ -49,6 +50,7 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.4.4",
     "@types/pg": "^8.10.9",
+    "@types/seedrandom": "^3.0.8",
     "@types/sinon": "^17.0.2",
     "@types/tap": "^15.0.5",
     "concurrently": "^8.2.2",
