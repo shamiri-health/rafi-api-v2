@@ -62,5 +62,6 @@ test("POST /journaling/ should return  401 status code if user is not authentica
   const response = await app.inject().post("/journaling").payload(payload);
 
   //then
+  t.equal(response.statusMessage, "Unauthorized");
   t.equal(response.statusCode, 401);
 });
