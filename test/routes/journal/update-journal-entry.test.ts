@@ -6,7 +6,7 @@ import { journal, user } from "../../../src/database/schema";
 import { generateUser } from "../../fixtures/users";
 import { generateJournalEntry } from "../../fixtures/journals";
 
-test("PUT /journaling/:journal_id should update the current journal entry", async (t) => {
+test("PUT /journal/:journal_id should update the current journal entry", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
@@ -27,7 +27,7 @@ test("PUT /journaling/:journal_id should update the current journal entry", asyn
   const response = await app
     .inject()
     .headers({ authorization: `Bearer ${token}` })
-    .put(`/journaling/${sampleJournalEntry.id}`)
+    .put(`/journal/${sampleJournalEntry.id}`)
     .payload(payload);
 
   const body = await response.json();
@@ -43,7 +43,7 @@ test("PUT /journaling/:journal_id should update the current journal entry", asyn
   t.equal(updatedJournalEntry.content1, payload.content_1);
 });
 
-test("PUT /journaling/:journal_id should 401 if the user is not authenticated", async (t) => {
+test("PUT /journal/:journal_id should 401 if the user is not authenticated", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
@@ -57,7 +57,7 @@ test("PUT /journaling/:journal_id should 401 if the user is not authenticated", 
   // when
   const response = await app
     .inject()
-    .put(`/journaling/${sampleJournalEntry.id}`)
+    .put(`/journal/${sampleJournalEntry.id}`)
     .payload(payload);
 
   // then
