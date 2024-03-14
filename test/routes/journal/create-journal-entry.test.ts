@@ -6,7 +6,7 @@ import { generateUser } from "../../fixtures/users";
 import { journal, user } from "../../../src/database/schema";
 import { and, eq } from "drizzle-orm";
 
-test("POST /journaling/ should create a journal entry", async (t) => {
+test("POST /journal/ should create a journal entry", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
@@ -31,7 +31,7 @@ test("POST /journaling/ should create a journal entry", async (t) => {
   const response = await app
     .inject()
     .headers({ authorization: `Bearer ${token}` })
-    .post("/journaling")
+    .post("/journal")
     .payload(payload);
 
   const body = await response.json();
@@ -44,7 +44,7 @@ test("POST /journaling/ should create a journal entry", async (t) => {
   t.ok(insertedJournal);
 });
 
-test("POST /journaling/ should return  401 status code if user is not authenticated.", async (t) => {
+test("POST /journal/ should return  401 status code if user is not authenticated.", async (t) => {
   // given
   const app = await build(t);
 
@@ -59,7 +59,7 @@ test("POST /journaling/ should return  401 status code if user is not authentica
   };
 
   // when
-  const response = await app.inject().post("/journaling").payload(payload);
+  const response = await app.inject().post("/journal").payload(payload);
 
   //then
   t.equal(response.statusMessage, "Unauthorized");

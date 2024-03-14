@@ -6,7 +6,7 @@ import { generateUser } from "../../fixtures/users";
 import { journal, user } from "../../../src/database/schema";
 import { eq } from "drizzle-orm";
 
-test("DELETE /journaling/:journal_id should delete the current journal entry", async (t) => {
+test("DELETE /journal/:journal_id should delete the current journal entry", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
@@ -22,13 +22,13 @@ test("DELETE /journaling/:journal_id should delete the current journal entry", a
   const response = await app
     .inject()
     .headers({ authorization: `Bearer ${token}` })
-    .delete(`/journaling/${sampleJournalEntry.id}`);
+    .delete(`/journal/${sampleJournalEntry.id}`);
 
   // then
   t.equal(response.statusCode, 200);
 });
 
-test("DELETE /journaling/:journal_id should return 401 is user is not authenticated", async (t) => {
+test("DELETE /journal/:journal_id should return 401 is user is not authenticated", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
@@ -42,7 +42,7 @@ test("DELETE /journaling/:journal_id should return 401 is user is not authentica
   // when
   const response = await app
     .inject()
-    .delete(`/journaling/${sampleJournalEntry.id}`);
+    .delete(`/journal/${sampleJournalEntry.id}`);
 
   // then
   t.equal(response.statusMessage, "Unauthorized");
