@@ -69,12 +69,11 @@ const favouriteAffirmations: FastifyPluginAsync = async (fastify, _): Promise<vo
                     }
                 }
                 const favAffirmation = {
-                    id: favourite.id,
+                    ...favourite,
                     created_at: favourite.createdAt,
                     updated_at: favourite.updatedAt,
-                    removed_at: favourite.removedAt,
-                    category: favourite.category,
                     user_id: favourite.userId,
+                    removed_at: favourite.removedAt,
                     affirmations: selectedAffirmation
                 }
                 favouriteAffirmations.push(favAffirmation);  
@@ -89,7 +88,7 @@ const favouriteAffirmations: FastifyPluginAsync = async (fastify, _): Promise<vo
             schema: {
                 body: CreateFavouriteAffirmation,
                 response: {
-                    200: FavouriteAffirmation
+                    201: FavouriteAffirmation
                 }
             }
         }, async (request, reply) => {
@@ -107,7 +106,12 @@ const favouriteAffirmations: FastifyPluginAsync = async (fastify, _): Promise<vo
                     updatedAt: new Date()
                 }).returning()
 
-                return reply.code(201).send(favAffirmation);
+                return reply.code(201).send({
+                    ...favAffirmation,
+                    created_at: favAffirmation.createdAt,
+                    updated_at: favAffirmation.updatedAt,
+                    user_id: favAffirmation.userId
+                });
 
             } catch (error) {
                 fastify.log.error(error);

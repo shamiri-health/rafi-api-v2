@@ -1,42 +1,55 @@
 import { test } from "tap";
 import { faker } from "@faker-js/faker";
 import { build } from "../../helper";
+import { generateAffirmation } from "../../fixtures/affirmations";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { affirmation, user } from "../../../src/database/schema";
 import { and, eq } from "drizzle-orm";
 
-test("POST /affirmations should return 404 if the category choice is invalid", async (t) => {
+test("PUT /affirmations/:affirmation_id should update the current affirmation", async (t) => {
     // given
     const app = await build(t);
     const sampleUser = await generateUser(app.db);
     const token = await encodeAuthToken(sampleUser.id, "user");
+    const sampleAffirmation = await generateAffirmation(app.db, sampleUser.id);
 
     t.teardown(async () => {
         await app.db.delete(affirmation).where(eq(affirmation.userId, sampleUser.id));
         await app.db.delete(user).where(eq(user.id, sampleUser.id));
     })
 
+    // when
     const payload = {
         content: faker.lorem.sentence(),
-        category: faker.lorem.slug,
+        category: "Mental and Emotional Wellness",
         background_file_name: faker.lorem.word()
     }
 
     const response = await app
     .inject()
     .headers({ authorization: `Bearer ${token}`})
-    .post("/affirmations")
+    .put(`/affirmations/${sampleAffirmation.id}`)
     .payload(payload)
-    
-    t.equal(response.statusMessage, "Bad Request")
-    t.equal(response.statusCode, 400);
+
+    const updatedAffirmation = await app.db.query.affirmation.findFirst({
+        where: and(
+            eq(affirmation.userId, sampleUser.id),
+            // @ts-ignore
+            eq(affirmation.id, sampleAffirmation.id)
+            )
+        })
+        
+    // then
+    t.equal(response.statusCode, 200);
+    t.ok(updatedAffirmation);
+    t.equal(updatedAffirmation.content, payload.content);
 })
 
-test("POST /affirmations should create a new affirmation", async (t) => {
+test("PUT /affirmations/:affirmation_id should return 401 when the user is not authenticated", async (t) => {
     const app = await build(t);
     const sampleUser = await generateUser(app.db);
-    const token = encodeAuthToken(sampleUser.id, "user");
+    const sampleAffirmation = await generateAffirmation(app.db, sampleUser.id);
 
     t.teardown(async () => {
         await app.db.delete(affirmation).where(eq(affirmation.userId, sampleUser.id));
@@ -48,41 +61,12 @@ test("POST /affirmations should create a new affirmation", async (t) => {
         category: "Mental and Emotional Wellness",
         background_file_name: faker.lorem.word()
     }
-    
+
     const response = await app
     .inject()
-    .headers({ authorization: `Bearer ${token}`})
-    .post("/affirmations")
+    .put(`/affirmations/${sampleAffirmation.id}`)
     .payload(payload)
 
-    const body = await response.json();
-
-    
-    const insertedAffirmation = await app.db.query.affirmation.findFirst({
-        where: and(
-            eq(affirmation.userId, sampleUser.id),
-            eq(affirmation.id, body.id)
-            )
-        })
-        
-    t.ok(insertedAffirmation);
-    t.equal(response.statusCode, 201);
-})
-
-
-test("POST /affirmations should 401 status code if user is not authenticated", async (t) => {
-    const app = await build(t);
-
-    const payload = {
-        content: faker.lorem.sentence(),
-        category: faker.lorem.slug(),
-        background_file_name: faker.lorem.word()
-    }
-    
-    const response = await app
-    .inject()
-    .post("/affirmations")
-    .payload(payload)
-
+    t.equal(response.statusMessage, "Unauthorized");
     t.equal(response.statusCode, 401);
 })
