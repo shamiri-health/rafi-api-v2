@@ -11,8 +11,7 @@ const WELLBEING_QUESTION_IDS = [
   "ghq12_7",
   "ghq12_8",
   "ghq12_9",
-]
-
+];
 
 const SOCIAL_QUESTION_IDS = [
   "mspss_1",
@@ -29,8 +28,7 @@ const SOCIAL_QUESTION_IDS = [
   "mspss_9",
   "shamiri_3_1",
   "shamiri_3_2",
-]
-
+];
 
 const SATISFACTION_QUESTION_IDS = [
   "b_phq2_1",
@@ -50,7 +48,7 @@ const SATISFACTION_QUESTION_IDS = [
   "shamiri_2_2",
   "satisfaction_sha_2_1",
   "motivation_pils4_4",
-]
+];
 
 const MOTIVATION_QUESTION_IDS = [
   "gadphq2_f",
@@ -63,7 +61,7 @@ const MOTIVATION_QUESTION_IDS = [
   "shamiri4_1",
   "shamiri_4_2",
   "motivation_pils4_4",
-]
+];
 
 const PURPOSE_QUESTION_IDS = [
   "ghq12_11",
@@ -75,10 +73,37 @@ const PURPOSE_QUESTION_IDS = [
   "shamiri_5_1",
   "shamiri_5_2",
   "motivation_pils4_4",
-]
+];
 
+const journalRouter: FastifyPluginAsync = async (
+  fastify,
+  _,
+): Promise<void> => {};
 
-const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
+function getDomain(
+  key: string,
+  wellbeingList: string[],
+  motivationKey: string,
+  purposeKey: string,
+  satisfactionKey: string,
+  socialKey: string,
+) {
+  if (wellbeingList.includes(key)) return "wellbeing";
+
+  switch (key) {
+    case motivationKey:
+      return "motivation";
+    case purposeKey:
+      return "purpose";
+    case satisfactionKey:
+      return "satisfaction";
+    case socialKey:
+      return "social";
+  }
+
+  throw new Error(
+    `The supplied question id ${key} does not have an associated domain`,
+  );
 }
 
 export default journalRouter;
