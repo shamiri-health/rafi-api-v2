@@ -256,7 +256,7 @@ const affirmationsRouter: FastifyPluginAsync = async (
         },
       },
     },
-    async (request, reply) => {
+    async (request) => {
       const { affirmation_id } = request.params;
       const postedAffirmation = await fastify.db.query.affirmation.findFirst({
         where: and(
@@ -277,7 +277,7 @@ const affirmationsRouter: FastifyPluginAsync = async (
         background_file_name: postedAffirmation.backgroundFileName,
       };
 
-      return reply.send(requestedAffirmation);
+      return requestedAffirmation;
     },
   );
 
