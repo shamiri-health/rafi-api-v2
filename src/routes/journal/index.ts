@@ -292,4 +292,3 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 };
 
 export default journalRouter;
-
