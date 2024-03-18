@@ -98,11 +98,11 @@ const affirmationsRouter: FastifyPluginAsync = async (
       const [createdAffirmation] = await fastify.db.execute(query);
 
       if (createdAffirmation) {
-        return reply.send({
+        return {
           ...createdAffirmation,
           created_at: createdAffirmation.createdAt,
           updated_at: createdAffirmation.updatedAt,
-        });
+        };
       }
 
       const category = shuffle(CATEGORIES);
