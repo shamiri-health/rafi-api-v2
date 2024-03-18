@@ -51,7 +51,7 @@ const favouriteAffirmations: FastifyPluginAsync = async (
         },
       },
     },
-    async (request, reply) => {
+    async (request) => {
       const favourites = await fastify.db.query.favouritedAffirmation.findMany({
         where: and(
           // @ts-ignore
@@ -83,7 +83,7 @@ const favouriteAffirmations: FastifyPluginAsync = async (
         favouriteAffirmations.push(favAffirmation);
       }
 
-      return reply.send(favouriteAffirmations);
+      return favouriteAffirmations;
     },
   );
 
@@ -132,7 +132,7 @@ const favouriteAffirmations: FastifyPluginAsync = async (
 
   fastify.delete<{ Params: FavouriteAffirmationParams }>(
     "/:affirmation_id",
-    async (request, reply) => {
+    async (request) => {
       const { affirmation_id } = request.params;
       const [favouriteAffirmation] = await fastify.db
         .update(favouritedAffirmation)
@@ -155,7 +155,7 @@ const favouriteAffirmations: FastifyPluginAsync = async (
         );
       }
 
-      return reply.send({});
+      return {};
     },
   );
 };

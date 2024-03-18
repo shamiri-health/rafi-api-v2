@@ -19,7 +19,7 @@ test("POST /favourite-affirmations should add favourite affirmations", async (t)
   });
 
   const payload = {
-    category: faker.lorem.slug(),
+    category: "Others",
   };
 
   const response = await app
@@ -54,7 +54,7 @@ test("/POST /favourite-affirmations should return 401 if the user is not authent
   });
 
   const payload = {
-    category: faker.lorem.slug(),
+    category: "Others",
   };
 
   const response = await app

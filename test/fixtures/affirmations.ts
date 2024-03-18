@@ -11,6 +11,7 @@ export const generateAffirmation = async (
   db: database["db"],
   userId: number,
 ) => {
+  const now = new Date();
   const [createdAffirmation] = await db
     .insert(affirmation)
     .values({
@@ -19,8 +20,8 @@ export const generateAffirmation = async (
       content: faker.lorem.sentence(),
       category: "Mental and Emotional Wellness",
       backgroundFileName: faker.lorem.word(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
 
@@ -31,16 +32,17 @@ export const generateAffirmationOfTheDay = async (
   db: database["db"],
   userId: number,
 ) => {
+  const now = new Date();
   const [createdAffirmation] = await db
     .insert(affirmationOfTheDay)
     .values({
       id: randomUUID(),
       userId,
-      category: faker.lorem.word(),
+      category: "Physical Wellness",
       subCategory: faker.lorem.slug(),
       affirmation: faker.lorem.sentence(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
 
@@ -51,13 +53,14 @@ export const generateFavouriteAffirmation = async (
   db: database["db"],
   userId: number,
 ) => {
+  const now = new Date();
   const [favouriteAffirmation] = await db
     .insert(favouritedAffirmation)
     .values({
       id: randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      category: faker.lorem.slug(),
+      createdAt: now,
+      updatedAt: now,
+      category: "Life Skills",
       userId,
     })
     .returning();

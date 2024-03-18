@@ -217,18 +217,19 @@ const affirmationsRouter: FastifyPluginAsync = async (
       }
 
       try {
+        const now = new Date();
         const [postedAffirmation] = await fastify.db
           .insert(affirmation)
           .values({
             // @ts-ignore
             id: randomUUID(),
-            category: category,
-            content: content,
+            category,
+            content,
             backgroundFileName: background_file_name,
             // @ts-ignore
             userId: request.user.sub,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: now,
+            updatedAt: now,
           })
           .returning();
 
@@ -291,7 +292,7 @@ const affirmationsRouter: FastifyPluginAsync = async (
         },
       },
     },
-    async (request, reply) => {
+    async (request) => {
       const { affirmation_id } = request.params;
       const { content, category, background_file_name } = request.body;
 
@@ -320,10 +321,10 @@ const affirmationsRouter: FastifyPluginAsync = async (
           );
         }
 
-        return reply.send({
+        return {
           ...postedAffirmation,
           background_file_name: postedAffirmation.backgroundFileName,
-        });
+        };
       } catch (error) {
         fastify.log.error(error);
         throw error;
@@ -338,7 +339,7 @@ const affirmationsRouter: FastifyPluginAsync = async (
         params: AffirmationParams,
       },
     },
-    async (request, reply) => {
+    async (request) => {
       const { affirmation_id } = request.params;
       try {
         const [postedAffirmation] = await fastify.db
@@ -362,7 +363,7 @@ const affirmationsRouter: FastifyPluginAsync = async (
           );
         }
 
-        return reply.send({});
+        return {};
       } catch (error) {
         fastify.log.error(error);
         throw error;
