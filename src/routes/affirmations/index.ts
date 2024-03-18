@@ -6,6 +6,7 @@ import { Static, Type } from "@sinclair/typebox";
 import Affirmations from "../../../static/affirmations.json";
 import { affirmation, affirmationOfTheDay } from "../../database/schema";
 import { sql } from "drizzle-orm";
+import { shuffleArray } from "../../lib/shuffleArray";
 
 const CATEGORIES = Object.keys(Affirmations);
 const AFFIRMATIONBANK: AffirmationObj = Affirmations;
@@ -128,11 +129,17 @@ const affirmationsRouter: FastifyPluginAsync = async (fastify, _): Promise<void>
                 200: Type.Array(RecommendedAffirmation)
             }
         }
-    }, async (_, reply) => {
-        const categories = shuffle(CATEGORIES).slice(0, 3);
+    }, async (request, reply) => {
+        const today = new Date();
+        const seed = `${
+            // @ts-ignore
+            request.user.sub
+          } ${today.getDay()} ${today.getMonth()} ${today.getFullYear()}`;
+    
+        const categories = shuffleArray(CATEGORIES, seed);
         const response = [];
         for (const category of categories) {
-            const subCategories = shuffle(Object.keys(AFFIRMATIONBANK[category]));
+            const subCategories = shuffleArray(Object.keys(AFFIRMATIONBANK[category]), seed);
             const affirmation = AFFIRMATIONBANK[category][subCategories[0]];
 
             response.push({
