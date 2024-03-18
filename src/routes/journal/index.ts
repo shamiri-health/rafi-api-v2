@@ -1,10 +1,10 @@
 import { FastifyPluginAsync } from "fastify";
-import seedrandom from "seedrandom";
 import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { Static, Type } from "@sinclair/typebox";
 import { journal } from "../../schema";
 import JOURNAL_QUESTION_BANK from "../../../static/journaling.json";
+import { shuffleArray } from "../../lib/shuffleArray";
 
 interface Journal {
   [category: string]: {
@@ -104,28 +104,26 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         // @ts-ignore
         request.user.sub
       } ${today.getDay()} ${today.getMonth()} ${today.getFullYear()}`;
-      const topThreeCategories = shuffleJournals(journalCategories, seed);
+
+      const topThreeCategories = shuffleArray(journalCategories, seed);
       const recommendedJournals = [];
 
       for (const category of topThreeCategories) {
-        const subCategory = shuffleJournals(
+        const subCategory = shuffleArray(
           Object.keys(QUESTION_BANK[category]),
           seed,
         );
-        for (const subCat of subCategory) {
-          const prompts = shuffleJournals(
-            QUESTION_BANK[category][subCat],
-            seed,
-          );
-          const journal = {
-            category: category,
-            sub_category: subCategory,
-            prompts: prompts,
-          };
-          recommendedJournals.push(journal);
-        }
+        const prompts = shuffleArray(
+          QUESTION_BANK[category][subCategory[0]],
+          seed,
+        );
+        const journal = {
+          category: category,
+          sub_category: subCategory[0],
+          prompts: prompts,
+        };
+        recommendedJournals.push(journal);
       }
-
       return recommendedJournals;
     },
   );
@@ -294,13 +292,3 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 };
 
 export default journalRouter;
-
-const shuffleJournals = (array: string[], seed: string) => {
-  const rng = seedrandom(seed);
-  const shuffledArray = array.slice();
-  for (let i = shuffledArray.length - 1; i > 0; i--) {
-    let j = Math.floor(rng() * (i + 1));
-    [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-  }
-  return shuffledArray.slice(0, 3);
-};
