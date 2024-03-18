@@ -7,37 +7,52 @@ import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { generateFavouriteAffirmation } from "../../fixtures/affirmations";
 
 test("DELETE /favourite-affirmations/:affirmation_id should remove the selected affirmation", async (t) => {
-    const app = await build(t);
-    const sampleUser = await generateUser(app.db);
-    const token = await encodeAuthToken(sampleUser.id, "user");
-    const favoriteAffirmation = await generateFavouriteAffirmation(app.db, sampleUser.id);
+  const app = await build(t);
+  const sampleUser = await generateUser(app.db);
+  const token = await encodeAuthToken(sampleUser.id, "user");
+  const favoriteAffirmation = await generateFavouriteAffirmation(
+    app.db,
+    sampleUser.id,
+  );
 
-    t.teardown(async () => {
-        await app.db.delete(favouritedAffirmation).where(eq(favouritedAffirmation.userId, sampleUser.id));
-        await app.db.delete(user).where(eq(user.id, sampleUser.id));
-    })
+  t.teardown(async () => {
+    await app.db
+      .delete(favouritedAffirmation)
+      .where(eq(favouritedAffirmation.userId, sampleUser.id));
+    await app.db.delete(user).where(eq(user.id, sampleUser.id));
+  });
 
-    const response = await app
+  const response = await app
     .inject()
-    .headers({ authorization: `Bearer ${token}`})
-    .delete(`/favourite-affirmations/${favoriteAffirmation.id}`)
+    .headers({ authorization: `Bearer ${token}` })
+    .delete(`/favourite-affirmations/${favoriteAffirmation.id}`);
 
-    t.equal(response.statusCode, 200);
-})
+  t.equal(response.statusCode, 200);
+  t.ok(
+    await app.db.query.favouritedAffirmation.findFirst({
+      where: eq(favouritedAffirmation.id, favoriteAffirmation.id),
+    }),
+  );
+});
 
 test("DELETE /favourite-affirmations/affirmation_id should return 401 is user is not authenticated", async (t) => {
-    const app = await build(t);
-    const sampleUser = await generateUser(app.db);
-    const favoriteAffirmation = await generateFavouriteAffirmation(app.db, sampleUser.id);
+  const app = await build(t);
+  const sampleUser = await generateUser(app.db);
+  const favoriteAffirmation = await generateFavouriteAffirmation(
+    app.db,
+    sampleUser.id,
+  );
 
-    t.teardown(async () => {
-        await app.db.delete(favouritedAffirmation).where(eq(favouritedAffirmation.userId, sampleUser.id));
-        await app.db.delete(user).where(eq(user.id, sampleUser.id));
-    })
+  t.teardown(async () => {
+    await app.db
+      .delete(favouritedAffirmation)
+      .where(eq(favouritedAffirmation.userId, sampleUser.id));
+    await app.db.delete(user).where(eq(user.id, sampleUser.id));
+  });
 
-    const response = await app
+  const response = await app
     .inject()
-    .delete(`/favourite-affirmations/${favoriteAffirmation.id}`)
+    .delete(`/favourite-affirmations/${favoriteAffirmation.id}`);
 
-    t.equal(response.statusCode, 401);
-})
+  t.equal(response.statusCode, 401);
+});
