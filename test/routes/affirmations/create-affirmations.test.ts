@@ -18,7 +18,7 @@ test("POST /affirmations should return 400 if the category choice is invalid", a
 
   const payload = {
     content: faker.lorem.sentence(),
-    category: faker.lorem.slug,
+    category: faker.lorem.slug(),
     background_file_name: faker.lorem.word(),
   };
 
