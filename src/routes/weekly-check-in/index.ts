@@ -1,4 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
+import { sample, sampleSize } from "lodash";
+import { systemResponse, userResponse, userSystemResponse } from "../../database/schema";
+import { inArray, eq } from "drizzle-orm";
 const WELLBEING_QUESTION_IDS = [
   "ghq12_10",
   "ghq12_11",
@@ -75,10 +78,76 @@ const PURPOSE_QUESTION_IDS = [
   "motivation_pils4_4",
 ];
 
-const journalRouter: FastifyPluginAsync = async (
-  fastify,
-  _,
-): Promise<void> => {};
+const weeklyCheckInRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
+  fastify.get("/question-set", {}, async (request, reply) => {
+    const wellbeingQuestionIds = sampleSize(WELLBEING_QUESTION_IDS, 4);
+
+    /*
+     * checks to ensure that we don't select duplicate question IDs
+     * in case they were already selected in the wellbeing category
+     */
+    const socialQuestionId: any = sample(
+      SOCIAL_QUESTION_IDS.filter((id) => !wellbeingQuestionIds.includes(id)),
+    );
+    const satisfactionQuestionId: any = sample(
+      SATISFACTION_QUESTION_IDS.filter(
+        (id) => !wellbeingQuestionIds.includes(id),
+      ),
+    );
+    const motivationQuestionId: any = sample(
+      MOTIVATION_QUESTION_IDS.filter(
+        (id) => !wellbeingQuestionIds.includes(id),
+      ),
+    );
+
+    const purposeQuestionId: any = sample(
+      PURPOSE_QUESTION_IDS.filter((id) => !wellbeingQuestionIds.includes(id)),
+    );
+
+    const questionIdArray = [
+      ...wellbeingQuestionIds,
+      socialQuestionId,
+      satisfactionQuestionId,
+      motivationQuestionId,
+      purposeQuestionId,
+    ];
+
+    const questionResponses = await fastify.db
+      .select()
+      .from(systemResponse)
+      .leftJoin(userSystemResponse, eq(systemResponse.id, userSystemResponse.systemResponseId))
+      .leftJoin(userResponse, eq(userSystemResponse.userResponseId, userResponse.id))
+      .where(inArray(systemResponse.id, questionIdArray));
+
+    const apiResponse = questionResponses.map((response) => {
+      const questionTextVariants = [
+        response.systemResponse.text,
+        response.systemResponse.altText1,
+        response.systemResponse.altText2,
+        response.systemResponse.altText3,
+        response.systemResponse.altText4,
+      ];
+
+      const text = questionTextVariants.filter((qst) => !!qst);
+      const domain = getDomain(
+        response.systemResponse.id,
+        wellbeingQuestionIds,
+        motivationQuestionId,
+        purposeQuestionId,
+        satisfactionQuestionId,
+        socialQuestionId,
+      );
+
+      return {
+        domain,
+        text
+      }
+    });
+
+    console.log(apiResponse)
+    return apiResponse
+  });
+};
 
 function getDomain(
   key: string,
@@ -106,4 +175,4 @@ function getDomain(
   );
 }
 
-export default journalRouter;
+export default weeklyCheckInRouter;
