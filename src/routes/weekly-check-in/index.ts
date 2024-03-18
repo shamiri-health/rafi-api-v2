@@ -1,7 +1,15 @@
 import { FastifyPluginAsync } from "fastify";
-import { sample, sampleSize } from "lodash";
-import { systemResponse, userResponse, userSystemResponse } from "../../database/schema";
+import { random, sample, sampleSize } from "lodash";
+import {
+  quickReplies,
+  systemResponse,
+  userResponse,
+  userSystemResponse,
+} from "../../database/schema";
 import { inArray, eq } from "drizzle-orm";
+import assert from "node:assert";
+import { Static, Type } from "@sinclair/typebox";
+
 const WELLBEING_QUESTION_IDS = [
   "ghq12_10",
   "ghq12_11",
@@ -61,7 +69,7 @@ const MOTIVATION_QUESTION_IDS = [
   "ghq12_5",
   "ghq12_6",
   "ghq12_8",
-  "shamiri4_1",
+  "shamiri_4_1",
   "shamiri_4_2",
   "motivation_pils4_4",
 ];
@@ -78,75 +86,152 @@ const PURPOSE_QUESTION_IDS = [
   "motivation_pils4_4",
 ];
 
-const weeklyCheckInRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
-  fastify.get("/question-set", {}, async (request, reply) => {
-    const wellbeingQuestionIds = sampleSize(WELLBEING_QUESTION_IDS, 4);
+const QuestionSetResponseObject = Type.Object({
+  id: Type.String(),
+  responseId: Type.Number(),
+  measure: Type.String(),
+  measureShortName: Type.String(),
+  text: Type.String(),
+  domain: Type.String(),
+  replies: Type.Array(
+    Type.Object({
+      responseId: Type.Number(),
+      systemResponseId: Type.Number(),
+      value: Type.Number(),
+      id: Type.Number(),
+      title: Type.String(),
+    }),
+  ),
+});
 
-    /*
-     * checks to ensure that we don't select duplicate question IDs
-     * in case they were already selected in the wellbeing category
-     */
-    const socialQuestionId: any = sample(
-      SOCIAL_QUESTION_IDS.filter((id) => !wellbeingQuestionIds.includes(id)),
-    );
-    const satisfactionQuestionId: any = sample(
-      SATISFACTION_QUESTION_IDS.filter(
-        (id) => !wellbeingQuestionIds.includes(id),
-      ),
-    );
-    const motivationQuestionId: any = sample(
-      MOTIVATION_QUESTION_IDS.filter(
-        (id) => !wellbeingQuestionIds.includes(id),
-      ),
-    );
+const QuestionSetResponseSchema = Type.Array(QuestionSetResponseObject);
 
-    const purposeQuestionId: any = sample(
-      PURPOSE_QUESTION_IDS.filter((id) => !wellbeingQuestionIds.includes(id)),
-    );
+type QuestionSetResponseObject = Static<QuestionSetResponseObject>;
 
-    const questionIdArray = [
-      ...wellbeingQuestionIds,
-      socialQuestionId,
-      satisfactionQuestionId,
-      motivationQuestionId,
-      purposeQuestionId,
-    ];
+const weeklyCheckInRouter: FastifyPluginAsync = async (
+  fastify,
+  _,
+): Promise<void> => {
+  fastify.get(
+    "/question-set",
+    { schema: { response: { 200: QuestionSetResponseSchema } } },
+    async (request, reply) => {
+      const questionIdArray: string[] = [];
+      const wellbeingQuestionIds = sampleSize(WELLBEING_QUESTION_IDS, 4);
+      wellbeingQuestionIds.forEach((id) => questionIdArray.push(id));
 
-    const questionResponses = await fastify.db
-      .select()
-      .from(systemResponse)
-      .leftJoin(userSystemResponse, eq(systemResponse.id, userSystemResponse.systemResponseId))
-      .leftJoin(userResponse, eq(userSystemResponse.userResponseId, userResponse.id))
-      .where(inArray(systemResponse.id, questionIdArray));
+      /*
+       * checks to ensure that we don't select duplicate question IDs
+       * in case they were already selected in the wellbeing category
+       */
+      const socialQuestionId: any = sample(
+        SOCIAL_QUESTION_IDS.filter((id) => !questionIdArray.includes(id)),
+      );
+      questionIdArray.push(socialQuestionId);
 
-    const apiResponse = questionResponses.map((response) => {
-      const questionTextVariants = [
-        response.systemResponse.text,
-        response.systemResponse.altText1,
-        response.systemResponse.altText2,
-        response.systemResponse.altText3,
-        response.systemResponse.altText4,
-      ];
+      const satisfactionQuestionId: any = sample(
+        SATISFACTION_QUESTION_IDS.filter((id) => !questionIdArray.includes(id)),
+      );
+      questionIdArray.push(satisfactionQuestionId);
 
-      const text = questionTextVariants.filter((qst) => !!qst);
-      const domain = getDomain(
-        response.systemResponse.id,
-        wellbeingQuestionIds,
-        motivationQuestionId,
-        purposeQuestionId,
-        satisfactionQuestionId,
-        socialQuestionId,
+      const motivationQuestionId: any = sample(
+        MOTIVATION_QUESTION_IDS.filter((id) => !questionIdArray.includes(id)),
+      );
+      questionIdArray.push(motivationQuestionId);
+
+      const purposeQuestionId: any = sample(
+        PURPOSE_QUESTION_IDS.filter((id) => !questionIdArray.includes(id)),
+      );
+      questionIdArray.push(purposeQuestionId);
+
+      const questionResponses = await fastify.db
+        .select()
+        .from(systemResponse)
+        .leftJoin(
+          userSystemResponse,
+          eq(systemResponse.id, userSystemResponse.systemResponseId),
+        )
+        .leftJoin(
+          userResponse,
+          eq(userSystemResponse.userResponseId, userResponse.id),
+        )
+        .leftJoin(quickReplies, eq(userResponse.id, quickReplies.id))
+        .where(inArray(systemResponse.id, questionIdArray));
+
+      const simplifiedQuestionResponse = questionResponses.reduce<
+        Record<string, QuestionSetResponseObject>
+      >((acc, val) => {
+        const { systemResponse: dbSystemResponse } = val;
+
+        if (acc[dbSystemResponse.id]) {
+          acc[dbSystemResponse.id].replies.push({
+            responseId: val.userResponse?.responseId,
+            systemResponseId: val.userResponse?.id,
+            value: val.quickReplies?.optionId,
+            id: val.userResponse?.id,
+            title: val.quickReplies?.text,
+          });
+        } else {
+          const { text, altText1, altText2, altText3, altText4 } =
+            dbSystemResponse;
+
+          const textList = [
+            text,
+            altText1,
+            altText2,
+            altText3,
+            altText4,
+          ].filter((t) => Boolean(t));
+          acc[dbSystemResponse.id] = {
+            id: dbSystemResponse.id,
+            responseId: dbSystemResponse.responseId,
+            measure: dbSystemResponse.measure,
+            measureShortName: dbSystemResponse.measureShortName,
+            text: sample(textList),
+            domain: getDomain(
+              dbSystemResponse.id,
+              wellbeingQuestionIds,
+              motivationQuestionId,
+              purposeQuestionId,
+              satisfactionQuestionId,
+              socialQuestionId,
+            ),
+            replies: [
+              {
+                responseId: val.userResponse?.responseId,
+                systemResponseId: val.userResponse?.id,
+                value: val.quickReplies?.optionId,
+                id: val.userResponse?.id,
+                title: val.quickReplies?.text,
+              },
+            ],
+          };
+        }
+
+        return acc;
+      }, {});
+
+      const formattedQuestionAndReplies = Object.values(
+        simplifiedQuestionResponse,
+      );
+      assert.strictEqual(
+        formattedQuestionAndReplies.length,
+        8,
+        "We were expecting 8 questions but we got a different figure. Initial question ID list: " +
+          JSON.stringify(questionIdArray) +
+          ", final question ID list: " +
+          JSON.stringify(Object.keys(simplifiedQuestionResponse)),
       );
 
-      return {
-        domain,
-        text
-      }
-    });
+      // sort the array so that wellbeing questions return first
+      formattedQuestionAndReplies.sort((a, b) => {
+        if (a.domain === "wellbeing") return -1;
+        return random(1, 5);
+      });
 
-    console.log(apiResponse)
-    return apiResponse
-  });
+      return formattedQuestionAndReplies;
+    },
+  );
 };
 
 function getDomain(
