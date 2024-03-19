@@ -1,14 +1,19 @@
 import { FastifyPluginAsync } from "fastify";
-import { random, sample, sampleSize } from "lodash";
+import { random, sample, sampleSize, sum } from "lodash";
 import {
   quickReplies,
   systemResponse,
   userResponse,
   userSystemResponse,
+  userDisplay,
+  user,
 } from "../../database/schema";
-import { inArray, eq } from "drizzle-orm";
+import { inArray, eq, desc } from "drizzle-orm";
 import assert from "node:assert";
 import { Static, Type } from "@sinclair/typebox";
+import { differenceInDays } from "date-fns";
+import { getSanaaFileName } from "../../lib/utils/sanaa";
+import { userRewardHub } from "../../schema";
 
 const WELLBEING_QUESTION_IDS = [
   "ghq12_10",
@@ -232,7 +237,43 @@ const weeklyCheckInRouter: FastifyPluginAsync = async (
       return formattedQuestionAndReplies;
     },
   );
+
+  // @ts-ignore
+  fastify.get("/", { onRequest: fastify.authenticate }, async (request) => {
+    const shamiriScoreRecord = await fastify.db.query.userDisplay.findFirst({
+      // @ts-ignore
+      where: eq(userDisplay.userId, request.user.sub),
+      orderBy: desc(userDisplay.dateTime),
+    });
+
+    if (!shamiriScoreRecord) {
+      throw fastify.httpErrors.notFound("No user weekly record for user");
+    }
+
+    const dayDifference = differenceInDays(
+      new Date(),
+      shamiriScoreRecord.userDisplay.dateTime,
+    );
+
+    if (dayDifference > 6) {
+      return {};
+    }
+
+    const { dalleRef } = userDisplay;
+
+    return {};
+  });
 };
+
+function getCompositeShamiriScore(
+  wellbeing: number,
+  satisfaction: number,
+  social: number,
+  motivation: number,
+  purpose: number,
+) {
+  return (sum([wellbeing, satisfaction, social, motivation, purpose]) / 5) * 10;
+}
 
 function getDomain(
   key: string,
