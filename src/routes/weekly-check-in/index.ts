@@ -88,25 +88,25 @@ const PURPOSE_QUESTION_IDS = [
 
 const QuestionSetResponseObject = Type.Object({
   id: Type.String(),
-  responseId: Type.Number(),
-  measure: Type.String(),
-  measureShortName: Type.String(),
+  responseId: Type.Union([Type.Number(), Type.Null()]),
+  measure: Type.Union([Type.String(), Type.Null()]),
+  measureShortName: Type.Union([Type.String(), Type.Null()]),
   text: Type.String(),
   domain: Type.String(),
   replies: Type.Array(
     Type.Object({
-      responseId: Type.Number(),
-      systemResponseId: Type.Number(),
-      value: Type.Number(),
-      id: Type.Number(),
-      title: Type.String(),
+      responseId: Type.Union([Type.Null(), Type.Number()]),
+      systemResponseId: Type.Optional(Type.Number()),
+      value: Type.Union([Type.Number(), Type.Null()]),
+      id: Type.Optional(Type.Number()),
+      title: Type.Optional(Type.String()),
     }),
   ),
 });
 
 const QuestionSetResponseSchema = Type.Array(QuestionSetResponseObject);
 
-type QuestionSetResponseObject = Static<QuestionSetResponseObject>;
+type QuestionSetResponseObject = Static<typeof QuestionSetResponseObject>;
 
 const weeklyCheckInRouter: FastifyPluginAsync = async (
   fastify,
@@ -147,15 +147,15 @@ const weeklyCheckInRouter: FastifyPluginAsync = async (
       const questionResponses = await fastify.db
         .select()
         .from(systemResponse)
-        .leftJoin(
+        .innerJoin(
           userSystemResponse,
           eq(systemResponse.id, userSystemResponse.systemResponseId),
         )
-        .leftJoin(
+        .innerJoin(
           userResponse,
           eq(userSystemResponse.userResponseId, userResponse.id),
         )
-        .leftJoin(quickReplies, eq(userResponse.id, quickReplies.id))
+        .innerJoin(quickReplies, eq(userResponse.id, quickReplies.id))
         .where(inArray(systemResponse.id, questionIdArray));
 
       const simplifiedQuestionResponse = questionResponses.reduce<
@@ -184,10 +184,10 @@ const weeklyCheckInRouter: FastifyPluginAsync = async (
           ].filter((t) => Boolean(t));
           acc[dbSystemResponse.id] = {
             id: dbSystemResponse.id,
-            responseId: dbSystemResponse.responseId,
-            measure: dbSystemResponse.measure,
-            measureShortName: dbSystemResponse.measureShortName,
-            text: sample(textList),
+            responseId: dbSystemResponse.responseId ?? null,
+            measure: dbSystemResponse.measure ?? null,
+            measureShortName: dbSystemResponse.measureShortName ?? null,
+            text: sample(textList) as string,
             domain: getDomain(
               dbSystemResponse.id,
               wellbeingQuestionIds,
@@ -198,9 +198,9 @@ const weeklyCheckInRouter: FastifyPluginAsync = async (
             ),
             replies: [
               {
-                responseId: val.userResponse?.responseId,
+                responseId: val.userResponse?.responseId ?? null,
                 systemResponseId: val.userResponse?.id,
-                value: val.quickReplies?.optionId,
+                value: val.quickReplies?.optionId ?? null,
                 id: val.userResponse?.id,
                 title: val.quickReplies?.text,
               },
