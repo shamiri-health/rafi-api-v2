@@ -47,6 +47,10 @@ const app: FastifyPluginAsync<AppOptions> = async (
     },
   });
 
+  void fastify.register(require("@immobiliarelabs/fastify-sentry"), {
+    dsn: "https://4989545f44cb88b83409514052875b25@o1375952.ingest.us.sentry.io/4506807502110720",
+  });
+
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
