@@ -1,7 +1,6 @@
 import admin from "firebase-admin";
 import { FastifyPluginAsync } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
-import serviceKey from "../../../static/shamiri-health-app-firebase-adminsdk-service-key.json";
 
 const MessageBody = Type.Object({
     clientId: Type.String(),
@@ -11,7 +10,9 @@ const MessageBody = Type.Object({
 
 type MessageBody = Static <typeof MessageBody>;
 
+const serviceKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "");
 const serviceAccount = serviceKey as admin.ServiceAccount
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 })
