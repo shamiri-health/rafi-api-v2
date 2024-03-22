@@ -15,6 +15,7 @@ import {
   customType,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 
 const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
   dataType() {
@@ -635,6 +636,17 @@ export const questions = pgTable("questions", {
     .notNull()
     .defaultNow(),
 });
+
+export const questionRelations = relations(questions, ({ many }) => ({
+  answers: many(answers),
+}));
+
+export const answersRelations = relations(answers, ({ one }) => ({
+  question: one(questions, {
+    fields: [answers.questionId],
+    references: [questions.id],
+  }),
+}));
 
 export const rewardHubRecord = pgTable("rewardHubRecord", {
   id: serial("id").primaryKey().notNull(),
