@@ -638,12 +638,15 @@ export const questions = pgTable("questions", {
 });
 
 export const questionRelations = relations(questions, ({ many }) => ({
-  answers: many(answers)
-}))
+  answers: many(answers),
+}));
 
 export const answersRelations = relations(answers, ({ one }) => ({
-  question: one(questions, { fields: [answers.questionId], references:[questions.id]})
-}))
+  question: one(questions, {
+    fields: [answers.questionId],
+    references: [questions.id],
+  }),
+}));
 
 export const rewardHubRecord = pgTable("rewardHubRecord", {
   id: serial("id").primaryKey().notNull(),
