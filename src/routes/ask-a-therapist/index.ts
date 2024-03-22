@@ -68,10 +68,10 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
   // TODO: implement pagination
-  // @ts-ignore
   fastify.get(
     "/",
     {
+      // @ts-ignore
       onRequest: fastify.authenticate,
       schema: {
         response: {
