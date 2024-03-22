@@ -29,14 +29,21 @@ const CommunityQuestionResponse = Type.Array(
   }),
 );
 
+const Answer = Type.Object({
+  id: Type.String(),
+  created_at: Type.String({ format: "date-time" }),
+  updated_at: Type.String({ format: "date-time" }),
+  questionId: Type.String(),
+  answer: Type.String(),
+});
+
 const NewQuestionResponse = Type.Object({
   id: Type.String(),
   question: Type.String(),
   user_id: Type.Integer(),
-  created_at: Type.String({ format: "date-time" }),
-  updated_at: Type.String({ format: "date-time" }),
-  // TODO: don't merge until you get the correct type for answers
-  // answers: Type.Optional(Type.Array(Type.Number()))
+  created_at: Type.Optional(Type.String({ format: "date-time" })),
+  updated_at: Type.Optional(Type.String({ format: "date-time" })),
+  answers: Type.Optional(Type.Array(Answer)),
 });
 
 const NewAnswerResponse = Type.Object({
@@ -61,13 +68,50 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
   // TODO: implement pagination
-  // @ts-ignore
-  fastify.get("/", { onRequest: fastify.authenticate }, async (request) => {
-    return await fastify.db.query.questions.findMany({
+
+  fastify.get(
+    "/",
+    {
       // @ts-ignore
-      where: eq(questions.userId, request.user.sub),
-    });
-  });
+      onRequest: fastify.authenticate,
+      schema: {
+        response: {
+          200: Type.Array(NewQuestionResponse),
+        },
+      },
+    },
+    async (request) => {
+      const result = await fastify.db.query.questions.findMany({
+        with: {
+          answers: true,
+        },
+        // @ts-ignore
+        where: eq(questions.userId, request.user.sub),
+      });
+
+      return result.map(
+        ({
+          userId: user_id,
+          createdAt: created_at,
+          updatedAt: updated_at,
+          answers,
+          ...rest
+        }) => ({
+          user_id,
+          created_at,
+          updated_at,
+          ...rest,
+          answers: answers.map(
+            ({ createdAt: created_at, updatedAt: updated_at, ...rest }) => ({
+              created_at,
+              updated_at,
+              ...rest,
+            }),
+          ),
+        }),
+      );
+    },
+  );
 
   fastify.post<{ Body: QuestionBody }>(
     "/question",
