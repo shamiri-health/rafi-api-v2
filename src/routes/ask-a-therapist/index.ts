@@ -68,6 +68,10 @@ const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
   // TODO: implement pagination
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6cdc03bc91c774e3c871b6cbf3640451dceb3291
   fastify.get(
     "/",
     {
