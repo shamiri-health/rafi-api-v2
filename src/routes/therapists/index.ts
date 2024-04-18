@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import { human, therapist } from "../../database/schema";
 import { eq } from "drizzle-orm";
+import { SPACE_CLIENT } from "../../lib/spaceClient";
 
 const TherapistBase = Type.Object({
     name: Type.String(),
@@ -64,12 +65,12 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
                 about: therapist.about,
                 summary: therapist.summary,
                 timeZone: therapist.timeZone,
-                photoUrl: therapist.photoUrl // configure the space client
+                photoUrl: therapist.photoUrl 
             })
             .from(therapist)
             .innerJoin(human, eq(human.id, therapist.id)
             )
-            return allTherapists;
+            return allTherapists
         }
     )
 
