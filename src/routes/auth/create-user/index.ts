@@ -88,39 +88,18 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
         );
       }
 
-      const TESTING_WHITELIST = [
-        "bennyhinnotieno@gmail.com",
-        "bkochuku@gmail.com ",
-        "kimujnr@yahoo.com",
-        "evan@shamirihealth.com",
-        "faith.kamau@shamiri.institute",
-        "wambuihellen690@gmail.com",
-        "nyareso@shamiri.institute",
-        "gkanyari@gmail.com",
-        "jacklinewanjiru273@gmail.com",
-        "jeankasuddi@gmail.com",
-        "mukariakelvin17@gmail.com",
-        "kendijuma@gmail.com",
-        "k.coovi@gmail.com",
-        "linetkarim@gmail.com",
-        "lynnette.waruguru@shamiri.institute",
-        "marieodhiambo@gmail.com",
-        "natalie.mukami@shamirihealth.com",
-        "paulosokoth@gmail.com",
-        "mumanyarosine@gmail.com",
-        "wanji.wangondu@gmail.com",
-        "mmbonewendy@gmail.com",
-        "winnanlucia@yahoo.com",
-      ];
-
       const isMkuUser = email.endsWith("@mylife.mku.ac.ke");
       const isMoringaUser = email.endsWith("@moringaschool.com");
       const isZerakiUser = email.endsWith("@zeraki.app");
+      const isAHNUser = email.endsWith("@africahealthcarenetwork.com")
+      const isBelvaUser = email.endsWith("@belvadigital.com")
 
       // TODO: create a better programmatic way of checking this
       const MKU_CLIENT_ID = 20;
       const MORINGA_CLIENT_ID = 18;
       const ZERAKI_CLIENT_ID = 2;
+      const AHN_CLIENT_ID = 24;
+      const BELVA_CLIENT_ID = 23;
 
       const SYMON_ID = 10;
       const HELLEN_ID = 205;
@@ -223,7 +202,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
                 `No referral record found for: ${request.body.referral_code}`,
               );
             }
-          } else if (isMkuUser || TESTING_WHITELIST.includes(email)) {
+          } else if (isMkuUser) {
             fastify.log.info("MKU user identified");
             insertedUserResult = await trx
               .update(user)
@@ -256,6 +235,30 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               .update(user)
               .set({
                 clientId: ZERAKI_CLIENT_ID,
+              })
+              .where(eq(user.id, insertedHumanResult[0].id))
+              .returning();
+
+            userServiceRecord.assignedTherapistId =
+              Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+          } else if (isBelvaUser) {
+            fastify.log.info("BELVA USER IDENTIFIED")
+            insertedUserResult = await trx
+              .update(user)
+              .set({
+                clientId: BELVA_CLIENT_ID,
+              })
+              .where(eq(user.id, insertedHumanResult[0].id))
+              .returning();
+
+            userServiceRecord.assignedTherapistId =
+              Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+          } else if (isAHNUser) {
+            fastify.log.info("AHN USER IDENTIFIED")
+            insertedUserResult = await trx
+              .update(user)
+              .set({
+                clientId: AHN_CLIENT_ID,
               })
               .where(eq(user.id, insertedHumanResult[0].id))
               .returning();
