@@ -2,7 +2,6 @@ import { FastifyPluginAsync } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import { human, therapist } from "../../database/schema";
 import { eq } from "drizzle-orm";
-import { SPACE_CLIENT } from "../../lib/spaceClient";
 
 const TherapistBase = Type.Object({
     name: Type.String(),
