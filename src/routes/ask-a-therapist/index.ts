@@ -37,21 +37,10 @@ const Answer = Type.Object({
   answer: Type.String(),
 });
 
-const Answer = Type.Object({
-  id: Type.String(),
-  created_at: Type.String({ format: "date-time" }),
-  updated_at: Type.String({ format: "date-time" }),
-  questionId: Type.String(),
-  answer: Type.String(),
-});
-
 const NewQuestionResponse = Type.Object({
   id: Type.String(),
   question: Type.String(),
   user_id: Type.Integer(),
-  created_at: Type.Optional(Type.String({ format: "date-time" })),
-  updated_at: Type.Optional(Type.String({ format: "date-time" })),
-  answers: Type.Optional(Type.Array(Answer)),
   created_at: Type.Optional(Type.String({ format: "date-time" })),
   updated_at: Type.Optional(Type.String({ format: "date-time" })),
   answers: Type.Optional(Type.Array(Answer)),
