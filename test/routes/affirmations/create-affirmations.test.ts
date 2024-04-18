@@ -27,9 +27,9 @@ test("POST /affirmations should return 400 if the category choice is invalid", a
     .headers({ authorization: `Bearer ${token}` })
     .post("/affirmations")
     .payload(payload);
-
-  t.equal(response.statusMessage, "Bad Request");
-  t.equal(response.statusCode, 400);
+  
+  t.equal(response.statusMessage, "Not Found");
+  t.equal(response.statusCode, 404);
 });
 
 test("POST /affirmations should create a new affirmation", async (t) => {

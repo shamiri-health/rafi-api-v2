@@ -23,8 +23,8 @@ const Therapist = Type.Object({
 
 const TherapistCreate = Type.Object({
     ...TherapistBase.properties,
-    workingTimeStart: Type.String({ format: "date-time" }),
-    workingTimeEnd: Type.String({ format: "date-time" }),
+    workingTimeStart: Type.Optional(Type.String({ format: "date-time" })),
+    workingTimeEnd: Type.Optional(Type.String({ format: "date-time" })),
     specialtyTags: Type.String(),
     dateOfBirth: Type.String({ format: "date-time" }),
     client_id: Type.Optional(Type.Integer()),
@@ -83,27 +83,42 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             }
         }, 
         async (request, reply) => {
-            const [createdTherapist] = await fastify.db
-            .insert(therapist)
-            .values({
-                // @ts-ignore
-                name: request.body.name,
-                clinicalLevel: request.body.clinicalLevel,
-                supportPhone: request.body.supportPhone,
-                supportInPerson: request.body.supportInPerson,
-                gmail: request.body.gmail,
-                about: request.body.about,
-                summary: request.body.summary,
-                timeZone: request.body.timeZone,
-                workingTimeEnd: request.body.workingTimeEnd,
-                workingTimeStart: request.body.workingTimeStart,
-                specialtyTags: request.body.specialtyTags,
-                dateOfBirth: request.body.dateOfBirth,
-                clientId: request.body.client_id,
-                photoUrl: request.body.photoUrl
-            }).returning();
+            await fastify.db.transaction(async trx => {
+                try {
+                    const [insertedHuman] = await trx
+                    .insert(human)
+                    .values({
+                        name: request.body.name,
+                        email: request.body.gmail
+                    })
+                    .returning()
+                    
+                    const [insertedTherapist] = await trx 
+                    .insert(therapist)
+                    .values({
+                        id: insertedHuman.id,
+                        clinicalLevel: request.body.clinicalLevel,
+                        supportPhone: request.body.supportPhone,
+                        supportInPerson: request.body.supportInPerson,
+                        gmail: request.body.gmail,
+                        about: request.body.about,
+                        summary: request.body.summary,
+                        timeZone: request.body.timeZone,
+                        workingTimeEnd: request.body.workingTimeEnd,
+                        workingTimeStart: request.body.workingTimeStart,
+                        specialtyTags: request.body.specialtyTags,
+                        dateOfBirth: request.body.dateOfBirth,
+                        clientId: request.body.client_id,
+                        photoUrl: request.body.photoUrl
+                    }).returning();
 
-            return reply.code(201).send(createdTherapist)
+                    return reply.code(201).send({ ...insertedHuman, ...insertedTherapist });
+                } catch (error) {
+                    fastify.log.error(error);
+                    await trx.rollback();
+                    throw error;
+                }
+            })
         }
     )
 
@@ -145,4 +160,3 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 }
 
 export default therapists;
-
