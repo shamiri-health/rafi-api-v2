@@ -10,7 +10,7 @@ const MessageBody = Type.Object({
 
 type MessageBody = Static<typeof MessageBody>;
 
-const serviceKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "");
+const serviceKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
 const serviceAccount = serviceKey as admin.ServiceAccount;
 
 admin.initializeApp({
