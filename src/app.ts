@@ -5,6 +5,7 @@ import fastifySwagger from "@fastify/swagger";
 import swaggerUI from "@fastify/swagger-ui";
 import fp from "fastify-plugin";
 import { FastifyJwtNamespace } from "@fastify/jwt";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -49,6 +50,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   void fastify.register(require("@immobiliarelabs/fastify-sentry"), {
     dsn: "https://4989545f44cb88b83409514052875b25@o1375952.ingest.us.sentry.io/4506807502110720",
+    tracesSampleRate: 0.7,
+    profilesSampleRate: 1.0,
+    integrations: [nodeProfilingIntegration()],
   });
 
   // Do not touch the following lines
