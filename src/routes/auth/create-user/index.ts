@@ -10,12 +10,14 @@ import { createUser } from "../../../services/userService";
 const CreateUserBody = Type.Object({
   email: Type.String(), // FIXME: tighten this to use 'email format'
   phone_number: Type.String(),
-  birth_date: Type.String(), // FIXME: tighten this to use the 'date format'
-  gender: Type.Union([
-    Type.Literal("MALE"),
-    Type.Literal("FEMALE"),
-    Type.Literal("PREFER NOT TO SAY"),
-  ]),
+  birth_date: Type.Optional(Type.String()), // FIXME: tighten this to use the 'date format'
+  gender: Type.Optional(
+    Type.Union([
+      Type.Literal("MALE"),
+      Type.Literal("FEMALE"),
+      Type.Literal("PREFER NOT TO SAY"),
+    ]),
+  ),
   education_level: Type.Union([
     Type.Literal("Primary School"),
     Type.Literal("High School"),
@@ -94,8 +96,6 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
         } catch (e) {
           fastify.log.warn(e);
         }
-      } else {
-        // TODO: best to log it to sentry
       }
 
       return reply.code(201).send(userResult);

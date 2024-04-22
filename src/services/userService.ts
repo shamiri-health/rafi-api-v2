@@ -2,6 +2,7 @@ import { Static, Type } from "@sinclair/typebox";
 import { database } from "../lib/db";
 import { eq } from "drizzle-orm";
 import {
+  client,
   human,
   referralCodes,
   rewardHubRecord,
@@ -14,16 +15,19 @@ import {
 } from "../database/schema";
 import { addDays } from "date-fns/addDays";
 import subscriptionTypes from "../../static/subscription_types.json";
+import { httpErrors } from "@fastify/sensible";
 
-const CreateUserBody = Type.Object({
+export const CreateUserBody = Type.Object({
   email: Type.String(), // FIXME: tighten this to use 'email format'
   phone_number: Type.String(),
-  birth_date: Type.String(), // FIXME: tighten this to use the 'date format'
-  gender: Type.Union([
-    Type.Literal("MALE"),
-    Type.Literal("FEMALE"),
-    Type.Literal("PREFER NOT TO SAY"),
-  ]),
+  birth_date: Type.Optional(Type.String()), // FIXME: tighten this to use the 'date format'
+  gender: Type.Optional(
+    Type.Union([
+      Type.Literal("MALE"),
+      Type.Literal("FEMALE"),
+      Type.Literal("PREFER NOT TO SAY"),
+    ]),
+  ),
   education_level: Type.Union([
     Type.Literal("Primary School"),
     Type.Literal("High School"),
@@ -60,7 +64,11 @@ const CreateUserBody = Type.Object({
 type CreateUser = Static<typeof CreateUserBody>;
 
 // TODO: ADD GLOBAL LOGGER
-export async function createUser(db: database["db"], userData: CreateUser) {
+export async function createUser(
+  db: database["db"],
+  userData: CreateUser,
+  clientId?: number,
+) {
   const { phone_number: phoneNumber, email } = userData;
   const isMkuUser = email.endsWith("@mylife.mku.ac.ke");
   const isMoringaUser = email.endsWith("@moringaschool.com");
@@ -84,15 +92,19 @@ export async function createUser(db: database["db"], userData: CreateUser) {
       const insertedHumanResult = await trx
         .insert(human)
         .values({
-          mobile: phoneNumber,
-          email,
+          mobile: phoneNumber.trim().toLowerCase(),
+          email: email.trim().toLowerCase(),
           role: "user",
         })
         .returning();
 
-      // TODO: we need to remove this/make it cleaner
-      const [year, month, date] = userData.birth_date.split("/");
-      const dateOfBirth = `${year}-${month}-${date}`;
+      let dateOfBirth: null | Date = null;
+
+      if (userData.birth_date) {
+        const [year, month, date] = userData.birth_date.split("/");
+        dateOfBirth = new Date(`${year}-${month}-${date}`);
+      }
+
       let insertedUserResult = await trx
         .insert(user)
         .values({
@@ -231,6 +243,29 @@ export async function createUser(db: database["db"], userData: CreateUser) {
           .update(user)
           .set({
             clientId: AHN_CLIENT_ID,
+          })
+          .where(eq(user.id, insertedHumanResult[0].id))
+          .returning();
+
+        userServiceRecord.assignedTherapistId =
+          Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+      } else if (clientId) {
+        console.log("Creating User with Client ID: ", clientId);
+
+        const clientExists = await db.query.client.findFirst({
+          where: eq(client.id, clientId),
+        });
+
+        if (!clientExists) {
+          throw httpErrors.notFound(
+            `Attempted to create user for client: ${clientId} but the client was not found`,
+          );
+        }
+
+        insertedUserResult = await trx
+          .update(user)
+          .set({
+            clientId,
           })
           .where(eq(user.id, insertedHumanResult[0].id))
           .returning();
