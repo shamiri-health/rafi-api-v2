@@ -242,7 +242,7 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
                     parseInt(groupTherapyRecommendation)
                 )
 
-                return groupSession;
+                return reply.code(201).send(groupSession);
             }
         }
     )

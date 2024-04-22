@@ -2,8 +2,14 @@ import { sql, eq, and, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 import type { database } from "./db";
-import { cbtEvent, onsiteEvent, phoneEvent, therapySession, userService } from "../database/schema";
-import { groupEvent } from "../schema";
+import { 
+    cbtEvent, 
+    onsiteEvent, 
+    phoneEvent, 
+    therapySession, 
+    userService, 
+    groupEvent 
+} from "../database/schema";
 
 export const recommendTeleTherapySession = async (
     db: database['db'], 
@@ -12,39 +18,35 @@ export const recommendTeleTherapySession = async (
 ) => {
     const query = sql `
         SELECT * from ${therapySession}
+        INNER JOIN ${phoneEvent}
+        ON ${phoneEvent.id} = ${therapySession.id}
         WHERE ${therapySession.userId} = ${userId}
         AND ${therapySession.type} = 'phoneEvent'
         AND DATE(${therapySession.recommendDatetime}) > DATE(NOW())
         AND ${therapySession.completeDatetime} IS NULL
+        AND ${phoneEvent.therapistId} = ${therapistId}
+        
     `
     const recommendedSessions = await db.execute(query);
     
-    // find a recommended therapy session associated with the therapist
-    const therapistSession = recommendedSessions.find(session => session.therapistId === therapistId);
-
     // check if the user has an assigned therapist
     const selectedUser = await db.query.userService.findFirst({
         where: eq(userService.userId, userId)
     });
 
     if (!selectedUser?.assignedTherapistId) {
-        try {
-            await db
-            .update(userService)
-            .set({
-                assignedTherapistId: therapistId
-            })
-            .where(
-                eq(userService.userId, userId)
-            )
-            .returning();
-        } catch (error) {
-            throw error
-        }
+        await db
+        .update(userService)
+        .set({
+            assignedTherapistId: therapistId
+        })
+        .where(
+            eq(userService.userId, userId)
+        )
     }
 
 
-    if(!therapistSession) {
+    if(!recommendedSessions) {
         await db.transaction(async trx => {
             try {
                 // Recommend a session to this user
@@ -59,15 +61,13 @@ export const recommendTeleTherapySession = async (
                     clinicalLevel: 1,
                 }).returning();
 
-                const [recommendedPhoneEvent] = await trx
+                await trx
                 .insert(phoneEvent)
                 .values({
                     id: recommendedTherapySession.id,
                     therapistId,
-                    googleTherapistEventId: randomUUID()
-                }).returning();
-
-                return recommendedPhoneEvent;
+                    googleTherapistEventId: recommendedTherapySession.id
+                })
             } catch (error) {
                 await trx.rollback();
                 throw error;
@@ -75,7 +75,7 @@ export const recommendTeleTherapySession = async (
         })
     }
 
-    return therapistSession;
+    return recommendedSessions;
 }
 
 export const recommendOnsiteSession = async (
@@ -85,15 +85,15 @@ export const recommendOnsiteSession = async (
 ) => {
     const query = sql `
         SELECT * from ${therapySession}
+        INNER JOIN ${onsiteEvent}
+        ON ${onsiteEvent.id} = ${therapySession.id}
         WHERE ${therapySession.userId} = ${userId}
         AND ${therapySession.type} = 'onsiteEvent'
         AND DATE(${therapySession.recommendDatetime}) > DATE(NOW())
         AND ${therapySession.completeDatetime} IS NULL
+        AND ${onsiteEvent.therapistId} = ${therapistId}
     `
     const recommendedSessions = await db.execute(query);
-    
-    // find a recommended therapy session associated with the therapist
-    const therapistSession = recommendedSessions.find(session => session.therapistId === therapistId);
 
     // check if the user has an assigned therapist
     const selectedUser = await db.query.userService.findFirst({
@@ -101,25 +101,20 @@ export const recommendOnsiteSession = async (
     });
 
     if (!selectedUser?.assignedTherapistId) {
-        try {
-            await db
-            .update(userService)
-            .set({
-                assignedTherapistId: therapistId
-            })
-            .where(
-                eq(userService.userId, userId)
-            )
-            .returning();
-        } catch (error) {
-            throw error
-        }
+        await db
+        .update(userService)
+        .set({
+            assignedTherapistId: therapistId
+        })
+        .where(
+            eq(userService.userId, userId)
+        )
+        .returning();
     }
 
-    if(!therapistSession) {
+    if(!recommendedSessions) {
         await db.transaction(async trx => {
             try {
-                // Recommend a session to this user
                 const [recommendedTherapySession] = await trx
                 .insert(therapySession)
                 .values({
@@ -131,14 +126,12 @@ export const recommendOnsiteSession = async (
                     clinicalLevel: 1
                 }).returning();
 
-                const [recommendedPhoneEvent] = await trx
+                await trx
                 .insert(onsiteEvent)
                 .values({
                     id: recommendedTherapySession.id,
                     therapistId,
-                }).returning();
-
-                return recommendedPhoneEvent;
+                })
             } catch (error) {
                 await trx.rollback();
                 throw error;
@@ -146,7 +139,7 @@ export const recommendOnsiteSession = async (
         })
     }
 
-    return therapistSession;
+    return recommendedSessions;
 }
 
 export const recommendGroupSession = async (
@@ -154,20 +147,20 @@ export const recommendGroupSession = async (
     userId: number,
     topicId: number
 ) => {
-    const enrolledGroupSesions = await db
+    const recommendedGroupSessions = await db
     .select()
     .from(therapySession)
     .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
-    .where(and(
+    .where(
+        and(
             eq(therapySession.userId, userId),
             eq(therapySession.type, "phoneEvent"),
-            isNull(therapySession.completeDatetime)
+            isNull(therapySession.completeDatetime),
+            eq(groupEvent.groupTopicId, topicId)
         )
     )
 
-    const recommendedGroupEvent = enrolledGroupSesions.find(session => session.groupEvent.groupTopicId === topicId);
-    
-    if (!recommendedGroupEvent) {
+    if (!recommendedGroupSessions) {
         await db.transaction(async trx => {
             try {
                 const [recommendedTherapySession] = await trx
@@ -180,14 +173,12 @@ export const recommendGroupSession = async (
                     relatedDomains: "wellbeing"
                 }).returning();
 
-                const [recommendedGroupSession] = await trx
+                await trx
                 .insert(groupEvent)
                 .values({
                     id: recommendedTherapySession.id,
                     groupTopicId: topicId
-                }).returning();
-
-                return recommendedGroupSession;
+                })
             } catch (error) {
                 await trx.rollback();
                 throw error;
@@ -195,7 +186,7 @@ export const recommendGroupSession = async (
         })
     }
 
-    return recommendedGroupEvent;
+    return recommendedGroupSessions;
 }
 
 export const recommendShamiriDigitalSession = async (
@@ -203,19 +194,20 @@ export const recommendShamiriDigitalSession = async (
     userId: number, 
     courseId: number
 ) => {
-    const query = sql `
-        SELECT * from ${therapySession} 
-        WHERE ${therapySession.userId} = ${userId} 
-        AND ${therapySession.completeDatetime} IS NULL
-        AND ${therapySession.type} = 'cbtEvent' 
-    `
-    const enrolledShamiriDigitalSessions = await db.execute(query);
-
-    // Find if the recommended courseId is amoung the enrolled courses.
-    const shamiriDigitalCourseId = enrolledShamiriDigitalSessions.find(event => event.cbtCourseId === courseId);
+    const enrolledShamiriDigital = await db
+    .select()
+    .from(therapySession)
+    .innerJoin(cbtEvent, eq(cbtEvent.id, therapySession.id))
+    .where(
+        and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.type, "cbtEvent"),
+            isNull(therapySession.completeDatetime),
+            eq(cbtEvent.cbtCourseId, courseId)
+        )
+    )
     
-    if(!shamiriDigitalCourseId) {
-        // create a new digital recommendation
+    if(!enrolledShamiriDigital) {
         await db.transaction(async trx => {
             try {
                 const [postedTherapySession] = await trx
@@ -229,22 +221,20 @@ export const recommendShamiriDigitalSession = async (
                     clinicalLevel: 1,
                 }).returning();
             
-                const [postedShamiriDigitalSession] = await trx
+                await trx
                 .insert(cbtEvent)
                 .values({
                     id: postedTherapySession.id,
                     userModule: 0,
                     cbtCourseId: courseId,
                     userProgress: `${courseId}.1.1`
-                }).returning();
-
-                return postedShamiriDigitalSession;
+                })
             } catch (error) {
                 await trx.rollback();
                 throw error;
             }
         })
     }
-    return enrolledShamiriDigitalSessions
+    return enrolledShamiriDigital
 }
 
