@@ -26,14 +26,22 @@ const supportRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
     { schema: { body: { users: schema, client_id: clientIdSchema } } },
     async (request) => {
       // TODO: possibility to optimise this
-      const createdusers = [];
-      for (let newUser of request.body.users) {
-        createdusers.push(
-          await createUser(fastify.db, newUser, request.body.client_id),
-        );
-      }
+      const result = await fastify.db.transaction(async (trx) => {
+        try {
+          const createdusers = [];
+          for (let newUser of request.body.users) {
+            createdusers.push(
+              await createUser(trx, newUser, request.body.client_id),
+            );
+          }
+          return createdusers;
+        } catch (e) {
+          fastify.log.error(e);
+          await trx.rollback();
+        }
+      });
 
-      return createdusers;
+      return result;
     },
   );
 };
