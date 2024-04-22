@@ -1,6 +1,5 @@
 import { test } from "tap";
 import { and, eq } from "drizzle-orm";
-import { faker } from "@faker-js/faker";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { build } from "../../helper";
@@ -9,7 +8,7 @@ import { favouritedAffirmation, user } from "../../../src/database/schema";
 test("POST /favourite-affirmations should add favourite affirmations", async (t) => {
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
-  const token = await encodeAuthToken(sampleUser.id, "user");
+  const token = encodeAuthToken(sampleUser.id, "user");
 
   t.teardown(async () => {
     await app.db

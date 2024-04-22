@@ -876,7 +876,7 @@ export const user = pgTable(
       .references(() => human.id),
     registeredOn: timestamp("registeredOn", { mode: "date" }),
     alias: varchar("alias", { length: 120 }),
-    dateOfBirth: date("dateOfBirth"),
+    dateOfBirth: date("dateOfBirth", { mode: "date" }).default(sql`null`),
     avatarId: integer("avatarId"),
     clientId: integer("clientId").references(() => client.id),
     // TODO: failed to parse database type 'bytea'
