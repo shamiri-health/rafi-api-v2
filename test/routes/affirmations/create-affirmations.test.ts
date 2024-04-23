@@ -6,7 +6,7 @@ import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { affirmation, user } from "../../../src/database/schema";
 import { and, eq } from "drizzle-orm";
 
-test("POST /affirmations should return 400 if the category choice is invalid", async (t) => {
+test("POST /affirmations should return 404 if the category choice is invalid", async (t) => {
   // given
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
