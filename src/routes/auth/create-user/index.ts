@@ -91,10 +91,10 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const isMkuUser = email.endsWith("@mylife.mku.ac.ke");
       const isMoringaUser = email.endsWith("@moringaschool.com");
       const isZerakiUser = email.endsWith("@zeraki.app");
-      const isAHNUser = email.endsWith("@africahealthcarenetwork.com");
       const isBelvaUser = email.endsWith("@belvadigital.com");
+      const isAHNUser = email.endsWith("@africahealthcarenetwork.com");
       const isGHCUser = email.endsWith("@ghcorps.org");
-
+      
       // TODO: create a better programmatic way of checking this
       const MKU_CLIENT_ID = 20;
       const MORINGA_CLIENT_ID = 18;

@@ -188,8 +188,8 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       schema: {
         body: TherapistAssignment,
         response: {
-          201: Type.Any()
-        }
+          201: Type.Any(),
+        },
       },
     },
     async (request, reply) => {
@@ -202,58 +202,58 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       } = request.body;
       try {
         const enrolledTherapySession =
-        await fastify.db.query.therapySession.findFirst({
-          where: eq(therapySession.id, eventId),
+          await fastify.db.query.therapySession.findFirst({
+            where: eq(therapySession.id, eventId),
+          });
+
+        const targetUser = await fastify.db.query.user.findFirst({
+          where: eq(user.id, userId),
         });
 
-      const targetUser = await fastify.db.query.user.findFirst({
-        where: eq(user.id, userId),
-      });
-
-      if (!targetUser) {
-        throw fastify.httpErrors.notFound(
-          `User with the id of ${userId} not found.`,
-        );
-      }
-
-      if (shamiriDigitalRecommendation) {
-        const recommendedSession = await recommendShamiriDigitalSession(
-          fastify.db,
-          userId,
-          parseInt(shamiriDigitalRecommendation.trim()),
-        );
-
-        return reply.code(201).send(recommendedSession);
-      }
-
-      if (therapistRecommendation) {
-        if (enrolledTherapySession?.type === "phoneEvent") {
-          await recommendTeleTherapySession(
-            fastify.db,
-            userId,
-            parseInt(therapistRecommendation),
+        if (!targetUser) {
+          throw fastify.httpErrors.notFound(
+            `User with the id of ${userId} not found.`,
           );
-          return reply.code(201).send("Success");
-        } else {
-          await recommendOnsiteSession(
-            fastify.db,
-            userId,
-            parseInt(therapistRecommendation),
-          );
-
-          return reply.code(201).send("Success");
         }
-      }
 
-      if (groupTherapyRecommendation) {
-        const groupSession = await recommendGroupSession(
-          fastify.db,
-          userId,
-          parseInt(groupTherapyRecommendation),
-        );
+        if (shamiriDigitalRecommendation) {
+          const recommendedSession = await recommendShamiriDigitalSession(
+            fastify.db,
+            userId,
+            parseInt(shamiriDigitalRecommendation.trim()),
+          );
 
-        return reply.code(201).send(groupSession);
-      }
+          return reply.code(201).send(recommendedSession);
+        }
+
+        if (therapistRecommendation) {
+          if (enrolledTherapySession?.type === "phoneEvent") {
+            await recommendTeleTherapySession(
+              fastify.db,
+              userId,
+              parseInt(therapistRecommendation),
+            );
+            return reply.code(201).send("Success");
+          } else {
+            await recommendOnsiteSession(
+              fastify.db,
+              userId,
+              parseInt(therapistRecommendation),
+            );
+
+            return reply.code(201).send("Success");
+          }
+        }
+
+        if (groupTherapyRecommendation) {
+          const groupSession = await recommendGroupSession(
+            fastify.db,
+            userId,
+            parseInt(groupTherapyRecommendation),
+          );
+
+          return reply.code(201).send(groupSession);
+        }
       } catch (error) {
         fastify.log.error(error);
         throw error;

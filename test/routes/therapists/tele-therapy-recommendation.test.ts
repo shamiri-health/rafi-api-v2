@@ -17,7 +17,7 @@ test("POST /therapists/assignment should recommend a teletherapy session", async
     sampleTherapistId,
   );
   const sampleEventId = samplePhoneEvent.id;
-  
+
   t.teardown(async () => {
     await app.db.delete(phoneEvent).where(eq(phoneEvent.id, sampleEventId));
     await app.db
@@ -31,12 +31,12 @@ test("POST /therapists/assignment should recommend a teletherapy session", async
     therapistRecommendation: sampleTherapistId,
     eventId: sampleEventId,
   };
-  
+
   const response = await app
-  .inject()
-  .headers({ authorization: `Bearer ${token}` })
-  .post("/therapists/assignment")
-  .payload(payload);
+    .inject()
+    .headers({ authorization: `Bearer ${token}` })
+    .post("/therapists/assignment")
+    .payload(payload);
 
   const recommendedSession = await app.db.query.therapySession.findFirst({
     where: and(
@@ -47,7 +47,7 @@ test("POST /therapists/assignment should recommend a teletherapy session", async
   });
 
   t.equal(response.statusCode, 201);
-  t.ok(recommendedSession)
+  t.ok(recommendedSession);
 });
 
 test("POST /therapists/assignment should return 401 if unauthorized", async (t) => {

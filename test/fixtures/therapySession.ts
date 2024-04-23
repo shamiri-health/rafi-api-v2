@@ -37,11 +37,11 @@ export const generatePhoneEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "phoneEvent",
-      completeDatetime: new Date()
+      completeDatetime: new Date(),
     })
     .returning();
 
-    const [postedPhoneEvent] = await db
+  const [postedPhoneEvent] = await db
     .insert(phoneEvent)
     .values({
       id: postedTherapySession.id,
@@ -76,7 +76,7 @@ export const generateOnsiteEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "onsiteEvent",
-      completeDatetime: new Date()
+      completeDatetime: new Date(),
     })
     .returning();
 
@@ -134,7 +134,7 @@ export const generateGroupEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "groupEvent",
-      completeDatetime: new Date()
+      completeDatetime: new Date(),
     })
     .returning();
 
@@ -193,7 +193,7 @@ export const generateShamiriDigitalEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "cbtEvent",
-      completeDatetime: new Date()
+      completeDatetime: new Date(),
     })
     .returning();
 

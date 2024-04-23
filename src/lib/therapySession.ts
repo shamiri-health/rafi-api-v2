@@ -57,15 +57,14 @@ export const recommendTeleTherapySession = async (
             clinicalLevel: 1,
           })
           .returning();
-        
+
         await trx.insert(phoneEvent).values({
           id: recommendedTherapySession.id,
           therapistId,
           googleTherapistEventId: recommendedTherapySession.id,
         });
-        
       } catch (error) {
-        console.log("error", error)
+        console.log("error", error);
         await trx.rollback();
         throw error;
       }
