@@ -187,6 +187,9 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     {
       schema: {
         body: TherapistAssignment,
+        response: {
+          201: Type.Any()
+        }
       },
     },
     async (request, reply) => {
@@ -197,8 +200,8 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         therapistRecommendation,
         groupTherapyRecommendation,
       } = request.body;
-
-      const enrolledTherapySession =
+      try {
+        const enrolledTherapySession =
         await fastify.db.query.therapySession.findFirst({
           where: eq(therapySession.id, eventId),
         });
@@ -225,21 +228,21 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
       if (therapistRecommendation) {
         if (enrolledTherapySession?.type === "phoneEvent") {
-          const teleTherapySession = await recommendTeleTherapySession(
+          await recommendTeleTherapySession(
             fastify.db,
             userId,
             parseInt(therapistRecommendation),
           );
 
-          return reply.code(201).send(teleTherapySession);
+          return reply.code(201).send("Sucess");
         } else {
-          const onsiteSession = await recommendOnsiteSession(
+          await recommendOnsiteSession(
             fastify.db,
             userId,
             parseInt(therapistRecommendation),
           );
 
-          return reply.code(201).send(onsiteSession);
+          return reply.code(201).send("Success");
         }
       }
 
@@ -251,6 +254,10 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
 
         return reply.code(201).send(groupSession);
+      }
+      } catch (error) {
+        fastify.log.error(error);
+        throw error;
       }
     },
   );

@@ -27,7 +27,7 @@ export const generatePhoneEvent = async (
     await generateHuman(db, therapistId);
     await generateTherapist(db, therapistId);
   }
-
+  
   const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
@@ -37,9 +37,10 @@ export const generatePhoneEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "phoneEvent",
+      completeDatetime: new Date()
     })
     .returning();
-
+   
   const [postedPhoneEvent] = await db
     .insert(phoneEvent)
     .values({
@@ -48,7 +49,7 @@ export const generatePhoneEvent = async (
       googleTherapistEventId: postedTherapySession.id,
     })
     .returning();
-
+    
   return postedPhoneEvent;
 };
 
@@ -75,6 +76,7 @@ export const generateOnsiteEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "onsiteEvent",
+      completeDatetime: new Date()
     })
     .returning();
 
@@ -132,6 +134,7 @@ export const generateGroupEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "groupEvent",
+      completeDatetime: new Date()
     })
     .returning();
 
@@ -190,6 +193,7 @@ export const generateShamiriDigitalEvent = async (
       relatedDomains: "wellbeing",
       clinicalLevel: 2,
       type: "cbtEvent",
+      completeDatetime: new Date()
     })
     .returning();
 

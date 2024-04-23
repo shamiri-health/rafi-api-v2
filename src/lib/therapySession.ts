@@ -28,7 +28,6 @@ export const recommendTeleTherapySession = async (
         
     `;
   const recommendedSessions = await db.execute(query);
-
   // check if the user has an assigned therapist
   const selectedUser = await db.query.userService.findFirst({
     where: eq(userService.userId, userId),
@@ -43,7 +42,7 @@ export const recommendTeleTherapySession = async (
       .where(eq(userService.userId, userId));
   }
 
-  if (!recommendedSessions) {
+  if (recommendedSessions.length === 0) {
     await db.transaction(async (trx) => {
       try {
         // Recommend a session to this user
@@ -58,13 +57,15 @@ export const recommendTeleTherapySession = async (
             clinicalLevel: 1,
           })
           .returning();
-
+        
         await trx.insert(phoneEvent).values({
           id: recommendedTherapySession.id,
           therapistId,
           googleTherapistEventId: recommendedTherapySession.id,
         });
+        
       } catch (error) {
+        console.log("error", error)
         await trx.rollback();
         throw error;
       }
@@ -106,7 +107,7 @@ export const recommendOnsiteSession = async (
       .returning();
   }
 
-  if (!recommendedSessions) {
+  if (recommendedSessions.length === 0) {
     await db.transaction(async (trx) => {
       try {
         const [recommendedTherapySession] = await trx
@@ -153,7 +154,7 @@ export const recommendGroupSession = async (
       ),
     );
 
-  if (!recommendedGroupSessions) {
+  if (recommendedGroupSessions.length === 0) {
     await db.transaction(async (trx) => {
       try {
         const [recommendedTherapySession] = await trx
@@ -199,7 +200,7 @@ export const recommendShamiriDigitalSession = async (
       ),
     );
 
-  if (!enrolledShamiriDigital) {
+  if (enrolledShamiriDigital.length === 0) {
     await db.transaction(async (trx) => {
       try {
         const [postedTherapySession] = await trx
