@@ -28,6 +28,10 @@ export const recommendTeleTherapySession = async (
         
     `;
   const recommendedSessions = await db.execute(query);
+
+  if(recommendedSessions.length) {
+    return recommendedSessions;
+  }
   // check if the user has an assigned therapist
   const selectedUser = await db.query.userService.findFirst({
     where: eq(userService.userId, userId),
@@ -42,8 +46,7 @@ export const recommendTeleTherapySession = async (
       .where(eq(userService.userId, userId));
   }
 
-  if (recommendedSessions.length === 0) {
-    await db.transaction(async (trx) => {
+  return await db.transaction(async (trx) => {
       try {
         // Recommend a session to this user
         const [recommendedTherapySession] = await trx
@@ -63,15 +66,14 @@ export const recommendTeleTherapySession = async (
           therapistId,
           googleTherapistEventId: recommendedTherapySession.id,
         });
+
+        return await db.execute(query);
       } catch (error) {
-        console.log("error", error);
         await trx.rollback();
         throw error;
       }
-    });
-  }
-
-  return recommendedSessions;
+    }
+  );
 };
 
 export const recommendOnsiteSession = async (
@@ -91,6 +93,10 @@ export const recommendOnsiteSession = async (
     `;
   const recommendedSessions = await db.execute(query);
 
+  if(recommendedSessions.length) {
+    return recommendedSessions;
+  }
+
   // check if the user has an assigned therapist
   const selectedUser = await db.query.userService.findFirst({
     where: eq(userService.userId, userId),
@@ -106,8 +112,7 @@ export const recommendOnsiteSession = async (
       .returning();
   }
 
-  if (recommendedSessions.length === 0) {
-    await db.transaction(async (trx) => {
+  return await db.transaction(async (trx) => {
       try {
         const [recommendedTherapySession] = await trx
           .insert(therapySession)
@@ -125,14 +130,13 @@ export const recommendOnsiteSession = async (
           id: recommendedTherapySession.id,
           therapistId,
         });
+
+        return await db.execute(query);
       } catch (error) {
         await trx.rollback();
         throw error;
       }
-    });
-  }
-
-  return recommendedSessions;
+  });
 };
 
 export const recommendGroupSession = async (
@@ -153,8 +157,11 @@ export const recommendGroupSession = async (
       ),
     );
 
-  if (recommendedGroupSessions.length === 0) {
-    await db.transaction(async (trx) => {
+  if(recommendedGroupSessions.length){
+    return recommendedGroupSessions;
+  }
+
+  return await db.transaction(async (trx) => {
       try {
         const [recommendedTherapySession] = await trx
           .insert(therapySession)
@@ -171,14 +178,25 @@ export const recommendGroupSession = async (
           id: recommendedTherapySession.id,
           groupTopicId: topicId,
         });
+
+        return await db
+          .select()
+          .from(therapySession)
+          .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+          .where(
+            and(
+              eq(therapySession.userId, userId),
+              eq(therapySession.type, "phoneEvent"),
+              isNull(therapySession.completeDatetime),
+              eq(groupEvent.groupTopicId, topicId),
+            ),
+          );
       } catch (error) {
         await trx.rollback();
         throw error;
       }
-    });
-  }
-
-  return recommendedGroupSessions;
+    }
+  );
 };
 
 export const recommendShamiriDigitalSession = async (
@@ -199,32 +217,46 @@ export const recommendShamiriDigitalSession = async (
       ),
     );
 
-  if (enrolledShamiriDigital.length === 0) {
-    await db.transaction(async (trx) => {
-      try {
-        const [postedTherapySession] = await trx
-          .insert(therapySession)
-          .values({
-            id: randomUUID(),
-            userId,
-            type: "cbtEvent",
-            recommendDatetime: new Date(),
-            relatedDomains: "wellbeing",
-            clinicalLevel: 1,
-          })
-          .returning();
-
-        await trx.insert(cbtEvent).values({
-          id: postedTherapySession.id,
-          userModule: 0,
-          cbtCourseId: courseId,
-          userProgress: `${courseId}.1.1`,
-        });
-      } catch (error) {
-        await trx.rollback();
-        throw error;
-      }
-    });
+  if (enrolledShamiriDigital.length) {
+    return enrolledShamiriDigital
   }
-  return enrolledShamiriDigital;
+
+  return await db.transaction(async (trx) => {
+    try {
+      const [postedTherapySession] = await trx
+        .insert(therapySession)
+        .values({
+          id: randomUUID(),
+          userId,
+          type: "cbtEvent",
+          recommendDatetime: new Date(),
+          relatedDomains: "wellbeing",
+          clinicalLevel: 1,
+        })
+        .returning();
+
+      await trx.insert(cbtEvent).values({
+        id: postedTherapySession.id,
+        userModule: 0,
+        cbtCourseId: courseId,
+        userProgress: `${courseId}.1.1`,
+      })
+
+      return await db
+        .select()
+        .from(therapySession)
+        .innerJoin(cbtEvent, eq(cbtEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.type, "cbtEvent"),
+            isNull(therapySession.completeDatetime),
+            eq(cbtEvent.cbtCourseId, courseId),
+          ),
+        )
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  });
 };
