@@ -233,8 +233,7 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             userId,
             parseInt(therapistRecommendation),
           );
-
-          return reply.code(201).send("Sucess");
+          return reply.code(201).send("Success");
         } else {
           await recommendOnsiteSession(
             fastify.db,

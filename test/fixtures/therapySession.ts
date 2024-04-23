@@ -27,7 +27,7 @@ export const generatePhoneEvent = async (
     await generateHuman(db, therapistId);
     await generateTherapist(db, therapistId);
   }
-  
+
   const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
@@ -40,8 +40,8 @@ export const generatePhoneEvent = async (
       completeDatetime: new Date()
     })
     .returning();
-   
-  const [postedPhoneEvent] = await db
+
+    const [postedPhoneEvent] = await db
     .insert(phoneEvent)
     .values({
       id: postedTherapySession.id,
@@ -49,7 +49,7 @@ export const generatePhoneEvent = async (
       googleTherapistEventId: postedTherapySession.id,
     })
     .returning();
-    
+
   return postedPhoneEvent;
 };
 

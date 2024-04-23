@@ -33,7 +33,7 @@ test("POST /therapists/assignment should recommend a onsite event", async (t) =>
   const payload = {
     eventId: sampleEventId,
     userId: sampleUser.id,
-    therapistRecommendation: "10",
+    therapistRecommendation: sampleTherapistId,
   };
 
   const response = await app
@@ -75,7 +75,7 @@ test("POST /therapists/assignment should return 401 if unauthorized", async (t) 
   const payload = {
     eventId: sampleEventId,
     userId: sampleUser.id,
-    therapistRecommendation: "10",
+    therapistRecommendation: sampleTherapistId,
   };
 
   const response = await app
