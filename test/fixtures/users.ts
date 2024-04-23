@@ -3,7 +3,10 @@ import { human, therapist, user } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
 import { formatISO } from "date-fns";
 
-export const generateHuman = async (db: database["db"], id: number | null = null,) => {
+export const generateHuman = async (
+  db: database["db"],
+  id: number | null = null,
+) => {
   const result = await db
     .insert(human)
     .values({

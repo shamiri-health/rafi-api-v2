@@ -2,196 +2,206 @@ import { randomUUID } from "crypto";
 import { faker } from "@faker-js/faker";
 import { eq } from "drizzle-orm";
 import { database } from "../../src/lib/db";
-import { 
-    cbtCourse,
-    cbtEvent, 
-    groupEvent, 
-    groupTopic, 
-    onsiteEvent, 
-    phoneEvent, 
-    therapist, 
-    therapySession 
+import {
+  cbtCourse,
+  cbtEvent,
+  groupEvent,
+  groupTopic,
+  onsiteEvent,
+  phoneEvent,
+  therapist,
+  therapySession,
 } from "../../src/database/schema";
 import { generateHuman, generateTherapist } from "./users";
 
 export const generatePhoneEvent = async (
-    db: database["db"], 
-    userId: number, 
-    therapistId: number
+  db: database["db"],
+  userId: number,
+  therapistId: number,
 ) => {
-    const sampleTherapist = await db.query.therapist.findFirst({
-        where: eq(therapist.id, therapistId)
-    });
+  const sampleTherapist = await db.query.therapist.findFirst({
+    where: eq(therapist.id, therapistId),
+  });
 
-    if(!sampleTherapist) {
-        await generateHuman(db, therapistId);
-        await generateTherapist(db, therapistId);
-    }
+  if (!sampleTherapist) {
+    await generateHuman(db, therapistId);
+    await generateTherapist(db, therapistId);
+  }
 
-    const [postedTherapySession] = await db
+  const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
-        id: randomUUID(),
-        userId,
-        recommendDatetime: new Date(),
-        relatedDomains: "wellbeing",
-        clinicalLevel: 2,
-        type: "phoneEvent"
-    }).returning();
+      id: randomUUID(),
+      userId,
+      recommendDatetime: new Date(),
+      relatedDomains: "wellbeing",
+      clinicalLevel: 2,
+      type: "phoneEvent",
+    })
+    .returning();
 
-    const [postedPhoneEvent] = await db
+  const [postedPhoneEvent] = await db
     .insert(phoneEvent)
     .values({
-        id: postedTherapySession.id,
-        therapistId,
-        googleTherapistEventId: postedTherapySession.id
-    }).returning();
+      id: postedTherapySession.id,
+      therapistId,
+      googleTherapistEventId: postedTherapySession.id,
+    })
+    .returning();
 
-    return postedPhoneEvent;
-}
+  return postedPhoneEvent;
+};
 
 export const generateOnsiteEvent = async (
-    db: database["db"], 
-    userId: number, 
-    therapistId: number
+  db: database["db"],
+  userId: number,
+  therapistId: number,
 ) => {
-    const sampleTherapist = await db.query.therapist.findFirst({
-        where: eq(therapist.id, therapistId)
-    });
+  const sampleTherapist = await db.query.therapist.findFirst({
+    where: eq(therapist.id, therapistId),
+  });
 
-    if(!sampleTherapist) {
-        await generateHuman(db, therapistId);
-        await generateTherapist(db, therapistId);
-    }
+  if (!sampleTherapist) {
+    await generateHuman(db, therapistId);
+    await generateTherapist(db, therapistId);
+  }
 
-    const [postedTherapySession] = await db
+  const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
-        id: randomUUID(),
-        userId,
-        recommendDatetime: new Date(),
-        relatedDomains: "wellbeing",
-        clinicalLevel: 2,
-        type: "onsiteEvent"
-    }).returning();
+      id: randomUUID(),
+      userId,
+      recommendDatetime: new Date(),
+      relatedDomains: "wellbeing",
+      clinicalLevel: 2,
+      type: "onsiteEvent",
+    })
+    .returning();
 
-    const [postedOnsiteEvent] = await db
+  const [postedOnsiteEvent] = await db
     .insert(onsiteEvent)
     .values({
-        id: postedTherapySession.id,
-        therapistId
-    }).returning();
+      id: postedTherapySession.id,
+      therapistId,
+    })
+    .returning();
 
-    return postedOnsiteEvent;
-}
+  return postedOnsiteEvent;
+};
 
 export const generateGroupTopic = async (
-    db: database["db"],
-    topicId: number
+  db: database["db"],
+  topicId: number,
 ) => {
-    const [postedGroupTopic] = await db
+  const [postedGroupTopic] = await db
     .insert(groupTopic)
     .values({
-        id: topicId,
-        name: faker.lorem.word(),
-        about: faker.lorem.words(),
-        summary: faker.lorem.sentence(),
-        relatedDomains: faker.lorem.word(),
-        backgroundColor: faker.lorem.word(),
-        buttonColor: faker.lorem.word(),
-        assetUrl: faker.lorem.sentence()
-    }).returning();
+      id: topicId,
+      name: faker.lorem.word(),
+      about: faker.lorem.words(),
+      summary: faker.lorem.sentence(),
+      relatedDomains: faker.lorem.word(),
+      backgroundColor: faker.lorem.word(),
+      buttonColor: faker.lorem.word(),
+      assetUrl: faker.lorem.sentence(),
+    })
+    .returning();
 
-    return postedGroupTopic;
-}
+  return postedGroupTopic;
+};
 
 export const generateGroupEvent = async (
-    db: database["db"], 
-    userId: number, 
-    topicId: number
+  db: database["db"],
+  userId: number,
+  topicId: number,
 ) => {
-    const sampleGroupTopic = await db.query.groupTopic.findFirst({
-        where: eq(groupTopic.id, topicId)
-    })
+  const sampleGroupTopic = await db.query.groupTopic.findFirst({
+    where: eq(groupTopic.id, topicId),
+  });
 
-    if (!sampleGroupTopic) {
-        await generateGroupTopic(db, topicId);
-    }
+  if (!sampleGroupTopic) {
+    await generateGroupTopic(db, topicId);
+  }
 
-    const [postedTherapySession] = await db
+  const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
-        id: randomUUID(),
-        userId,
-        recommendDatetime: new Date(),
-        relatedDomains: "wellbeing",
-        clinicalLevel: 2,
-        type: "groupEvent"
-    }).returning();
+      id: randomUUID(),
+      userId,
+      recommendDatetime: new Date(),
+      relatedDomains: "wellbeing",
+      clinicalLevel: 2,
+      type: "groupEvent",
+    })
+    .returning();
 
-    const [postedGroupEvent] = await db
+  const [postedGroupEvent] = await db
     .insert(groupEvent)
     .values({
-        id: postedTherapySession.id,
-        groupTopicId: topicId
-    }).returning();
+      id: postedTherapySession.id,
+      groupTopicId: topicId,
+    })
+    .returning();
 
-    return postedGroupEvent;
-}
+  return postedGroupEvent;
+};
 
 export const generateShamiriDigitalCourse = async (
-    db: database["db"], 
-    courseId: number
+  db: database["db"],
+  courseId: number,
 ) => {
-    const [postedCourse] = await db
+  const [postedCourse] = await db
     .insert(cbtCourse)
     .values({
-        id: courseId,
-        name: faker.lorem.word(),
-        summary: faker.lorem.words(),
-        modulesString: faker.lorem.sentence(),
-        relatedDomains: faker.lorem.slug(),
-        about: faker.lorem.sentences(),
-        assetUrl: faker.lorem.sentence(),
-        backgroundColor: faker.lorem.word(),
-        buttonColor: faker.lorem.word()
-    }).returning()
+      id: courseId,
+      name: faker.lorem.word(),
+      summary: faker.lorem.words(),
+      modulesString: faker.lorem.sentence(),
+      relatedDomains: faker.lorem.slug(),
+      about: faker.lorem.sentences(),
+      assetUrl: faker.lorem.sentence(),
+      backgroundColor: faker.lorem.word(),
+      buttonColor: faker.lorem.word(),
+    })
+    .returning();
 
-    return postedCourse;
-}
+  return postedCourse;
+};
 
 export const generateShamiriDigitalEvent = async (
-    db: database["db"], 
-    userId: number, 
-    courseId: number
+  db: database["db"],
+  userId: number,
+  courseId: number,
 ) => {
-    const sampleCBTCourse = await db.query.cbtCourse.findFirst({
-        where: eq(cbtCourse.id, courseId)
-    });
+  const sampleCBTCourse = await db.query.cbtCourse.findFirst({
+    where: eq(cbtCourse.id, courseId),
+  });
 
-    if(!sampleCBTCourse) {
-        await generateShamiriDigitalCourse(db, courseId);
-    }
+  if (!sampleCBTCourse) {
+    await generateShamiriDigitalCourse(db, courseId);
+  }
 
-    const [postedTherapySession] = await db
+  const [postedTherapySession] = await db
     .insert(therapySession)
     .values({
-        id: randomUUID(),
-        userId,
-        recommendDatetime: new Date(),
-        relatedDomains: "wellbeing",
-        clinicalLevel: 2,
-        type: "cbtEvent"
-    }).returning();
+      id: randomUUID(),
+      userId,
+      recommendDatetime: new Date(),
+      relatedDomains: "wellbeing",
+      clinicalLevel: 2,
+      type: "cbtEvent",
+    })
+    .returning();
 
-    const [postedCBTEvent] = await db
+  const [postedCBTEvent] = await db
     .insert(cbtEvent)
     .values({
-        id: postedTherapySession.id,
-        userModule: 0,
-        cbtCourseId: courseId,
-        userProgress: `${courseId}.1.1`
-    }).returning();
+      id: postedTherapySession.id,
+      userModule: 0,
+      cbtCourseId: courseId,
+      userProgress: `${courseId}.1.1`,
+    })
+    .returning();
 
-    return postedCBTEvent;
-}
+  return postedCBTEvent;
+};
