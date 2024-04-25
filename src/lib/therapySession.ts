@@ -29,7 +29,7 @@ export const recommendTeleTherapySession = async (
     `;
   const recommendedSessions = await db.execute(query);
 
-  if(recommendedSessions.length) {
+  if (recommendedSessions.length) {
     return recommendedSessions;
   }
   // check if the user has an assigned therapist
@@ -47,33 +47,32 @@ export const recommendTeleTherapySession = async (
   }
 
   return await db.transaction(async (trx) => {
-      try {
-        // Recommend a session to this user
-        const [recommendedTherapySession] = await trx
-          .insert(therapySession)
-          .values({
-            id: randomUUID(),
-            userId,
-            type: "phoneEvent",
-            relatedDomains: "wellbeing",
-            recommendDatetime: new Date(),
-            clinicalLevel: 1,
-          })
-          .returning();
+    try {
+      // Recommend a session to this user
+      const [recommendedTherapySession] = await trx
+        .insert(therapySession)
+        .values({
+          id: randomUUID(),
+          userId,
+          type: "phoneEvent",
+          relatedDomains: "wellbeing",
+          recommendDatetime: new Date(),
+          clinicalLevel: 1,
+        })
+        .returning();
 
-        await trx.insert(phoneEvent).values({
-          id: recommendedTherapySession.id,
-          therapistId,
-          googleTherapistEventId: recommendedTherapySession.id,
-        });
+      await trx.insert(phoneEvent).values({
+        id: recommendedTherapySession.id,
+        therapistId,
+        googleTherapistEventId: recommendedTherapySession.id,
+      });
 
-        return await db.execute(query);
-      } catch (error) {
-        await trx.rollback();
-        throw error;
-      }
+      return await db.execute(query);
+    } catch (error) {
+      await trx.rollback();
+      throw error;
     }
-  );
+  });
 };
 
 export const recommendOnsiteSession = async (
@@ -93,7 +92,7 @@ export const recommendOnsiteSession = async (
     `;
   const recommendedSessions = await db.execute(query);
 
-  if(recommendedSessions.length) {
+  if (recommendedSessions.length) {
     return recommendedSessions;
   }
 
@@ -113,29 +112,29 @@ export const recommendOnsiteSession = async (
   }
 
   return await db.transaction(async (trx) => {
-      try {
-        const [recommendedTherapySession] = await trx
-          .insert(therapySession)
-          .values({
-            id: randomUUID(),
-            userId,
-            type: "onsiteEvent",
-            relatedDomains: "wellbeing",
-            recommendDatetime: new Date(),
-            clinicalLevel: 1,
-          })
-          .returning();
+    try {
+      const [recommendedTherapySession] = await trx
+        .insert(therapySession)
+        .values({
+          id: randomUUID(),
+          userId,
+          type: "onsiteEvent",
+          relatedDomains: "wellbeing",
+          recommendDatetime: new Date(),
+          clinicalLevel: 1,
+        })
+        .returning();
 
-        await trx.insert(onsiteEvent).values({
-          id: recommendedTherapySession.id,
-          therapistId,
-        });
+      await trx.insert(onsiteEvent).values({
+        id: recommendedTherapySession.id,
+        therapistId,
+      });
 
-        return await db.execute(query);
-      } catch (error) {
-        await trx.rollback();
-        throw error;
-      }
+      return await db.execute(query);
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
   });
 };
 
@@ -152,50 +151,49 @@ export const recommendGroupSession = async (
     AND ${therapySession.type} = 'groupEvent'
     AND ${groupEvent.groupTopicId} = ${topicId}
     AND ${therapySession.completeDatetime} IS NULL
-  `
+  `;
 
-  const recommendedGroupSessions = await db.execute(query)
+  const recommendedGroupSessions = await db.execute(query);
 
-  if(recommendedGroupSessions.length){
+  if (recommendedGroupSessions.length) {
     return recommendedGroupSessions;
   }
 
   return await db.transaction(async (trx) => {
-      try {
-        const [recommendedTherapySession] = await trx
-          .insert(therapySession)
-          .values({
-            id: randomUUID(),
-            userId,
-            type: "groupEvent",
-            recommendDatetime: new Date(),
-            relatedDomains: "wellbeing",
-          })
-          .returning();
+    try {
+      const [recommendedTherapySession] = await trx
+        .insert(therapySession)
+        .values({
+          id: randomUUID(),
+          userId,
+          type: "groupEvent",
+          recommendDatetime: new Date(),
+          relatedDomains: "wellbeing",
+        })
+        .returning();
 
-        await trx.insert(groupEvent).values({
-          id: recommendedTherapySession.id,
-          groupTopicId: topicId,
-        });
+      await trx.insert(groupEvent).values({
+        id: recommendedTherapySession.id,
+        groupTopicId: topicId,
+      });
 
-        return await db
-          .select()
-          .from(therapySession)
-          .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
-          .where(
-            and(
-              eq(therapySession.userId, userId),
-              eq(therapySession.type, "phoneEvent"),
-              isNull(therapySession.completeDatetime),
-              eq(groupEvent.groupTopicId, topicId),
-            ),
-          );
-      } catch (error) {
-        await trx.rollback();
-        throw error;
-      }
+      return await db
+        .select()
+        .from(therapySession)
+        .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.type, "phoneEvent"),
+            isNull(therapySession.completeDatetime),
+            eq(groupEvent.groupTopicId, topicId),
+          ),
+        );
+    } catch (error) {
+      await trx.rollback();
+      throw error;
     }
-  );
+  });
 };
 
 export const recommendShamiriDigitalSession = async (
@@ -217,7 +215,7 @@ export const recommendShamiriDigitalSession = async (
     );
 
   if (enrolledShamiriDigital.length) {
-    return enrolledShamiriDigital
+    return enrolledShamiriDigital;
   }
 
   return await db.transaction(async (trx) => {
@@ -239,7 +237,7 @@ export const recommendShamiriDigitalSession = async (
         userModule: 0,
         cbtCourseId: courseId,
         userProgress: `${courseId}.1.1`,
-      })
+      });
 
       return await db
         .select()
@@ -252,7 +250,7 @@ export const recommendShamiriDigitalSession = async (
             isNull(therapySession.completeDatetime),
             eq(cbtEvent.cbtCourseId, courseId),
           ),
-        )
+        );
     } catch (error) {
       await trx.rollback();
       throw error;

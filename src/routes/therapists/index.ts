@@ -26,8 +26,9 @@ const Therapist = Type.Composite([
     id: Type.Integer(),
     gender: Type.Optional(Type.String()),
     photoUrl: Type.String(),
-  }), TherapistBase
-])
+  }),
+  TherapistBase,
+]);
 
 const TherapistCreate = Type.Composite([
   TherapistBase,
@@ -38,8 +39,8 @@ const TherapistCreate = Type.Composite([
     dateOfBirth: Type.String({ format: "date-time" }),
     client_id: Type.Optional(Type.Integer()),
     photoUrl: Type.String(),
-  })
-])
+  }),
+]);
 
 const TherapistAssignment = Type.Object({
   userId: Type.Integer(),
