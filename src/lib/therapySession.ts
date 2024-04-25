@@ -144,18 +144,15 @@ export const recommendGroupSession = async (
   userId: number,
   topicId: number,
 ) => {
-  const recommendedGroupSessions = await db
-    .select()
-    .from(therapySession)
-    .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
-    .where(
-      and(
-        eq(therapySession.userId, userId),
-        eq(therapySession.type, "phoneEvent"),
-        isNull(therapySession.completeDatetime),
-        eq(groupEvent.groupTopicId, topicId),
-      ),
-    );
+  const query = sql`
+    SELECT * from ${therapySession}
+    INNER JOIN ${groupEvent}
+    ON ${groupEvent.id} = ${therapySession.id}
+    WHERE ${therapySession.userId} = ${userId}
+    AND ${therapySession.type} = 'groupEvent'
+    AND ${groupEvent.groupTopicId} = ${topicId}
+  `
+  const recommendedGroupSessions = await db.execute(query);
 
   if(recommendedGroupSessions.length){
     return recommendedGroupSessions;
