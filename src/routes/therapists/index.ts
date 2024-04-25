@@ -105,7 +105,7 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       },
     },
     async (request, reply) => {
-      await fastify.db.transaction(async (trx) => {
+      const createdTherapist = await fastify.db.transaction(async (trx) => {
         try {
           const [insertedHuman] = await trx
             .insert(human)
@@ -135,15 +135,15 @@ const therapists: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             })
             .returning();
 
-          return reply
-            .code(201)
-            .send({ ...insertedHuman, ...insertedTherapist });
+          return { ...insertedHuman, ...insertedTherapist };
         } catch (error) {
           fastify.log.error(error);
           await trx.rollback();
           throw error;
         }
       });
+
+      return reply.code(201).send(createdTherapist);
     },
   );
 
