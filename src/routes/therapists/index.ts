@@ -21,22 +21,25 @@ const TherapistBase = Type.Object({
   timeZone: Type.String({ default: "Africa/Nairobi" }),
 });
 
-const Therapist = Type.Object({
-  id: Type.Integer(),
-  gender: Type.Optional(Type.String()),
-  photoUrl: Type.String(),
-  ...TherapistBase.properties,
-});
+const Therapist = Type.Composite([
+  Type.Object({
+    id: Type.Integer(),
+    gender: Type.Optional(Type.String()),
+    photoUrl: Type.String(),
+  }), TherapistBase
+])
 
-const TherapistCreate = Type.Object({
-  ...TherapistBase.properties,
-  workingTimeStart: Type.Optional(Type.String({ format: "date-time" })),
-  workingTimeEnd: Type.Optional(Type.String({ format: "date-time" })),
-  specialtyTags: Type.String(),
-  dateOfBirth: Type.String({ format: "date-time" }),
-  client_id: Type.Optional(Type.Integer()),
-  photoUrl: Type.String(),
-});
+const TherapistCreate = Type.Composite([
+  TherapistBase,
+  Type.Object({
+    workingTimeStart: Type.Optional(Type.String({ format: "date-time" })),
+    workingTimeEnd: Type.Optional(Type.String({ format: "date-time" })),
+    specialtyTags: Type.String(),
+    dateOfBirth: Type.String({ format: "date-time" }),
+    client_id: Type.Optional(Type.Integer()),
+    photoUrl: Type.String(),
+  })
+])
 
 const TherapistAssignment = Type.Object({
   userId: Type.Integer(),
