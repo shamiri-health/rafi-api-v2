@@ -151,8 +151,10 @@ export const recommendGroupSession = async (
     WHERE ${therapySession.userId} = ${userId}
     AND ${therapySession.type} = 'groupEvent'
     AND ${groupEvent.groupTopicId} = ${topicId}
+    AND ${therapySession.completeDatetime} IS NULL
   `
-  const recommendedGroupSessions = await db.execute(query);
+
+  const recommendedGroupSessions = await db.execute(query)
 
   if(recommendedGroupSessions.length){
     return recommendedGroupSessions;
