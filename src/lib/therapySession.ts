@@ -184,7 +184,7 @@ export const recommendGroupSession = async (
         .where(
           and(
             eq(therapySession.userId, userId),
-            eq(therapySession.type, "phoneEvent"),
+            eq(therapySession.type, "groupEvent"),
             isNull(therapySession.completeDatetime),
             eq(groupEvent.groupTopicId, topicId),
           ),
