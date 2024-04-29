@@ -90,7 +90,7 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
                     capacity: request.body.capacity,
                     discordLink: request.body.discordLink,
                     createdAt: today,
-                    updatedAt: today
+                    updatedAt: today,
                 }).returning();
                 
                 const therapistInfo = await fastify.db
@@ -192,7 +192,8 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
                 eq(groupSession.id, groupSessionId)
             )
             return {}
-        })
+        }
+    )
 
 }
 export default groupSessions;
