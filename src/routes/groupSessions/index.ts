@@ -1,20 +1,16 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
-import { asc, sql } from "drizzle-orm";
-import { groupSession } from "../../database/schema";
+import { asc, eq, isNull, sql } from "drizzle-orm";
+import { groupSession, groupTopic, human, therapist } from "../../database/schema";
+import { and } from "drizzle-orm";
 
 const Therapist = Type.Object({
     id: Type.Integer(),
     gender: Type.Optional(Type.String()),
     photoUrl: Type.String(),
     name: Type.String(),
-    clinicalLevel: Type.Integer(),
-    supportPhone: Type.Boolean(),
-    supportInPerson: Type.Boolean(),
-    gmail: Type.String(),
     about: Type.String(),
     summary: Type.String(),
-    timeZone: Type.String({ default: "Africa/Nairobi" }),
 });
 
 const GroupSessionBase = Type.Object({
@@ -40,16 +36,25 @@ const GroupTopic = Type.Object({
 })
 
 const GroupSession = Type.Object({
-    id: Type.String(),
+    id: Type.Number(),
     therapist: Therapist,
     groupTopic: GroupTopic
 })
 
-const GroupSessionParams = Type.Object({
-    groupTopicId: Type.Number(),
-    startDate: Type.String({ format: "date-time" })
+const GroupTopicParams = Type.Object({
+    groupTopicId: Type.Number()
 })
 
+const GroupSessionParams = Type.Object({
+    groupSessionId: Type.Number()
+})
+
+const GroupSessionQuery = Type.Object({
+    startDate: Type.String({ format: "date" })
+})
+
+type GroupTopicParams = Static<typeof GroupTopicParams>;
+type GroupSessionQuery = Static<typeof GroupSessionQuery>;
 type Therapist = Static<typeof Therapist>;
 type GroupTopic = Static<typeof GroupTopic>;
 type GroupSessionParams = Static<typeof GroupSessionParams>;
@@ -61,7 +66,8 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     // @ts-ignore
     fastify.addHook("onRequest", fastify.authenticate);
 
-    fastify.post<{ Body: GroupSessionCreate }>("/", 
+    fastify.post<{ Body: GroupSessionCreate }>(
+        "/", 
         {
             schema: {
                 body: GroupSessionCreate,
@@ -71,47 +77,125 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             }
         }, 
         async (request, reply) => {
-            const today = new Date();
-            const [postedGroupSession] = await fastify.db
-            .insert(groupSession)
-            .values({
-                // @ts-ignore
-                startTime: request.body.startTime,
-                endTime: request.body.endTime,
-                therapistId: request.body.therapistId,
-                groupTopicId: request.body.groupTopicId,
-                capacity: request.body.capacity,
-                discordLink: request.body.discordLink,
-                createdAt: today,
-                updatedAt: today
-            }).returning();
+            try {
+                // const isoString = new Date().toISOString();
+                // const today = isoString.slice(0, -1) + '+00';
+                // console.log(today)\
+                const today = "2024-01-12 09:00:00+00"
+                const [postedGroupSession] = await fastify.db
+                .insert(groupSession)
+                .values({
+                    // @ts-ignore
+                    startTime: request.body.startTime,
+                    endTime: request.body.endTime,
+                    therapistId: request.body.therapistId,
+                    groupTopicId: request.body.groupTopicId,
+                    capacity: request.body.capacity,
+                    discordLink: request.body.discordLink,
+                    createdAt: today,
+                    updatedAt: today
+                }).returning();
+                
+                const therapistInfo = await fastify.db
+                .select()
+                .from(therapist)
+                .innerJoin(human, eq(human.id, postedGroupSession.therapistId))
 
-            return reply.code(201).send(postedGroupSession);
+                const groupTopicInfo = await fastify.db.query.groupTopic.findFirst({
+                    where: 
+                    // @ts-ignore
+                    eq(groupTopic.id, postedGroupSession.groupTopicId)
+                })
+
+                return reply.code(201).send({
+                    id: postedGroupSession.id,
+                    therapist: { ...therapistInfo[0].therapist, name: therapistInfo[0].human.name },
+                    groupTopic: groupTopicInfo
+                });
+
+            } catch (error) {
+                fastify.log.error(error)
+                throw error;
+            }
         }
     )
 
-    fastify.get("/", {}, async () => {
-        const groupSessions = await fastify.db.query.groupSession.findMany({
-            orderBy: asc(groupSession.startTime)
-        })
-            return groupSessions;
+    fastify.get("/", 
+        {
+            schema: {
+                response: {
+                    200: Type.Array(GroupSession)
+                }
+            }
+        }, 
+        async () => {
+            const groupSessions = await fastify.db
+            .select()
+            .from(groupSession)
+            .innerJoin(groupTopic, eq(groupTopic.id, groupSession.groupTopicId))
+            .innerJoin(therapist, eq(therapist.id, groupSession.therapistId))
+            .innerJoin(human, eq(human.id, therapist.id))
+            .orderBy(asc(groupSession.startTime))  
+
+            return groupSessions.map(session => ({
+                id: session.groupSession.id,
+                therapist: { ...session.therapist, name: session.human.name },
+                groupTopic: session.groupTopic
+            }))
         }
     )
-
-    fastify.get<{ Params: GroupSessionParams }>("/:groupTopicId", 
-        {}, 
+    
+    fastify.get<{ Params: GroupTopicParams, Query: GroupSessionQuery }>(
+        "/:groupTopicId", 
+        {
+            schema: {
+                querystring: GroupSessionQuery,
+                params: GroupTopicParams,
+                response: {
+                    200: Type.Array(GroupSession)
+                }
+            }
+        }, 
         async (request) => {
-            const { groupTopicId, startDate } = request.params;
-            const query = sql `
-                SELECT * from ${groupSession}
-                WHERE DATE(${groupSession.startTime}) = DATE(${startDate})
-                AND ${groupSession.archivedAt} IS NULL
-                AND ${groupSession.groupTopicId} = ${groupTopicId}
-            `
-            const groupSessions = await fastify.db.execute(query);
-            return groupSessions;
+            const { groupTopicId } = request.params;
+            const { startDate } = request.query as GroupSessionQuery;
+
+            const groupSessions = await fastify.db
+            .select()
+            .from(groupSession)
+            .innerJoin(groupTopic, eq(groupTopic.id, groupTopicId))
+            .innerJoin(therapist, eq(therapist.id, groupSession.therapistId))
+            .innerJoin(human, eq(human.id, therapist.id))
+            .where(and(
+                isNull(groupSession.archivedAt),
+                eq(groupSession.groupTopicId, groupTopicId),
+                eq(sql`DATE(${groupSession.startTime})`, startDate)
+            ))
+            
+            return groupSessions.map(session => ({
+                id: session.groupSession.id,
+                therapist: { ...session.therapist, name: session.human.name },
+                groupTopic: session.groupTopic
+            }))
         }
     )
+
+    fastify.delete<{ Params: GroupSessionParams }>("/:groupSessionId", 
+        {
+            schema: {
+                params: GroupSessionParams
+            }
+        }, 
+        async (request) => {
+            const { groupSessionId } = request.params;
+
+            await fastify.db
+            .delete(groupSession)
+            .where(
+                eq(groupSession.id, groupSessionId)
+            )
+            return {}
+        })
 
 }
 export default groupSessions;
