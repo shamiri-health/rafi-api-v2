@@ -29,7 +29,7 @@ const GroupSessionCreate = Type.Composite([
 ])
 
 const GroupTopic = Type.Object({
-    id: Type.String(),
+    id: Type.Integer(),
     name: Type.String(),
     about: Type.String(),
     summary: Type.String()
@@ -78,10 +78,7 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }, 
         async (request, reply) => {
             try {
-                // const isoString = new Date().toISOString();
-                // const today = isoString.slice(0, -1) + '+00';
-                // console.log(today)\
-                const today = "2024-01-12 09:00:00+00"
+                const today = new Date().toISOString();
                 const [postedGroupSession] = await fastify.db
                 .insert(groupSession)
                 .values({
