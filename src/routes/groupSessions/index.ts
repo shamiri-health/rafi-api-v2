@@ -41,23 +41,18 @@ const GroupSession = Type.Object({
     groupTopic: GroupTopic
 })
 
-const GroupTopicParams = Type.Object({
-    groupTopicId: Type.Number()
-})
-
 const GroupSessionParams = Type.Object({
-    groupSessionId: Type.Number()
+    groupTopicId: Type.Number()
 })
 
 const GroupSessionQuery = Type.Object({
     startDate: Type.String({ format: "date" })
 })
 
-type GroupTopicParams = Static<typeof GroupTopicParams>;
+type GroupSessionParams = Static<typeof GroupSessionParams>;
 type GroupSessionQuery = Static<typeof GroupSessionQuery>;
 type Therapist = Static<typeof Therapist>;
 type GroupTopic = Static<typeof GroupTopic>;
-type GroupSessionParams = Static<typeof GroupSessionParams>;
 type GroupSession = Static<typeof GroupSession>;
 type GroupSessionBase = Static<typeof GroupSessionBase>;
 type GroupSessionCreate = Static<typeof GroupSessionCreate>;
@@ -78,13 +73,12 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }, 
         async (request, reply) => {
             try {
-                const today = new Date().toISOString();
+                const today = new Date();
                 const [postedGroupSession] = await fastify.db
                 .insert(groupSession)
                 .values({
-                    // @ts-ignore
-                    startTime: request.body.startTime,
-                    endTime: request.body.endTime,
+                    startTime: new Date(request.body.startTime),
+                    endTime: new Date(request.body.endTime),
                     therapistId: request.body.therapistId,
                     groupTopicId: request.body.groupTopicId,
                     capacity: request.body.capacity,
@@ -142,12 +136,12 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         }
     )
     
-    fastify.get<{ Params: GroupTopicParams, Query: GroupSessionQuery }>(
+    fastify.get<{ Params: GroupSessionParams, Query: GroupSessionQuery }>(
         "/:groupTopicId", 
         {
             schema: {
                 querystring: GroupSessionQuery,
-                params: GroupTopicParams,
+                params: GroupSessionParams,
                 response: {
                     200: Type.Array(GroupSession)
                 }
@@ -176,24 +170,5 @@ const groupSessions: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             }))
         }
     )
-
-    fastify.delete<{ Params: GroupSessionParams }>("/:groupSessionId", 
-        {
-            schema: {
-                params: GroupSessionParams
-            }
-        }, 
-        async (request) => {
-            const { groupSessionId } = request.params;
-
-            await fastify.db
-            .delete(groupSession)
-            .where(
-                eq(groupSession.id, groupSessionId)
-            )
-            return {}
-        }
-    )
-
 }
 export default groupSessions;
