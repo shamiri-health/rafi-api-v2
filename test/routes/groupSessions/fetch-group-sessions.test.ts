@@ -2,11 +2,15 @@ import { test } from "tap";
 import { build } from "../../helper";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
+import { generateGroupSession } from "../../fixtures/groupSessions";
 
 test("GET /groupSessions should return a list of group sessions if available", async (t) => {
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
   const token = await encodeAuthToken(sampleUser.id, "user");
+
+  // Generate a sample group session
+  await generateGroupSession(app.db);
 
   const response = await app
     .inject()
