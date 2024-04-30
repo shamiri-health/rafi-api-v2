@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import CHECKINPROMTS from "../../../static/daily_checkin_prompts.json";
+import CHECKINPROMPTS from "../../../static/daily_checkin_prompts.json";
 import { and, eq, sql } from "drizzle-orm";
 import {
   dailyCheckIn,
@@ -8,6 +8,10 @@ import {
 } from "../../database/schema";
 import { Static, Type } from "@sinclair/typebox";
 import { randomUUID } from "crypto";
+import {
+  addRewardHubGems,
+  createRewardHubRecord,
+} from "../../lib/userRewardHub";
 
 const DailyCheckInSubmission = Type.Object({
   how_are_you_feeling: Type.String(),
@@ -45,15 +49,15 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   fastify.addHook("onRequest", fastify.authenticate);
 
   fastify.get("/fetch-screen-1", () => {
-    return CHECKINPROMTS.DAILY_CHECK_FEELING;
+    return CHECKINPROMPTS.DAILY_CHECK_FEELING;
   });
 
   fastify.get("/fetch-screen-2", () => {
-    return CHECKINPROMTS.MOOD_DESCRIPTION;
+    return CHECKINPROMPTS.MOOD_DESCRIPTION;
   });
 
   fastify.get("/fetch-screen-3", () => {
-    return CHECKINPROMTS.MOOD_DESCRIPTION;
+    return CHECKINPROMPTS.MOOD_DESCRIPTION;
   });
 
   fastify.get(
@@ -94,11 +98,10 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       },
     },
     async (request, reply) => {
-      const checkinResult = await fastify.db.transaction(async (trx) => {
+      // @ts-ignore
+      const userId = request.user.sub;
+      const dailyCheckInResult = await fastify.db.transaction(async (trx) => {
         try {
-          // @ts-ignore
-          const userId = request.user.sub;
-
           await trx.insert(dailyCheckIn).values({
             // @ts-ignore
             id: randomUUID(),
@@ -118,12 +121,13 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
               request.body.mood_description_cause_response_3,
             userId,
           });
-          const rewardHubRecord = await trx.query.userRewardHub.findFirst({
+          let rewardHubRecord = await trx.query.userRewardHub.findFirst({
             where: eq(userRewardHub.userId, userId),
           });
 
           if (!rewardHubRecord) {
             // do something
+            // rewardHubRecord =
           }
 
           const userAchievementRecord =
@@ -136,99 +140,29 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             // do something
           }
 
-          // update reward hub record
-        } catch (error) {}
+          // @ts-ignore
+          await addRewardHubGems(trx, rewardHubRecord, 5);
+          // @ts-ignore
+          await createRewardHubRecord(trx, rewardHubRecord?.id);
+
+          // update gems and streak
+
+          // return the created record
+          return await trx.query.dailyCheckIn.findFirst({
+            where: and(
+              eq(dailyCheckIn.userId, userId),
+              eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
+            ),
+          });
+        } catch (error) {
+          await trx.rollback();
+          throw error;
+        }
       });
-      return reply.code(201).send(checkinResult);
+
+      return reply.code(201).send(dailyCheckInResult);
     },
   );
 };
 
 export default dailyCheckin;
-
-//         if user_reward_hub is None:
-//             user_reward_hub = models.UserRewardHub(
-//                 level=0,
-//                 userId=user_id,
-//                 gemsHave=0,
-//             )
-//             user_achievement = models.UserAchievement(
-//                 userRewardHubId=user_reward_hub.id, user_id=user_id
-//             )
-//             db.add_all([user_reward_hub, user_reward_hub, user_achievement])
-//             db.flush()
-//             db.commit()
-//             db.refresh(user_reward_hub)
-
-//         user_achievement = (
-//             db.query(models.UserAchievement)
-//             # DEPRECATED: filter this using user_id once we move off v2
-//             .filter(models.UserAchievement.userRewardHubId == user_reward_hub.id)
-//             .first()
-//         )
-
-//         if user_achievement is None:
-//             user_achievement = models.UserAchievement(
-//                 streak_updated_at=datetime.utcnow()
-//             )
-
-//         # DEPRECATED: remove this once we phase out v2
-//         user_reward_hub.add_gems(5)
-//         utils.create_reward_hub_record(user_reward_hub, db)
-
-//         # update streak and gems here
-//         user_achievement.gems = (
-//             user_achievement.gems + 5 if user_achievement.gems is not None else 0
-//         )
-//         valid_achievement_streak = (
-//             user_achievement.streak if user_achievement.streak is not None else 0
-//         )
-//         NUMBER_OF_SECONDS = 86400  # seconds in 24 hours
-//         valid_streak_updated_at = (
-//             user_achievement.streak_updated_at
-//             if user_achievement.streak_updated_at is not None
-//             else datetime.utcnow()
-//         )
-//         tz_string = tz.gettz(valid_streak_updated_at.astimezone().tzname())
-//         now = datetime.now(tz=tz_string)
-//         achievement_created_at = (
-//             now if user_achievement.created_at is None else user_achievement.created_at
-//         )
-//         user_achievement.streak = (
-//             valid_achievement_streak + 1
-//             if (now - achievement_created_at).total_seconds() < NUMBER_OF_SECONDS
-//             else 1
-//         )
-//         user_achievement.streak_updated_at = datetime.utcnow()
-
-//         db.add(daily_check_in_entry)
-//         db.flush()
-//         db.commit()
-//         db.refresh(daily_check_in_entry)
-//         db.refresh(user_achievement)
-
-//         daily_check_in_entry.streak = user_achievement.streak
-//         daily_check_in_entry.gems = user_achievement.gems
-
-//         latest_weekly_record = (
-//             db.query(models.UserDisplay)
-//             .filter_by(userId=user_id)
-//             .order_by(models.UserDisplay.dateTime.desc())
-//             .first()
-//         )
-
-//         if latest_weekly_record is None:
-//             daily_check_in_entry.prompt_weekly = True
-//             return daily_check_in_entry
-
-//         tz_daily_record = latest_weekly_record.dateTime.tzinfo
-//         today_time = datetime.now(tz=tz_daily_record)
-//         time_difference = today_time - latest_weekly_record.dateTime
-
-//         daily_check_in_entry.prompt_weekly = time_difference.days >= 7
-
-//         return daily_check_in_entry
-//     except Exception as e:
-//         logging.exception(e)
-//         db.rollback()
-//         raise HTTPException(status_code=500)

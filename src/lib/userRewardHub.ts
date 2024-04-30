@@ -1,12 +1,13 @@
 import { Static, Type } from "@sinclair/typebox";
 import { eq } from "drizzle-orm";
 import { database } from "./db";
-import { userRewardHub } from "../database/schema";
+import { rewardHubRecord, userRewardHub } from "../database/schema";
 
 const RewardHub = Type.Object({
-  id: Type.Number(),
-  gemHave: Type.Number(),
-  level: Type.Number(),
+  id: Type.Number() || null,
+  gemsHave: Type.Number() || null,
+  level: Type.Number() || null,
+  userId: Type.Number() || undefined,
 });
 
 type RewardHub = Static<typeof RewardHub>;
@@ -28,12 +29,12 @@ const gemsLevel: GemLevel = {
   10: ["Unicorn", 2000],
 };
 
-export const addGems = async (
+export const addRewardHubGems = async (
   db: database["db"],
   record: RewardHub,
   nGems: number,
 ) => {
-  const totalGems: number = record.gemHave + nGems;
+  const totalGems: number = record.gemsHave + nGems;
   const gemsNextLevel: number = gemsLevel[record.level + 1][1];
 
   await db
@@ -66,4 +67,22 @@ export const unlockNextLevel = async (
     level: updatedRecord.level,
     achievement: `achLevel ${updatedRecord.level}`,
   };
+};
+
+export const createRewardHubRecord = async (
+  db: database["db"],
+  rewardId: number,
+) => {
+  const record = await db.query.userRewardHub.findFirst({
+    where: eq(userRewardHub.id, rewardId),
+  });
+
+  await db.insert(rewardHubRecord).values({
+    level: record?.level,
+    levelName: "",
+    streak: 0,
+    gemsHave: record?.gemsHave,
+    gemsNextLevel: 2,
+    userRewardHubId: rewardId,
+  });
 };
