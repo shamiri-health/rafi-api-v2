@@ -1,6 +1,6 @@
 import { and, isNull, eq } from "drizzle-orm";
 import { FastifyPluginAsync } from "fastify";
-import { favouritedAffirmation } from "../../schema";
+import { favouritedAffirmation } from "../../database/schema";
 import Affirmations from "../../../static/affirmations.json";
 import { randomUUID } from "crypto";
 import { Type, Static } from "@sinclair/typebox";
