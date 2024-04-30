@@ -238,7 +238,15 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
       }
 
-      return journalEntry;
+      return {
+        ...journalEntry,
+        question_1: journalEntry.question1,
+        question_2: journalEntry.question2,
+        question_3: journalEntry.question3,
+        content_1: journalEntry.content1,
+        content_2: journalEntry.content2,
+        content_3: journalEntry.content3,
+      };
     },
   );
 
