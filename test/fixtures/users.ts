@@ -3,11 +3,14 @@ import { human, therapist, user } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
 import { formatISO } from "date-fns";
 
-export const generateHuman = async (db: database["db"]) => {
+export const generateHuman = async (
+  db: database["db"],
+  id: number | null = null,
+) => {
   const result = await db
     .insert(human)
     .values({
-      id: faker.number.int({ min: 300, max: 6000 }),
+      id: id || faker.number.int({ min: 300, max: 6000 }),
       name: faker.person.fullName(),
       role: "user",
       email: faker.internet.email().trim().toLowerCase(),

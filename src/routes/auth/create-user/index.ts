@@ -94,7 +94,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const isBelvaUser = email.endsWith("@belvadigital.com");
       const isAHNUser = email.endsWith("@africahealthcarenetwork.com");
       const isGHCUser = email.endsWith("@ghcorps.org");
-      
+
       // TODO: create a better programmatic way of checking this
       const MKU_CLIENT_ID = 20;
       const MORINGA_CLIENT_ID = 18;
