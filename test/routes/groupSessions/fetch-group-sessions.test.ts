@@ -20,7 +20,11 @@ test("GET /groupSessions should return a list of group sessions if available", a
     // @ts-ignore
     await app.db
       .delete(groupTopic)
-      .where(eq(groupTopic.id, sampleGroupTopicId));
+
+      .where(
+        // @ts-ignore
+        eq(groupTopic.id, sampleGroupTopicId),
+      );
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
   });
 
@@ -30,8 +34,8 @@ test("GET /groupSessions should return a list of group sessions if available", a
     .get("/groupSessions");
 
   const body = await response.json();
-  // @ts-ignore
   const targetSession = body.find(
+    // @ts-ignore
     (session) => session.id === sampleGroupSession.id,
   );
 
