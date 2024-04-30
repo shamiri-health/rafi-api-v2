@@ -94,14 +94,22 @@ const affirmationsRouter: FastifyPluginAsync = async (
     async (request, reply) => {
       // @ts-ignore
       const userId = request.user.sub;
-      const query = sql`SELECT * FROM ${affirmationOfTheDay} WHERE ${affirmationOfTheDay.userId} = ${userId} AND DATE(${affirmationOfTheDay.createdAt}) = DATE(NOW())`;
-      const [createdAffirmation] = await fastify.db.execute(query);
+
+      const createdAffirmation =
+        await fastify.db.query.affirmationOfTheDay.findFirst({
+          where: and(
+            eq(affirmationOfTheDay.userId, userId),
+            eq(sql`DATE(${affirmationOfTheDay.createdAt})`, sql`DATE(NOW())`),
+          ),
+        });
 
       if (createdAffirmation) {
         return {
           ...createdAffirmation,
           created_at: createdAffirmation.createdAt,
           updated_at: createdAffirmation.updatedAt,
+          user_id: createdAffirmation.userId,
+          sub_category: createdAffirmation.subCategory,
         };
       }
 
@@ -128,6 +136,8 @@ const affirmationsRouter: FastifyPluginAsync = async (
           ...newAffirmation,
           created_at: newAffirmation.createdAt,
           updated_at: newAffirmation.updatedAt,
+          user_id: newAffirmation.userId,
+          sub_category: newAffirmation.subCategory,
         });
       } catch (error) {
         fastify.log.error(error);
