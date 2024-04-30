@@ -263,7 +263,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     },
     async (request) => {
       const { journal_id } = request.params;
-      const [updatedJournalEntry] = await fastify.db
+      const [journalEntry] = await fastify.db
         .update(journal)
         .set({
           // @ts-ignore
@@ -284,13 +284,21 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         )
         .returning();
 
-      if (!updatedJournalEntry) {
+      if (!journalEntry) {
         throw fastify.httpErrors.notFound(
           `Journal with the id ${journal_id} not found.`,
         );
       }
 
-      return updatedJournalEntry;
+      return {
+        ...journalEntry,
+        question_1: journalEntry.question1,
+        question_2: journalEntry.question2,
+        question_3: journalEntry.question3,
+        content_1: journalEntry.content1,
+        content_2: journalEntry.content2,
+        content_3: journalEntry.content3,
+      };
     },
   );
 
