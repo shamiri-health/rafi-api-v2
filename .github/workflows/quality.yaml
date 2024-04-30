@@ -3,7 +3,7 @@ on:
   pull_request:
 
 jobs:
-  prettier:
+  style-and-type-checks:
     name: Prettier
     runs-on: ubuntu-22.04
     steps:
