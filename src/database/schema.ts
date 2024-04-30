@@ -238,13 +238,6 @@ export const discountCode = pgTable("discountCode", {
   ref: varchar("ref", { length: 100 }),
 });
 
-export const fitnessClass = pgTable("fitnessClass", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => providerSession.id),
-});
-
 export const dailyCheckIn = pgTable("daily_check_in", {
   id: dbText("id"),
   createdAt: timestamp("created_at", { mode: "date" }),
@@ -258,14 +251,6 @@ export const dailyCheckIn = pgTable("daily_check_in", {
   moodDescriptionCauseCategory3: dbText("mood_description_cause_category_3"),
   moodDescriptionCauseResponse3: dbText("mood_description_cause_response_3"),
   userId: integer("user_id").references(() => user.id),
-});
-
-export const enterpriseStandard = pgTable("enterpriseStandard", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => subscription.id),
-  clientId: integer("clientId").references(() => client.id),
 });
 
 export const favouritedAffirmation = pgTable("favourited_affirmation", {
@@ -398,21 +383,6 @@ export const groupPlanOrder = pgTable("groupPlanOrder", {
   userId: integer("userId").references(() => user.id),
 });
 
-export const gymPass = pgTable("gymPass", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => providerSession.id),
-});
-
-export const individualBasic = pgTable("individualBasic", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => subscription.id),
-  autoRenew: boolean("autoRenew"),
-});
-
 export const human = pgTable(
   "human",
   {
@@ -447,16 +417,6 @@ export const insurance = pgTable(
     };
   },
 );
-
-export const joinShamiri = pgTable("joinShamiri", {
-  id: serial("id").primaryKey().notNull(),
-  fullName: varchar("fullName", { length: 80 }),
-  organisationName: varchar("organisationName", { length: 120 }),
-  contactEmail: varchar("contactEmail", { length: 120 }),
-  homeCity: varchar("homeCity", { length: 120 }),
-  phoneNumber: varchar("phoneNumber", { length: 120 }),
-  note: varchar("note", { length: 120 }),
-});
 
 export const journal = pgTable("journal", {
   id: varchar("id", { length: 100 }).primaryKey().notNull(),
@@ -524,27 +484,6 @@ export const quickReplies = pgTable("quickReplies", {
   text: varchar("text", { length: 200 }).notNull(),
 });
 
-export const organization = pgTable(
-  "organization",
-  {
-    id: serial("id").primaryKey().notNull(),
-    role: varchar("role", { length: 50 }),
-    name: varchar("name", { length: 80 }),
-    email: varchar("email", { length: 400 }),
-    phone: varchar("phone", { length: 120 }),
-    location: varchar("location", { length: 6000 }),
-  },
-  (table) => {
-    return {
-      organizationEmailKey: unique("organization_email_key").on(table.email),
-      organizationPhoneKey: unique("organization_phone_key").on(table.phone),
-      organizationLocationKey: unique("organization_location_key").on(
-        table.location,
-      ),
-    };
-  },
-);
-
 export const referralCodes = pgTable(
   "referral_codes",
   {
@@ -580,18 +519,6 @@ export const message = pgTable("message", {
   role: varchar("role", { length: 20 })
     .default(sql`'assistant'::character varying`)
     .notNull(),
-});
-
-export const providerSession = pgTable("providerSession", {
-  id: serial("id").primaryKey().notNull(),
-  startTime: timestamp("startTime", { mode: "date" }),
-  endTime: timestamp("endTime", { mode: "date" }),
-  providerId: integer("providerId").references(() => provider.id),
-  capacity: integer("capacity"),
-  summary: varchar("summary", { length: 200 }),
-  about: varchar("about", { length: 1000 }),
-  credit: integer("credit"),
-  type: varchar("type", { length: 80 }),
 });
 
 export const order = pgTable(
@@ -680,27 +607,6 @@ export const subscription = pgTable("subscription", {
   ref: varchar("ref", { length: 100 }),
 });
 
-export const tip = pgTable(
-  "Tip",
-  {
-    id: serial("id").primaryKey().notNull(),
-    name: varchar("name", { length: 10 }),
-    text: varchar("text", { length: 4000 }),
-    summary: varchar("summary", { length: 500 }),
-    modifyDatetime: timestamp("modifyDatetime", { mode: "date" }),
-    frequency: doublePrecision("frequency"),
-    relatedGoal1: integer("relatedGoal1"),
-    relatedGoal2: integer("relatedGoal2"),
-  },
-  (table) => {
-    return {
-      tipNameKey: unique("Tip_name_key").on(table.name),
-      tipTextKey: unique("Tip_text_key").on(table.text),
-      tipSummaryKey: unique("Tip_summary_key").on(table.summary),
-    };
-  },
-);
-
 export const therapySession = pgTable("therapySession", {
   id: varchar("id", { length: 64 }).primaryKey().notNull(),
   userId: integer("userId").notNull(),
@@ -753,14 +659,6 @@ export const subscriptionOrder = pgTable("subscriptionOrder", {
   actionNow: boolean("actionNow").notNull(),
 });
 
-export const teamAdmin = pgTable("teamAdmin", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => human.id),
-  clientId: integer("clientId").references(() => client.id),
-});
-
 export const teletherapyOrder = pgTable("teletherapyOrder", {
   id: serial("id")
     .primaryKey()
@@ -806,13 +704,6 @@ export const systemResponse = pgTable("systemResponse", {
   motivation: boolean("motivation"),
   purpose: boolean("purpose"),
   rewardHubActions: json("rewardHubActions").array(),
-});
-
-export const coachingSession = pgTable("coachingSession", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => providerSession.id),
 });
 
 export const userAchievement = pgTable("userAchievement", {
@@ -1076,17 +967,6 @@ export const userService = pgTable("userService", {
     .references(() => therapist.id),
 });
 
-export const wellnessEvent = pgTable("wellnessEvent", {
-  id: varchar("id", { length: 64 }).primaryKey().notNull(),
-  userId: integer("userId").notNull(),
-  type: varchar("type", { length: 80 }),
-  providerId: integer("providerId").references(() => provider.id),
-  recommendDatetime: timestamp("recommendDatetime", { mode: "date" }),
-  completeDatetime: timestamp("completeDatetime", { mode: "date" }),
-  enrollDatetime: timestamp("enrollDatetime", { mode: "date" }),
-  providerSessionId: integer("providerSessionId").notNull(),
-});
-
 export const goalProgress = pgTable("goal_progress", {
   id: dbText("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
@@ -1094,20 +974,6 @@ export const goalProgress = pgTable("goal_progress", {
   goalId: dbText("goal_id").references(() => goals.id, {
     onDelete: "set null",
   }),
-});
-
-export const provider = pgTable("provider", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => organization.id),
-  photoUrl: varchar("photoUrl", { length: 500 }),
-  about: varchar("about", { length: 500 }),
-  summary: varchar("summary", { length: 100 }),
-  timeZone: varchar("timeZone", { length: 80 }),
-  workingTimeStart: varchar("workingTimeStart", { length: 15 }),
-  workingTimeEnd: varchar("workingTimeEnd", { length: 15 }),
-  type: varchar("type", { length: 80 }),
 });
 
 export const userResponse = pgTable("userResponse", {
