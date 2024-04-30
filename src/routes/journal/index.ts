@@ -17,13 +17,13 @@ const JournalEntry = Type.Object({
   createdAt: Type.Optional(Type.String({ format: "date-time" })),
   updatedAt: Type.Optional(Type.String({ format: "date-time" })),
   deletedAt: Type.Optional(Type.String({ format: "date-time" })),
-  question1: Type.String(),
+  question_1: Type.String(),
   tag: Type.Optional(Type.String()),
-  content1: Type.String(),
-  question2: Type.Optional(Type.String()),
-  content2: Type.Optional(Type.String()),
-  question3: Type.Optional(Type.String()),
-  content3: Type.Optional(Type.String()),
+  content_1: Type.String(),
+  question_2: Type.Optional(Type.String()),
+  content_2: Type.Optional(Type.String()),
+  question_3: Type.Optional(Type.String()),
+  content_3: Type.Optional(Type.String()),
 });
 
 const JournalCategories = Type.Array(Type.String());
@@ -143,7 +143,25 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         where: eq(journal.userId, request.user.sub),
         orderBy: desc(journal.createdAt),
       });
-      return journalEntries;
+      return journalEntries.map(
+        ({
+          question1: question_1,
+          question2: question_2,
+          question3: question_3,
+          content1: content_1,
+          content2: content_2,
+          content3: content_3,
+          ...rest
+        }) => ({
+          ...rest,
+          question_1,
+          question_2,
+          question_3,
+          content_1,
+          content_2,
+          content_3,
+        }),
+      );
     },
   );
 
@@ -178,7 +196,15 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             tag: request.body.tag,
           })
           .returning();
-        return reply.code(201).send(journalEntry);
+        return reply.code(201).send({
+          ...journalEntry,
+          question_1: journalEntry.question1,
+          question_2: journalEntry.question2,
+          question_3: journalEntry.question3,
+          content_1: journalEntry.content1,
+          content_2: journalEntry.content2,
+          content_3: journalEntry.content3,
+        });
       } catch (error) {
         fastify.log.error(error);
         throw error;
@@ -212,7 +238,15 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
       }
 
-      return journalEntry;
+      return {
+        ...journalEntry,
+        question_1: journalEntry.question1,
+        question_2: journalEntry.question2,
+        question_3: journalEntry.question3,
+        content_1: journalEntry.content1,
+        content_2: journalEntry.content2,
+        content_3: journalEntry.content3,
+      };
     },
   );
 
@@ -229,7 +263,7 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     },
     async (request) => {
       const { journal_id } = request.params;
-      const [updatedJournalEntry] = await fastify.db
+      const [journalEntry] = await fastify.db
         .update(journal)
         .set({
           // @ts-ignore
@@ -250,13 +284,21 @@ const journalRouter: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         )
         .returning();
 
-      if (!updatedJournalEntry) {
+      if (!journalEntry) {
         throw fastify.httpErrors.notFound(
           `Journal with the id ${journal_id} not found.`,
         );
       }
 
-      return updatedJournalEntry;
+      return {
+        ...journalEntry,
+        question_1: journalEntry.question1,
+        question_2: journalEntry.question2,
+        question_3: journalEntry.question3,
+        content_1: journalEntry.content1,
+        content_2: journalEntry.content2,
+        content_3: journalEntry.content3,
+      };
     },
   );
 
