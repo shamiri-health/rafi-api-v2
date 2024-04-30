@@ -14,21 +14,27 @@ test("GET /groupSessions should return a list of group sessions if available", a
   const sampleGroupTopicId = sampleGroupSession.groupTopicId;
 
   t.teardown(async () => {
-    await app.db.delete(groupSession).where(eq(groupSession.id, sampleGroupSession.id));
+    await app.db
+      .delete(groupSession)
+      .where(eq(groupSession.id, sampleGroupSession.id));
     // @ts-ignore
-    await app.db.delete(groupTopic).where(eq(groupTopic.id, sampleGroupTopicId));
+    await app.db
+      .delete(groupTopic)
+      .where(eq(groupTopic.id, sampleGroupTopicId));
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
-  })
+  });
 
   const response = await app
     .inject()
     .headers({ authorization: `bearer ${token}` })
     .get("/groupSessions");
-    
+
   const body = await response.json();
   // @ts-ignore
-  const targetSession = body.find(session => session.id === sampleGroupSession.id);
-    
+  const targetSession = body.find(
+    (session) => session.id === sampleGroupSession.id,
+  );
+
   t.equal(response.statusCode, 200);
   t.equal(targetSession.groupTopic.id, sampleGroupSession.groupTopicId);
 });
