@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { Static, Type } from "@sinclair/typebox";
-import { journal } from "../../schema";
+import { journal } from "../../database/schema";
 import JOURNAL_QUESTION_BANK from "../../../static/journaling.json";
 import { shuffleArray } from "../../lib/shuffleArray";
 
@@ -31,7 +31,7 @@ const JournalCategories = Type.Array(Type.String());
 const CreateJournalEntry = Type.Object({
   question_1: Type.String(),
   content_1: Type.String(),
-  tag: Type.Optional(Type.Array(Type.String())),
+  tag: Type.Optional(Type.String()),
   question_2: Type.Optional(Type.String()),
   content_2: Type.Optional(Type.String()),
   question_3: Type.Optional(Type.String()),
