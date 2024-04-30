@@ -1,6 +1,5 @@
 import { test } from "tap";
 import { and, eq } from "drizzle-orm";
-import { faker } from "@faker-js/faker";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { build } from "../../helper";
