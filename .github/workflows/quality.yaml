@@ -1,0 +1,21 @@
+name: Code quality checks
+on:
+  pull_request:
+
+jobs:
+  style-and-type-checks:
+    name: Prettier
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Prettier checks
+        run: yarn prettier --check .
+
+      - name: Type checks
+        run: yarn typecheck
