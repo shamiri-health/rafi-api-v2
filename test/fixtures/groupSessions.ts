@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { groupSession } from "../../src/database/schema";
 import { database } from "../../src/lib/db";
 import { generateGroupTopic } from "./therapySession";
@@ -5,7 +6,7 @@ import { generateTherapist } from "./users";
 
 export const generateGroupSession = async (db: database["db"]) => {
   const therapist = await generateTherapist(db);
-  const groupTopic = await generateGroupTopic(db, 111);
+  const groupTopic = await generateGroupTopic(db, faker.number.int(20));
   const today = new Date();
 
   const [postedGroupSession] = await db

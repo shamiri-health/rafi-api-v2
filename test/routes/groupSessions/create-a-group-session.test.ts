@@ -39,7 +39,7 @@ test("POST /groupSessions should create a group session", async (t) => {
     where: and(
       eq(groupSession.groupTopicId, payload.groupTopicId),
       eq(groupSession.therapistId, payload.therapistId),
-      eq(sql`DATE(${groupSession.startTime})`, payload.startTime),
+      eq(sql`DATE(${groupSession.startTime})`, sql`DATE(${payload.startTime})`),
     ),
   });
 
