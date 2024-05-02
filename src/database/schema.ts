@@ -659,7 +659,7 @@ export const rewardHubRecord = pgTable("rewardHubRecord", {
   gemsHave: integer("gemsHave"),
   gemsNextLevel: integer("gemsNextLevel"),
   timestamp: timestamp("timestamp", { mode: "date" }),
-  userId: integer("user_id").references(() => user.id)
+  userId: integer("user_id").references(() => user.id),
 });
 
 export const text = pgTable("text", {

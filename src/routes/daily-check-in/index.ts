@@ -1,10 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import CHECKINPROMPTS from "../../../static/daily_checkin_prompts.json";
 import { and, eq, sql } from "drizzle-orm";
-import {
-  dailyCheckIn,
-  userAchievement
-} from "../../database/schema";
+import { dailyCheckIn, userAchievement } from "../../database/schema";
 import { Static, Type } from "@sinclair/typebox";
 import { randomUUID } from "crypto";
 import { createRewardHubRecord } from "../../lib/userRewardHub";
@@ -122,14 +119,14 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             await trx.query.userAchievement.findFirst({
               where: eq(userAchievement.userId, userId),
             });
-          
+
           if (!userAchievementRecord) {
             throw fastify.httpErrors.notFound("User achievement not found");
           }
-          
+
           // @ts-ignore
           await createRewardHubRecord(trx, userAchievementRecord, 5);
-         
+
           return await trx.query.dailyCheckIn.findFirst({
             where: and(
               eq(dailyCheckIn.userId, userId),

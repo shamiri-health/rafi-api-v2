@@ -9,7 +9,7 @@ const RewardHub = Type.Object({
   level: Type.Number(),
   streak: Type.Number(),
   userId: Type.Number(),
-  streakUpdatedAt: Type.Optional(Type.String({ format: "date-time" }))
+  streakUpdatedAt: Type.Optional(Type.String({ format: "date-time" })),
 });
 
 type RewardHub = Static<typeof RewardHub>;
@@ -39,28 +39,25 @@ export const createRewardHubRecord = async (
   const totalGems: number = record.gems + nGems;
   const gemsNextLevel: number = gemsLevel[record.level + 1][1];
   const updatedStreak: number = getUserStreak(record);
-  
+
   await db
     .update(userAchievement)
-    .set({ 
+    .set({
       gems: totalGems,
       streak: updatedStreak,
       streakUpdatedAt: new Date(),
-      level: record.level
-    })
-    .where(eq(userAchievement.id, record.id))
-  
-  await db
-    .insert(rewardHubRecord)
-    .values({
       level: record.level,
-      levelName: gemsLevel[record.level][0],
-      streak: updatedStreak,
-      gemsHave: record.gems,
-      gemsNextLevel: gemsNextLevel,
-      userId: record.userId,    
-    }
-  );
+    })
+    .where(eq(userAchievement.id, record.id));
+
+  await db.insert(rewardHubRecord).values({
+    level: record.level,
+    levelName: gemsLevel[record.level][0],
+    streak: updatedStreak,
+    gemsHave: record.gems,
+    gemsNextLevel: gemsNextLevel,
+    userId: record.userId,
+  });
 
   if (totalGems >= gemsNextLevel) {
     return await unlockNextLevel(db, record);
@@ -68,27 +65,22 @@ export const createRewardHubRecord = async (
   return {};
 };
 
-const unlockNextLevel = async (
-  db: database["db"],
-  record: RewardHub,
-) => {
+const unlockNextLevel = async (db: database["db"], record: RewardHub) => {
   if (record.level > 9) return;
 
   const nextLevel: number = record.level + 1;
 
-  await db
-  .insert(rewardHubRecord)
-  .values({
+  await db.insert(rewardHubRecord).values({
     level: nextLevel,
-    levelName: gemsLevel[nextLevel][0]  ,
-    gemsNextLevel: gemsLevel[nextLevel + 1][1]  
+    levelName: gemsLevel[nextLevel][0],
+    gemsNextLevel: gemsLevel[nextLevel + 1][1],
   });
 
   const [achievement] = await db
-  .update(userAchievement)
-  .set({ level: nextLevel })
-  .where(eq(userAchievement.id, record.id))
-  .returning();
+    .update(userAchievement)
+    .set({ level: nextLevel })
+    .where(eq(userAchievement.id, record.id))
+    .returning();
 
   return {
     displayText: `You have just reached to level ${achievement.level}`,
@@ -98,15 +90,14 @@ const unlockNextLevel = async (
 };
 
 const getUserStreak = (record: RewardHub) => {
-  const NUMBER_OF_SECONDS = 86400  // seconds in 24 hours
+  const NUMBER_OF_SECONDS = 86400; // seconds in 24 hours
   const lastStreakUpdate = new Date(`${record.streakUpdatedAt}`).getTime();
   const currentStreakUpdate = new Date().getTime();
   let currentSteak = record.streak;
-  
-  if (((currentStreakUpdate - lastStreakUpdate) / 1000) < NUMBER_OF_SECONDS) {
-    return currentSteak += 1;
+
+  if ((currentStreakUpdate - lastStreakUpdate) / 1000 < NUMBER_OF_SECONDS) {
+    return (currentSteak += 1);
   }
 
   return 1;
-}
-
+};
