@@ -69,13 +69,22 @@ export const unlockNextLevel = async (
   record: RewardHub,
 ) => {
   if (record.level > 9) return;
-    const nextLevel: number = record.level + 1;
   
-    const [achievement] = await db
-    .update(userAchievement)
-    .set({ level: nextLevel })
-    .where(eq(userAchievement.id, record.id))
-    .returning();
+  const nextLevel: number = record.level + 1;
+
+  await db
+  .insert(rewardHubRecord)
+  .values({
+    level: nextLevel,
+    levelName: gemsLevel[nextLevel][0]  ,
+    gemsNextLevel: gemsLevel[nextLevel + 1][1]  
+  });
+
+  const [achievement] = await db
+  .update(userAchievement)
+  .set({ level: nextLevel })
+  .where(eq(userAchievement.id, record.id))
+  .returning();
 
   return {
     displayText: `You have just reached to level ${achievement.level}`,
