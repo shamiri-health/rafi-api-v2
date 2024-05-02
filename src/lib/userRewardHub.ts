@@ -7,7 +7,9 @@ const RewardHub = Type.Object({
   id: Type.Number(),
   gems: Type.Number(),
   level: Type.Number(),
+  streak: Type.Number(),
   userId: Type.Number(),
+  streakUpdatedAt: Type.Optional(Type.String({ format: "date-time" }))
 });
 
 type RewardHub = Static<typeof RewardHub>;
@@ -36,12 +38,13 @@ export const createRewardHubRecord = async (
 ) => {
   const totalGems: number = record.gems + nGems;
   const gemsNextLevel: number = gemsLevel[record.level + 1][1];
+  const updatedStreak: number = getUserStreak(record);
   
   await db
     .update(userAchievement)
     .set({ 
       gems: totalGems,
-      streak: 1,
+      streak: updatedStreak,
       streakUpdatedAt: new Date(),
       level: record.level
     })
@@ -52,7 +55,7 @@ export const createRewardHubRecord = async (
     .values({
       level: record.level,
       levelName: gemsLevel[record.level][0],
-      streak: 1,
+      streak: updatedStreak,
       gemsHave: record.gems,
       gemsNextLevel: gemsNextLevel,
       userId: record.userId,    
@@ -65,7 +68,7 @@ export const createRewardHubRecord = async (
   return {};
 };
 
-export const unlockNextLevel = async (
+const unlockNextLevel = async (
   db: database["db"],
   record: RewardHub,
 ) => {
@@ -93,4 +96,17 @@ export const unlockNextLevel = async (
     achievement: `achLevel ${achievement.level}`,
   };
 };
+
+const getUserStreak = (record: RewardHub) => {
+  const NUMBER_OF_SECONDS = 86400  // seconds in 24 hours
+  const lastStreakUpdate = new Date(`${record.streakUpdatedAt}`).getTime();
+  const currentStreakUpdate = new Date().getTime();
+  let currentSteak = record.streak;
+  
+  if (((currentStreakUpdate - lastStreakUpdate) / 1000) < NUMBER_OF_SECONDS) {
+    return currentSteak += 1;
+  }
+
+  return 1;
+}
 
