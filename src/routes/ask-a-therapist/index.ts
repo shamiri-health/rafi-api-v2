@@ -67,6 +67,8 @@ type NewQuestionResponse = Static<typeof NewQuestionResponse>;
 const askATherapistRouter: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
+  // TODO: implement pagination
+
   fastify.get(
     "/",
     {

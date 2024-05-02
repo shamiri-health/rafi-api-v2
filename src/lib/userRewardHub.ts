@@ -1,13 +1,13 @@
 import { Static, Type } from "@sinclair/typebox";
 import { eq } from "drizzle-orm";
 import { database } from "./db";
-import { rewardHubRecord, userRewardHub } from "../database/schema";
+import { rewardHubRecord, userAchievement } from "../database/schema";
 
 const RewardHub = Type.Object({
-  id: Type.Number() || null,
-  gemsHave: Type.Number() || null,
-  level: Type.Number() || null,
-  userId: Type.Number() || undefined,
+  id: Type.Number(),
+  gems: Type.Number(),
+  level: Type.Number(),
+  userId: Type.Number(),
 });
 
 type RewardHub = Static<typeof RewardHub>;
@@ -29,21 +29,36 @@ const gemsLevel: GemLevel = {
   10: ["Unicorn", 2000],
 };
 
-export const addRewardHubGems = async (
+export const createRewardHubRecord = async (
   db: database["db"],
   record: RewardHub,
   nGems: number,
 ) => {
-  const totalGems: number = record.gemsHave + nGems;
+  const totalGems: number = record.gems + nGems;
   const gemsNextLevel: number = gemsLevel[record.level + 1][1];
-
+  
   await db
-    .update(userRewardHub)
-    .set({ gemsHave: totalGems })
-    .where(eq(userRewardHub.id, record.id));
+    .update(userAchievement)
+    .set({ 
+      gems: totalGems,
+      streak: 1,
+      streakUpdatedAt: new Date() 
+    })
+    .where(eq(userAchievement.id, record.id))
+  
+  await db
+    .insert(rewardHubRecord)
+    .values({
+      level: record?.level,
+      levelName: gemsLevel[record.level][0],
+      streak: 1,
+      gemsHave: record?.gems,
+      gemsNextLevel: gemsNextLevel,
+      userId: record.userId,    
+    }
+  );
 
   if (totalGems >= gemsNextLevel) {
-    // unlock next level
     return await unlockNextLevel(db, record);
   }
   return [];
@@ -54,35 +69,18 @@ export const unlockNextLevel = async (
   record: RewardHub,
 ) => {
   if (record.level > 9) return;
-  const nextLevel: number = record.level + 1;
-
-  const [updatedRecord] = await db
-    .update(userRewardHub)
+    const nextLevel: number = record.level + 1;
+  
+    const [achievement] = await db
+    .update(userAchievement)
     .set({ level: nextLevel })
-    .where(eq(userRewardHub.id, record.id))
+    .where(eq(userAchievement.id, record.id))
     .returning();
 
   return {
-    displayText: `You have just reached to level ${updatedRecord.level}`,
-    level: updatedRecord.level,
-    achievement: `achLevel ${updatedRecord.level}`,
+    displayText: `You have just reached to level ${achievement.level}`,
+    level: achievement.level,
+    achievement: `achLevel ${achievement.level}`,
   };
 };
 
-export const createRewardHubRecord = async (
-  db: database["db"],
-  rewardId: number,
-) => {
-  const record = await db.query.userRewardHub.findFirst({
-    where: eq(userRewardHub.id, rewardId),
-  });
-
-  await db.insert(rewardHubRecord).values({
-    level: record?.level,
-    levelName: "",
-    streak: 0,
-    gemsHave: record?.gemsHave,
-    gemsNextLevel: 2,
-    userRewardHubId: rewardId,
-  });
-};

@@ -3,15 +3,11 @@ import CHECKINPROMPTS from "../../../static/daily_checkin_prompts.json";
 import { and, eq, sql } from "drizzle-orm";
 import {
   dailyCheckIn,
-  userAchievement,
-  userRewardHub,
+  userAchievement
 } from "../../database/schema";
 import { Static, Type } from "@sinclair/typebox";
 import { randomUUID } from "crypto";
-import {
-  addRewardHubGems,
-  createRewardHubRecord,
-} from "../../lib/userRewardHub";
+import { createRewardHubRecord } from "../../lib/userRewardHub";
 
 const DailyCheckInSubmission = Type.Object({
   how_are_you_feeling: Type.String(),
@@ -121,33 +117,19 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
               request.body.mood_description_cause_response_3,
             userId,
           });
-          let rewardHubRecord = await trx.query.userRewardHub.findFirst({
-            where: eq(userRewardHub.userId, userId),
-          });
-
-          if (!rewardHubRecord) {
-            // do something
-            // rewardHubRecord =
-          }
 
           const userAchievementRecord =
             await trx.query.userAchievement.findFirst({
-              // @ts-ignore
-              where: eq(userAchievement.userRewardHubId, rewardHubRecord?.id),
+              where: eq(userAchievement.userId, userId),
             });
-
+          
           if (!userAchievementRecord) {
-            // do something
+            throw fastify.httpErrors.notFound("User achievement not found");
           }
-
+          
           // @ts-ignore
-          await addRewardHubGems(trx, rewardHubRecord, 5);
-          // @ts-ignore
-          await createRewardHubRecord(trx, rewardHubRecord?.id);
-
-          // update gems and streak
-
-          // return the created record
+          await createRewardHubRecord(trx, userAchievementRecord, 5);
+         
           return await trx.query.dailyCheckIn.findFirst({
             where: and(
               eq(dailyCheckIn.userId, userId),
