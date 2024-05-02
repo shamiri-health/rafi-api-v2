@@ -42,17 +42,18 @@ export const createRewardHubRecord = async (
     .set({ 
       gems: totalGems,
       streak: 1,
-      streakUpdatedAt: new Date() 
+      streakUpdatedAt: new Date(),
+      level: record.level
     })
     .where(eq(userAchievement.id, record.id))
   
   await db
     .insert(rewardHubRecord)
     .values({
-      level: record?.level,
+      level: record.level,
       levelName: gemsLevel[record.level][0],
       streak: 1,
-      gemsHave: record?.gems,
+      gemsHave: record.gems,
       gemsNextLevel: gemsNextLevel,
       userId: record.userId,    
     }
@@ -61,7 +62,7 @@ export const createRewardHubRecord = async (
   if (totalGems >= gemsNextLevel) {
     return await unlockNextLevel(db, record);
   }
-  return [];
+  return {};
 };
 
 export const unlockNextLevel = async (
@@ -69,7 +70,7 @@ export const unlockNextLevel = async (
   record: RewardHub,
 ) => {
   if (record.level > 9) return;
-  
+
   const nextLevel: number = record.level + 1;
 
   await db
