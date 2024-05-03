@@ -1,7 +1,7 @@
 import {
   pgTable,
   foreignKey,
-  text as dbText,
+  text,
   timestamp,
   integer,
   varchar,
@@ -24,19 +24,19 @@ const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
 });
 
 export const affirmationOfTheDay = pgTable("affirmation_of_the_day", {
-  id: dbText("id").primaryKey().notNull(),
+  id: text("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
-  category: dbText("category"),
-  subCategory: dbText("sub_category"),
-  affirmation: dbText("affirmation"),
+  category: text("category"),
+  subCategory: text("sub_category"),
+  affirmation: text("affirmation"),
   userId: integer("user_id").references(() => user.id, {
     onDelete: "set null",
   }),
 });
 
 export const affirmationReminder = pgTable("affirmation_reminder", {
-  id: dbText("id"),
+  id: text("id"),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "date",
@@ -46,9 +46,9 @@ export const affirmationReminder = pgTable("affirmation_reminder", {
     mode: "date",
   }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
-  category: dbText("category"),
-  name: dbText("name"),
-  frequency: dbText("frequency"),
+  category: text("category"),
+  name: text("name"),
+  frequency: text("frequency"),
   numberOfTimes: integer("number_of_times"),
   userId: integer("user_id").references(() => user.id),
 });
@@ -130,10 +130,10 @@ export const affirmation = pgTable("affirmation", {
   createdAt: timestamp("createdAt", { mode: "date" }),
   updatedAt: timestamp("updatedAt", { mode: "date" }),
   deletedAt: timestamp("deletedAt", { mode: "date" }),
-  content: dbText("content"),
-  category: dbText("category"),
+  content: text("content"),
+  category: text("category"),
   userId: integer("userId").references(() => user.id),
-  backgroundFileName: dbText("background_file_name"),
+  backgroundFileName: text("background_file_name"),
 });
 
 export const answers = pgTable("answers", {
@@ -238,26 +238,26 @@ export const discountCode = pgTable("discountCode", {
 });
 
 export const dailyCheckIn = pgTable("daily_check_in", {
-  id: dbText("id"),
+  id: text("id"),
   createdAt: timestamp("created_at", { mode: "date" }),
   updatedAt: timestamp("updated_at", { mode: "date" }),
-  howAreYouFeeling: dbText("how_are_you_feeling"),
-  moodDescription: dbText("mood_description"),
-  moodDescriptionCauseCategory1: dbText("mood_description_cause_category_1"),
-  moodDescriptionCauseResponse1: dbText("mood_description_cause_response_1"),
-  moodDescriptionCauseCategory2: dbText("mood_description_cause_category_2"),
-  moodDescriptionCauseResponse2: dbText("mood_description_cause_response_2"),
-  moodDescriptionCauseCategory3: dbText("mood_description_cause_category_3"),
-  moodDescriptionCauseResponse3: dbText("mood_description_cause_response_3"),
+  howAreYouFeeling: text("how_are_you_feeling"),
+  moodDescription: text("mood_description"),
+  moodDescriptionCauseCategory1: text("mood_description_cause_category_1"),
+  moodDescriptionCauseResponse1: text("mood_description_cause_response_1"),
+  moodDescriptionCauseCategory2: text("mood_description_cause_category_2"),
+  moodDescriptionCauseResponse2: text("mood_description_cause_response_2"),
+  moodDescriptionCauseCategory3: text("mood_description_cause_category_3"),
+  moodDescriptionCauseResponse3: text("mood_description_cause_response_3"),
   userId: integer("user_id").references(() => user.id),
 });
 
 export const favouritedAffirmation = pgTable("favourited_affirmation", {
-  id: dbText("id").primaryKey().notNull(),
+  id: text("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { mode: "date" }),
   updatedAt: timestamp("updated_at", { mode: "date" }),
   removedAt: timestamp("removed_at", { mode: "date" }),
-  category: dbText("category"),
+  category: text("category"),
   userId: integer("user_id").references(() => user.id),
 });
 
@@ -275,7 +275,7 @@ export const goals = pgTable(
       mode: "date",
     }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
-    description: dbText("description").notNull(),
+    description: text("description").notNull(),
     durationStart: timestamp("duration_start", {
       withTimezone: true,
       mode: "date",
@@ -286,12 +286,11 @@ export const goals = pgTable(
     }),
     timeOfDay: varchar("time_of_day", { length: 50 }),
     weeklyFrequency: integer("weekly_frequency"),
-    reasonForGoal: dbText("reason_for_goal"),
-    parentGoalId: dbText("parent_goal_id"),
-    goalCategoryId: dbText("goal_category_id").references(
-      () => goalCategory.id,
-      { onDelete: "set null" },
-    ),
+    reasonForGoal: text("reason_for_goal"),
+    parentGoalId: text("parent_goal_id"),
+    goalCategoryId: text("goal_category_id").references(() => goalCategory.id, {
+      onDelete: "set null",
+    }),
   },
   (table) => {
     return {
@@ -351,7 +350,7 @@ export const groupSession = pgTable("groupSession", {
 });
 
 export const goalCategory = pgTable("goal_category", {
-  id: dbText("id").primaryKey().notNull(),
+  id: text("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
   deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
@@ -360,7 +359,7 @@ export const goalCategory = pgTable("goal_category", {
   userId: integer("user_id").references(() => user.id, {
     onDelete: "set null",
   }),
-  backgroundImageName: dbText("background_image_name"),
+  backgroundImageName: text("background_image_name"),
 });
 
 export const groupPlan = pgTable("groupPlan", {
@@ -406,13 +405,13 @@ export const journal = pgTable("journal", {
   userId: integer("userId").references(() => user.id),
   deletedAt: timestamp("deletedAt", { mode: "date" }),
   updatedAt: timestamp("updatedAt", { mode: "date" }),
-  question1: dbText("question_1").notNull(),
-  content1: dbText("content_1").notNull(),
-  question2: dbText("question_2"),
-  content2: dbText("content_2"),
-  question3: dbText("question_3"),
-  content3: dbText("content_3"),
-  tag: dbText("tag"),
+  question1: text("question_1").notNull(),
+  content1: text("content_1").notNull(),
+  question2: text("question_2"),
+  content2: text("content_2"),
+  question3: text("question_3"),
+  content3: text("content_3"),
+  tag: text("tag"),
 });
 
 export const onsiteEvent = pgTable("onsiteEvent", {
@@ -469,7 +468,7 @@ export const quickReplies = pgTable("quickReplies", {
 export const referralCodes = pgTable(
   "referral_codes",
   {
-    id: dbText("id").primaryKey().notNull(),
+    id: text("id").primaryKey().notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
     archivedAt: timestamp("archived_at", { mode: "date" }),
@@ -568,14 +567,6 @@ export const rewardHubRecord = pgTable("rewardHubRecord", {
   gemsHave: integer("gemsHave"),
   gemsNextLevel: integer("gemsNextLevel"),
   timestamp: timestamp("timestamp", { mode: "date" }),
-});
-
-export const text = pgTable("text", {
-  id: integer("id")
-    .primaryKey()
-    .notNull()
-    .references(() => userResponse.id),
-  value: varchar("value", { length: 300 }),
 });
 
 export const subscription = pgTable("subscription", {
@@ -768,7 +759,7 @@ export const user = pgTable(
     educationalLevel: varchar("educationalLevel"),
     // TODO: failed to parse database type 'bytea'
     pinH: bytea("pinH").notNull(),
-    profession: dbText("profession"),
+    profession: text("profession"),
     referralRecordId: varchar("referral_record_id", { length: 100 }).references(
       () => referralCodes.id,
     ),
@@ -950,10 +941,10 @@ export const userService = pgTable("userService", {
 });
 
 export const goalProgress = pgTable("goal_progress", {
-  id: dbText("id").primaryKey().notNull(),
+  id: text("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
-  goalId: dbText("goal_id").references(() => goals.id, {
+  goalId: text("goal_id").references(() => goals.id, {
     onDelete: "set null",
   }),
 });
