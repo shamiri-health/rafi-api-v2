@@ -1,6 +1,6 @@
 {
-  "id": "65acb80b-e315-4a16-bcb5-349e145ad687",
-  "prevId": "2790f7da-89d0-4015-98ef-6174587309dd",
+  "id": "aa47d8b0-7aab-407e-9071-d31a757ce375",
+  "prevId": "65acb80b-e315-4a16-bcb5-349e145ad687",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -249,12 +249,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "insuranceId": {
-          "name": "insuranceId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -273,15 +267,6 @@
           "tableFrom": "alacarteOrder",
           "tableTo": "user",
           "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "alacarteOrder_insuranceId_insurance_id_fk": {
-          "name": "alacarteOrder_insuranceId_insurance_id_fk",
-          "tableFrom": "alacarteOrder",
-          "tableTo": "insurance",
-          "columnsFrom": ["insuranceId"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -1797,68 +1782,6 @@
           "name": "mobile_unique",
           "nullsNotDistinct": false,
           "columns": ["mobile"]
-        }
-      }
-    },
-    "insurance": {
-      "name": "insurance",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "underwriter": {
-          "name": "underwriter",
-          "type": "varchar(200)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "underwriterRef": {
-          "name": "underwriterRef",
-          "type": "varchar(200)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(200)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "active": {
-          "name": "active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "insurance_userId_user_id_fk": {
-          "name": "insurance_userId_user_id_fk",
-          "tableFrom": "insurance",
-          "tableTo": "user",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "insurance_userId_key": {
-          "name": "insurance_userId_key",
-          "nullsNotDistinct": false,
-          "columns": ["userId"]
         }
       }
     },
