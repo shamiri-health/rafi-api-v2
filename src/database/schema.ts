@@ -59,7 +59,6 @@ export const alacarteOrder = pgTable("alacarteOrder", {
     .notNull()
     .references(() => order.id),
   userId: integer("userId").references(() => user.id),
-  insuranceId: integer("insuranceId").references(() => insurance.id),
 });
 
 export const alembicVersion = pgTable("alembic_version", {
@@ -397,23 +396,6 @@ export const human = pgTable(
     return {
       humanEmailKey: unique("human_email_key").on(table.email),
       mobileUnique: unique("mobile_unique").on(table.mobile),
-    };
-  },
-);
-
-export const insurance = pgTable(
-  "insurance",
-  {
-    id: integer("id").primaryKey().notNull(),
-    underwriter: varchar("underwriter", { length: 200 }).notNull(),
-    underwriterRef: varchar("underwriterRef", { length: 200 }).notNull(),
-    name: varchar("name", { length: 200 }).notNull(),
-    active: boolean("active"),
-    userId: integer("userId").references(() => user.id),
-  },
-  (table) => {
-    return {
-      insuranceUserIdKey: unique("insurance_userId_key").on(table.userId),
     };
   },
 );
