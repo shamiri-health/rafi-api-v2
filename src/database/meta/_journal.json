@@ -43,6 +43,13 @@
       "when": 1714719241514,
       "tag": "0005_robust_bruce_banner",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1714720924285,
+      "tag": "0006_bitter_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }
