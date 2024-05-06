@@ -5,6 +5,7 @@ import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { updateLastCheckin } from "../../fixtures/dailyCheckin";
 import {
   dailyCheckIn,
+  human,
   rewardHubRecord,
   user,
   userAchievement,
@@ -34,6 +35,7 @@ test("POST /daily-check-in should unlock new level if the user has hit the targe
       .delete(dailyCheckIn)
       .where(eq(dailyCheckIn.userId, sampleUser.id));
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
+    await app.db.delete(human).where(eq(human.id, sampleUser.id));
   });
 
   const payload = {
@@ -58,6 +60,9 @@ test("POST /daily-check-in should unlock new level if the user has hit the targe
   });
 
   t.equal(response.statusCode, 201);
-  t.notSame(achievement.level, lastAchievementRecord.level);
-  t.notSame(achievement.gems, lastAchievementRecord.gems);
+  // @ts-ignore
+  t.equal(achievement.level, lastAchievementRecord.level + 1);
+  // @ts-ignore
+  t.equal(achievement.gems, lastAchievementRecord.gems + 5);
+
 });

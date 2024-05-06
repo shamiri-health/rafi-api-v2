@@ -5,6 +5,7 @@ import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import { updateLastCheckin } from "../../fixtures/dailyCheckin";
 import {
   dailyCheckIn,
+  human,
   rewardHubRecord,
   user,
   userAchievement,
@@ -34,6 +35,7 @@ test("POST /daily-check-in does update the streak and gems", async (t) => {
       .delete(dailyCheckIn)
       .where(eq(dailyCheckIn.userId, sampleUser.id));
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
+    await app.db.delete(human).where(eq(human.id, sampleUser.id));
   });
 
   const payload = {
@@ -56,6 +58,8 @@ test("POST /daily-check-in does update the streak and gems", async (t) => {
   const body = await response.json();
 
   t.equal(response.statusCode, 201);
-  t.notSame(lastAchievementRecord.streak, body.streak);
-  t.notSame(lastAchievementRecord.gems, body.gems);
+  // @ts-ignore
+  t.equal(body.streak, lastAchievementRecord.streak + 1)
+  // @ts-ignore
+  t.equal(body.gems, lastAchievementRecord.gems + 5);
 });
