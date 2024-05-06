@@ -1,29 +1,27 @@
 import { test } from "tap";
-import { and, eq, sql } from "drizzle-orm";
-import { faker } from "@faker-js/faker";
 import { build } from "../../helper";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
+import { updateLastCheckin } from "../../fixtures/dailyCheckin";
 import {
   dailyCheckIn,
   rewardHubRecord,
   user,
   userAchievement,
 } from "../../../src/database/schema";
-import {
-  generateRewardHubRecord,
-  generateUserAchievement,
-} from "../../fixtures/rewardHub";
+import { eq } from "drizzle-orm";
+import { faker } from "@faker-js/faker";
 
-test("POST /daily-check-in should create a new daily checkin record", async (t) => {
+test("POST /daily-check-in should unlock new level if the user has hit the target", async (t) => {
   const app = await build(t);
   const sampleUser = await generateUser(app.db);
   const token = await encodeAuthToken(sampleUser.id, "user");
-
-  // generate sample achievement
-  await generateUserAchievement(app.db, sampleUser.id);
-  // Generate a sample reward hub record
-  await generateRewardHubRecord(app.db, sampleUser.id);
+  const gems = 25;
+  const lastAchievementRecord = await updateLastCheckin(
+    app.db,
+    sampleUser.id,
+    gems,
+  );
 
   t.teardown(async () => {
     await app.db
@@ -55,14 +53,11 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
     .post("/daily-check-in")
     .payload(payload);
 
-  const checkInRecord = await app.db.query.dailyCheckIn.findFirst({
-    where: and(
-      eq(dailyCheckIn.userId, sampleUser.id),
-      eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
-    ),
+  const achievement = await app.db.query.userAchievement.findFirst({
+    where: eq(userAchievement.userId, sampleUser.id),
   });
 
   t.equal(response.statusCode, 201);
-  t.ok(checkInRecord);
-  t.equal(checkInRecord.howAreYouFeeling, payload.how_are_you_feeling);
+  t.notSame(achievement.level, lastAchievementRecord.level);
+  t.notSame(achievement.gems, lastAchievementRecord.gems);
 });
