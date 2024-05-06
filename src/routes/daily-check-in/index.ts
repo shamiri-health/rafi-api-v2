@@ -125,12 +125,13 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
           if (!userAchievementRecord) {
             throw fastify.httpErrors.notFound("User achievement not found");
           }
-
-          // @ts-ignore
+          
+          const gemsToAdd = 5;
           const rewardHubRecord = await createRewardHubRecord(
             trx,
+            // @ts-ignore
             userAchievementRecord,
-            5,
+            gemsToAdd,
           );
 
           const dailyCheckinRecord = await trx.query.dailyCheckIn.findFirst({
