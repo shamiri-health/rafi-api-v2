@@ -999,13 +999,11 @@ export const friendship = pgTable(
   },
 );
 
-export const subscriptionType = pgTable(
-  "subscription_type",
-  {
-    id: varchar("id", { length: 100 }).primaryKey().notNull(),
-    description: dbText("description").notNull(),
-    duration_days: integer("duration_days"),
-    duration_months: integer("duration_months"),
-    price: integer("price"),
-  }
-)
+export const subscriptionType = pgTable("subscription_type", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  description: text("description").notNull(),
+  duration_days: integer("duration_days"),
+  duration_months: integer("duration_months"),
+  price: integer("price"),
+  archivedAt: timestamp("archived_at", { mode: 'date' })
+});
