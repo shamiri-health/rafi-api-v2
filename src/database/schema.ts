@@ -1010,7 +1010,10 @@ export const subscriptionType = pgTable("subscription_type", {
 
 export const subscriptionV2 = pgTable("subscription_v2", {
   id: varchar("id", { length: 100 }).primaryKey().notNull(),
-  subscriptionTypeId: varchar("subscription_type_id", { length: 1000 })
+  userId: integer("user_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  subscriptionTypeId: varchar("subscription_type_id", { length: 100 })
     .notNull()
     .references(() => subscriptionType.id),
   startDate: timestamp("start_date", {
@@ -1021,4 +1024,8 @@ export const subscriptionV2 = pgTable("subscription_v2", {
     mode: "date",
     withTimezone: true,
   }).notNull(),
+  cancelledAt: timestamp("cancelled_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
 });

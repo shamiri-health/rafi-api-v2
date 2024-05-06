@@ -1,5 +1,5 @@
 {
-  "id": "16eeaf6c-7a74-413b-92f5-ab8e3b696915",
+  "id": "f7b3edb0-0f33-45e0-877f-2c697848b704",
   "prevId": "44a202a4-18ae-4285-b2d4-fc560369b9f5",
   "version": "5",
   "dialect": "pg",
@@ -2665,9 +2665,15 @@
           "primaryKey": true,
           "notNull": true
         },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "subscription_type_id": {
           "name": "subscription_type_id",
-          "type": "varchar(1000)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -2682,10 +2688,25 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "subscription_v2_user_id_user_id_fk": {
+          "name": "subscription_v2_user_id_user_id_fk",
+          "tableFrom": "subscription_v2",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "subscription_v2_subscription_type_id_subscription_type_id_fk": {
           "name": "subscription_v2_subscription_type_id_subscription_type_id_fk",
           "tableFrom": "subscription_v2",
