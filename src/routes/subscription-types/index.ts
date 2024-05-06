@@ -65,11 +65,11 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
     })
 
     if (!existingSubscriptionType) {
-      throw fastify.httpErrors.notFound("Could not archive a subscription with the given id")
+      throw fastify.httpErrors.notFound("Could not find a subscription type with the given id")
     }
 
     if (existingSubscriptionType.archivedAt) {
-      throw fastify.httpErrors.badRequest("Could not archive and already archived subscription")
+      throw fastify.httpErrors.badRequest("Could not archive and already archived subscription type")
     }
 
     const [archivedSubscription] = await fastify.db.update(subscriptionType).set({
