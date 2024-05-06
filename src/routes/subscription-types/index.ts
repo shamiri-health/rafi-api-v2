@@ -38,7 +38,9 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
     },
     async (req) => {
       if (!req.body.duration_months && !req.body.duration_days) {
-        throw fastify.httpErrors.badRequest('Please supply one of duration_days or duration_months')
+        throw fastify.httpErrors.badRequest(
+          "Please supply one of duration_days or duration_months",
+        );
       }
 
       const body: typeof subscriptionType.$inferInsert = {
@@ -46,8 +48,8 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
         durationDays: req.body.duration_days ?? undefined,
         durationMonths: req.body.duration_months ?? undefined,
         price: req.body.price,
-        description: req.body.description
-      }
+        description: req.body.description,
+      };
       const [newSubscriptionType] = await fastify.db
         .insert(subscriptionType)
         .values(body)
@@ -57,27 +59,38 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
     },
   );
 
-  fastify.post<{ Params: ParamsSchema }>('/:subscriptionTypeId/archive', async (req) => {
-    const { subscriptionTypeId } = req.params;
+  fastify.post<{ Params: ParamsSchema }>(
+    "/:subscriptionTypeId/archive",
+    async (req) => {
+      const { subscriptionTypeId } = req.params;
 
-    const existingSubscriptionType = await fastify.db.query.subscriptionType.findFirst({
-      where: eq(subscriptionType.id, subscriptionTypeId)
-    })
+      const existingSubscriptionType =
+        await fastify.db.query.subscriptionType.findFirst({
+          where: eq(subscriptionType.id, subscriptionTypeId),
+        });
 
-    if (!existingSubscriptionType) {
-      throw fastify.httpErrors.notFound("Could not find a subscription type with the given id")
-    }
+      if (!existingSubscriptionType) {
+        throw fastify.httpErrors.notFound(
+          "Could not find a subscription type with the given id",
+        );
+      }
 
-    if (existingSubscriptionType.archivedAt) {
-      throw fastify.httpErrors.badRequest("Could not archive and already archived subscription type")
-    }
+      if (existingSubscriptionType.archivedAt) {
+        throw fastify.httpErrors.badRequest(
+          "Could not archive and already archived subscription type",
+        );
+      }
 
-    const [archivedSubscription] = await fastify.db.update(subscriptionType).set({
-      archivedAt: new Date(),
-    }).returning()
+      const [archivedSubscription] = await fastify.db
+        .update(subscriptionType)
+        .set({
+          archivedAt: new Date(),
+        })
+        .returning();
 
-    return archivedSubscription
-  })
+      return archivedSubscription;
+    },
+  );
 };
 
 export default subscriptionTypesRouter;
