@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { human, therapist, user } from "../../src/database/schema";
+import { human, therapist, user, userAchievement } from "../../src/database/schema";
 import type { database } from "../../src/lib/db";
 import { formatISO } from "date-fns";
 
@@ -51,6 +51,14 @@ export const generateUser = async (
     .insert(user)
     .values(data as typeof user.$inferSelect)
     .returning();
+  
+  await db
+  .insert(userAchievement)
+  .values({
+    level: 1,
+    userId: data.id
+  })
+
   return result;
 };
 
