@@ -1007,3 +1007,25 @@ export const subscriptionType = pgTable("subscription_type", {
   price: integer("price"),
   archivedAt: timestamp("archived_at", { mode: "date", withTimezone: true }),
 });
+
+export const subscriptionV2 = pgTable("subscription_v2", {
+  id: varchar("id", { length: 100 }).primaryKey().notNull(),
+  userId: integer("user_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  subscriptionTypeId: varchar("subscription_type_id", { length: 100 })
+    .notNull()
+    .references(() => subscriptionType.id),
+  startDate: timestamp("start_date", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
+  endDate: timestamp("end_date", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
+  cancelledAt: timestamp("cancelled_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
+});

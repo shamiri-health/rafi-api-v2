@@ -86,6 +86,7 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
         .set({
           archivedAt: new Date(),
         })
+        .where(eq(subscriptionType.id, subscriptionTypeId))
         .returning();
 
       return archivedSubscription;

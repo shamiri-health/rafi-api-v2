@@ -57,6 +57,13 @@
       "when": 1714982080113,
       "tag": "0007_needy_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1714986379748,
+      "tag": "0008_living_fixer",
+      "breakpoints": true
     }
   ]
 }
