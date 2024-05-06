@@ -64,15 +64,15 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     async (request, _) => {
       //@ts-ignore
       const userId = request.user.sub;
-      const checkinRecords = await fastify.db.query.dailyCheckIn.findFirst({
+      const checkinRecord = await fastify.db.query.dailyCheckIn.findFirst({
         where: and(
           eq(dailyCheckIn.userId, userId),
           eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
         ),
       });
 
-      if (checkinRecords) {
-        return checkinRecords;
+      if (checkinRecord) {
+        return checkinRecord;
       }
 
       return {};
