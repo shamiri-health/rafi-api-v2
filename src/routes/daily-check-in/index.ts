@@ -94,11 +94,9 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const userId = request.user.sub;
       const today = new Date();
       // @ts-ignore
-      const dailyCheckInResult = await fastify.db.transaction(async trx => {
+      const dailyCheckInResult = await fastify.db.transaction(async (trx) => {
         try {
-          await trx
-          .insert(dailyCheckIn)
-          .values({
+          await trx.insert(dailyCheckIn).values({
             // @ts-ignore
             id: randomUUID(),
             howAreYouFeeling: request.body.how_are_you_feeling,
@@ -123,21 +121,25 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             await trx.query.userAchievement.findFirst({
               where: eq(userAchievement.userId, userId),
             });
-          
+
           if (!userAchievementRecord) {
             throw fastify.httpErrors.notFound("User achievement not found");
           }
-         
+
           // @ts-ignore
-          const rewardHubRecord = await createRewardHubRecord(trx, userAchievementRecord, 5);
-        
+          const rewardHubRecord = await createRewardHubRecord(
+            trx,
+            userAchievementRecord,
+            5,
+          );
+
           const dailyCheckinRecord = await trx.query.dailyCheckIn.findFirst({
             where: and(
               eq(dailyCheckIn.userId, userId),
-              eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`)
-            ) 
-          })
-          
+              eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
+            ),
+          });
+
           return {
             id: dailyCheckinRecord?.id,
             gems: rewardHubRecord.gems,
@@ -146,19 +148,25 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             updated_at: dailyCheckinRecord?.updatedAt,
             how_are_you_feeling: dailyCheckinRecord?.howAreYouFeeling,
             mood_description: dailyCheckinRecord?.moodDescription,
-            mood_description_cause_category_1: dailyCheckinRecord?.moodDescriptionCauseCategory1,
-            mood_description_cause_response_1: dailyCheckinRecord?.moodDescriptionCauseResponse1,
-            mood_description_cause_category_2: dailyCheckinRecord?.moodDescriptionCauseCategory2,
-            mood_description_cause_response_2: dailyCheckinRecord?.moodDescriptionCauseResponse2,
-            mood_description_cause_category_3: dailyCheckinRecord?.moodDescriptionCauseCategory3,
-            mood_description_cause_response_3: dailyCheckinRecord?.moodDescriptionCauseResponse3,
-          }
+            mood_description_cause_category_1:
+              dailyCheckinRecord?.moodDescriptionCauseCategory1,
+            mood_description_cause_response_1:
+              dailyCheckinRecord?.moodDescriptionCauseResponse1,
+            mood_description_cause_category_2:
+              dailyCheckinRecord?.moodDescriptionCauseCategory2,
+            mood_description_cause_response_2:
+              dailyCheckinRecord?.moodDescriptionCauseResponse2,
+            mood_description_cause_category_3:
+              dailyCheckinRecord?.moodDescriptionCauseCategory3,
+            mood_description_cause_response_3:
+              dailyCheckinRecord?.moodDescriptionCauseResponse3,
+          };
         } catch (error) {
           await trx.rollback();
           throw error;
         }
       });
-     
+
       return reply.code(201).send(dailyCheckInResult);
     },
   );

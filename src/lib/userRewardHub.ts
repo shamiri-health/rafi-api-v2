@@ -42,29 +42,27 @@ export const createRewardHubRecord = async (
   const levelName: string = gemsLevel[level][0];
   const updatedStreak: number = getUserStreak(record);
   try {
-    await db
-    .insert(rewardHubRecord)
-    .values({
+    await db.insert(rewardHubRecord).values({
       level,
       levelName,
       streak: updatedStreak,
       gemsHave: totalGems,
       gemsNextLevel: gemsNextLevel,
       userId: record.userId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const [postedAchievement] = await db
-    .update(userAchievement)
-    .set({
-      gems: totalGems,
-      streak: updatedStreak,
-      streakUpdatedAt: new Date(),
-      level,
-    })
-    .where(eq(userAchievement.id, record.id))
-    .returning();
-    
+      .update(userAchievement)
+      .set({
+        gems: totalGems,
+        streak: updatedStreak,
+        streakUpdatedAt: new Date(),
+        level,
+      })
+      .where(eq(userAchievement.id, record.id))
+      .returning();
+
     if (totalGems >= gemsNextLevel) {
       // @ts-ignore
       return await unlockNextLevel(db, postedAchievement);
@@ -78,7 +76,7 @@ export const createRewardHubRecord = async (
 const unlockNextLevel = async (db: database["db"], record: RewardHub) => {
   if (record.level > 9) return record;
   const nextLevel: number = record.level + 1;
- try {
+  try {
     await db.insert(rewardHubRecord).values({
       level: nextLevel,
       levelName: gemsLevel[nextLevel][0],
@@ -92,14 +90,16 @@ const unlockNextLevel = async (db: database["db"], record: RewardHub) => {
       .returning();
 
     return achievement;
- } catch (error) {
+  } catch (error) {
     throw error;
- }
+  }
 };
 
 const getUserStreak = (record: RewardHub) => {
   const NUMBER_OF_SECONDS = 86400; // seconds in 24 hours
-  const lastStreakUpdate: number = record.streakUpdatedAt ? new Date(`${record.streakUpdatedAt}`).getTime() : 0;
+  const lastStreakUpdate: number = record.streakUpdatedAt
+    ? new Date(`${record.streakUpdatedAt}`).getTime()
+    : 0;
   const currentStreakUpdate: number = new Date().getTime();
   let currentSteak: number = record.streak;
 
