@@ -17,6 +17,7 @@ type RewardHub = Static<typeof RewardHub>;
 interface GemLevel {
   [level: number]: [level: string, gems: number];
 }
+
 const gemsLevel: GemLevel = {
   0: ["", 0],
   1: ["Worm", 5],
@@ -102,7 +103,7 @@ const getUserStreak = (record: RewardHub) => {
     : 0;
   const currentStreakUpdate: number = new Date().getTime();
   let currentSteak: number = record.streak;
-
+ 
   if ((currentStreakUpdate - lastStreakUpdate) / 1000 < NUMBER_OF_SECONDS) {
     return (currentSteak += 1);
   }
