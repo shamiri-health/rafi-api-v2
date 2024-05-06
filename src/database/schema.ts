@@ -11,6 +11,7 @@ import {
   doublePrecision,
   date,
   json,
+  jsonb,
   primaryKey,
   customType,
 } from "drizzle-orm/pg-core";
@@ -1032,4 +1033,18 @@ export const subscriptionV2 = pgTable("subscription_v2", {
     mode: "date",
     withTimezone: true,
   }),
+});
+
+export const subscriptionPayment = pgTable("subscription_payment", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  subscriptionId: varchar("subscription_id", { length: 36 })
+    .references(() => subscriptionV2.id)
+    .notNull(),
+  amountPaid: integer("amount_paid").notNull(),
+  paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  status: text("status").notNull(),
+  metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc
 });
