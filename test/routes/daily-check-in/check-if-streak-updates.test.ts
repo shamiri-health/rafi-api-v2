@@ -59,7 +59,7 @@ test("POST /daily-check-in does update the streak and gems", async (t) => {
 
   t.equal(response.statusCode, 201);
   // @ts-ignore
-  t.equal(body.streak, lastAchievementRecord.streak + 1)
+  t.equal(body.streak, lastAchievementRecord.streak + 1);
   // @ts-ignore
   t.equal(body.gems, lastAchievementRecord.gems + 5);
 });
