@@ -54,7 +54,7 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
     .headers({ authorization: `bearer ${token}` })
     .post("/daily-check-in")
     .payload(payload);
-  
+
   // const body = await response.json();
   const checkInRecord = await app.db.query.dailyCheckIn.findFirst({
     where: and(
@@ -62,7 +62,7 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
       eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
     ),
   });
-  
+
   t.equal(response.statusCode, 201);
   t.ok(checkInRecord);
   t.equal(checkInRecord.howAreYouFeeling, payload.how_are_you_feeling);

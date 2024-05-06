@@ -64,5 +64,4 @@ test("POST /daily-check-in should unlock new level if the user has hit the targe
   t.equal(achievement.level, lastAchievementRecord.level + 1);
   // @ts-ignore
   t.equal(achievement.gems, lastAchievementRecord.gems + 5);
-
 });
