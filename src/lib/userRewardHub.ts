@@ -103,7 +103,7 @@ const getUserStreak = (record: RewardHub) => {
     : 0;
   const currentStreakUpdate: number = new Date().getTime();
   let currentSteak: number = record.streak;
- 
+
   if ((currentStreakUpdate - lastStreakUpdate) / 1000 < NUMBER_OF_SECONDS) {
     return (currentSteak += 1);
   }
