@@ -1005,5 +1005,5 @@ export const subscriptionType = pgTable("subscription_type", {
   duration_days: integer("duration_days"),
   duration_months: integer("duration_months"),
   price: integer("price"),
-  archivedAt: timestamp("archived_at", { mode: 'date' })
+  archivedAt: timestamp("archived_at", { mode: "date", withTimezone: true }),
 });
