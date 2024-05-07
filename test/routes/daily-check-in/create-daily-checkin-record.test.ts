@@ -40,18 +40,34 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
     await app.db.delete(human).where(eq(human.id, sampleUser.id));
   });
-  
+
   const payload = {
-    how_are_you_feeling: faker.helpers.arrayElement(CHECKINPROMPTS.DAILY_CHECK_FEELING),
-    mood_description: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION),
-    mood_description_cause_category_1: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
-    mood_description_cause_response_1: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Academics),
-    mood_description_cause_category_2: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
-    mood_description_cause_response_2: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Family),
-    mood_description_cause_category_3: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
-    mood_description_cause_response_3: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Health),
+    how_are_you_feeling: faker.helpers.arrayElement(
+      CHECKINPROMPTS.DAILY_CHECK_FEELING,
+    ),
+    mood_description: faker.helpers.arrayElement(
+      CHECKINPROMPTS.MOOD_DESCRIPTION,
+    ),
+    mood_description_cause_category_1: faker.helpers.arrayElement(
+      Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE),
+    ),
+    mood_description_cause_response_1: faker.helpers.arrayElement(
+      CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Academics,
+    ),
+    mood_description_cause_category_2: faker.helpers.arrayElement(
+      Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE),
+    ),
+    mood_description_cause_response_2: faker.helpers.arrayElement(
+      CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Family,
+    ),
+    mood_description_cause_category_3: faker.helpers.arrayElement(
+      Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE),
+    ),
+    mood_description_cause_response_3: faker.helpers.arrayElement(
+      CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Health,
+    ),
   };
-  
+
   const response = await app
     .inject()
     .headers({ authorization: `bearer ${token}` })
@@ -65,7 +81,6 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
     // @ts-ignore
     t.equal(body[key], payload[key]);
   }
-  
+
   t.equal(response.statusCode, 201);
-  
 });
