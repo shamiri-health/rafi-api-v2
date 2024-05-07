@@ -1,11 +1,12 @@
 import { test } from "tap";
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { faker } from "@faker-js/faker";
 import { build } from "../../helper";
 import { generateUser } from "../../fixtures/users";
 import { encodeAuthToken } from "../../../src/lib/utils/jwt";
 import {
   dailyCheckIn,
+  human,
   rewardHubRecord,
   user,
   userAchievement,
@@ -14,6 +15,7 @@ import {
   generateRewardHubRecord,
   generateUserAchievement,
 } from "../../fixtures/rewardHub";
+import CHECKINPROMPTS from "../../../static/daily_checkin_prompts.json";
 
 test("POST /daily-check-in should create a new daily checkin record", async (t) => {
   const app = await build(t);
@@ -36,34 +38,34 @@ test("POST /daily-check-in should create a new daily checkin record", async (t) 
       .delete(dailyCheckIn)
       .where(eq(dailyCheckIn.userId, sampleUser.id));
     await app.db.delete(user).where(eq(user.id, sampleUser.id));
+    await app.db.delete(human).where(eq(human.id, sampleUser.id));
   });
-
+  
   const payload = {
-    how_are_you_feeling: faker.lorem.word(),
-    mood_description: faker.lorem.sentence(),
-    mood_description_cause_category_1: faker.lorem.word(),
-    mood_description_cause_response_1: faker.lorem.word(),
-    mood_description_cause_category_2: faker.lorem.word(),
-    mood_description_cause_response_2: faker.lorem.word(),
-    mood_description_cause_category_3: faker.lorem.word(),
-    mood_description_cause_response_3: faker.lorem.word(),
+    how_are_you_feeling: faker.helpers.arrayElement(CHECKINPROMPTS.DAILY_CHECK_FEELING),
+    mood_description: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION),
+    mood_description_cause_category_1: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
+    mood_description_cause_response_1: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Academics),
+    mood_description_cause_category_2: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
+    mood_description_cause_response_2: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Family),
+    mood_description_cause_category_3: faker.helpers.arrayElement(Object.keys(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE)),
+    mood_description_cause_response_3: faker.helpers.arrayElement(CHECKINPROMPTS.MOOD_DESCRIPTION_CAUSE.Health),
   };
-
+  
   const response = await app
     .inject()
     .headers({ authorization: `bearer ${token}` })
     .post("/daily-check-in")
     .payload(payload);
 
-  // const body = await response.json();
-  const checkInRecord = await app.db.query.dailyCheckIn.findFirst({
-    where: and(
-      eq(dailyCheckIn.userId, sampleUser.id),
-      eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
-    ),
-  });
+  const body = await response.json();
 
+  for (const key of Object.keys(payload)) {
+    t.ok(body.hasOwnProperty(key));
+    // @ts-ignore
+    t.equal(body[key], payload[key]);
+  }
+  
   t.equal(response.statusCode, 201);
-  t.ok(checkInRecord);
-  t.equal(checkInRecord.howAreYouFeeling, payload.how_are_you_feeling);
+  
 });
