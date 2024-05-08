@@ -1039,13 +1039,15 @@ export const subscriptionPayment = pgTable("subscription_payment", {
   id: varchar("id", { length: 36 }).primaryKey().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  subscriptionId: varchar("subscription_id", { length: 36 })
-    .references(() => subscriptionV2.id)
+  subscriptionId: varchar("subscription_id", { length: 36 }) // null if payment is not completed
+    .references(() => subscriptionV2.id),
+  subscriptionTypeId: varchar("subscription_type_id", { length: 36 })
+    .references(() => subscriptionType.id)
     .notNull(),
   amountPaid: integer("amount_paid").notNull(),
   paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
   paymentMethod: text("payment_method").notNull(),
   status: text("status").notNull(),
-  mpesaRef: text("mpesa_ref"),
+  mpesaRef: text("mpesa_ref"), // TO store the mpesa ref for processing the web hook
   metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc
 });
