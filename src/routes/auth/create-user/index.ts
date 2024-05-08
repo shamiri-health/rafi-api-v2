@@ -94,6 +94,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const isBelvaUser = email.endsWith("@belvadigital.com");
       const isAHNUser = email.endsWith("@africahealthcarenetwork.com");
       const isGHCUser = email.endsWith("@ghcorps.org");
+      const isTuracoUser = email.endsWith("@turaco.insure");
 
       // TODO: create a better programmatic way of checking this
       const MKU_CLIENT_ID = 20;
@@ -102,6 +103,7 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const AHN_CLIENT_ID = 24;
       const BELVA_CLIENT_ID = 23;
       const GHC_CLIENT_ID = 25;
+      const TURACO_CLIENT_ID = 26;
 
       const SYMON_ID = 10;
       const HELLEN_ID = 205;
@@ -273,6 +275,18 @@ const createUserRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
               .update(user)
               .set({
                 clientId: GHC_CLIENT_ID,
+              })
+              .where(eq(user.id, insertedHumanResult[0].id))
+              .returning();
+
+            userServiceRecord.assignedTherapistId =
+              Math.random() > 0.5 ? HELLEN_ID : SYMON_ID;
+          } else if (isTuracoUser) {
+            fastify.log.info("TURACO USER IDENTIFIED");
+            insertedUserResult = await trx
+              .update(user)
+              .set({
+                clientId: TURACO_CLIENT_ID,
               })
               .where(eq(user.id, insertedHumanResult[0].id))
               .returning();
