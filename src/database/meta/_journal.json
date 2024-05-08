@@ -85,6 +85,13 @@
       "when": 1715950228304,
       "tag": "0011_pink_nightshade",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1715165614610,
+      "tag": "0012_wild_talos",
+      "breakpoints": true
     }
   ]
 }

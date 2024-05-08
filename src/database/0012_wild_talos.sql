@@ -1,0 +1,1 @@
+ALTER TABLE "subscription_type" ALTER COLUMN "price" SET NOT NULL;

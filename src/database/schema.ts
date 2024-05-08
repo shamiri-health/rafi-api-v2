@@ -1009,7 +1009,7 @@ export const subscriptionType = pgTable("subscription_type", {
   description: text("description").notNull(),
   durationDays: integer("duration_days"),
   durationMonths: integer("duration_months"),
-  price: integer("price"),
+  price: integer("price").notNull(),
   archivedAt: timestamp("archived_at", { mode: "date", withTimezone: true }),
 });
 
@@ -1048,6 +1048,6 @@ export const subscriptionPayment = pgTable("subscription_payment", {
   paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
   paymentMethod: text("payment_method").notNull(),
   status: text("status").notNull(),
-  mpesaRef: text("mpesa_ref"), // TO store the mpesa ref for processing the web hook
+  mpesaRef: text("mpesa_ref"), // TO store the mpesa checkout response ID for processing the web hook
   metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc
 });
