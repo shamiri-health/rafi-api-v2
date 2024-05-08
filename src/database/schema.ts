@@ -1046,5 +1046,6 @@ export const subscriptionPayment = pgTable("subscription_payment", {
   paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
   paymentMethod: text("payment_method").notNull(),
   status: text("status").notNull(),
+  mpesaRef: text("mpesa_ref"),
   metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc
 });
