@@ -24,23 +24,28 @@ const GEMS_LEVEL: GemLevel = {
 
 export const createRewardHubRecord = async (
   db: database["db"],
-  achivementRecord: AchievementRecord,
+  achievementRecord: AchievementRecord,
   nGems: number,
 ) => {
   // @ts-ignore
-  const totalGems = achivementRecord.gems + nGems;
-  const currentLevel = achivementRecord.level ? achivementRecord.level : 1;
+  const totalGems = achievementRecord.gems + nGems;
+  const currentLevel = achievementRecord.level ? achievementRecord.level : 1;
   const gemsNextLevel = GEMS_LEVEL[currentLevel + 1][1];
-  const currentLevelName = GEMS_LEVEL[currentLevel][0];
-  const updatedStreak: number = getUserStreak(achivementRecord);
+  const nextLevel = totalGems >= gemsNextLevel;
+  const level = nextLevel ? currentLevel + 1 : currentLevel;
+  const levelName = GEMS_LEVEL[level][0];
+  const updatedStreak: number = getUserStreak(achievementRecord);
+
   try {
-    await db.insert(rewardHubRecord).values({
-      level: currentLevel,
-      levelName: currentLevelName,
+    await db
+    .insert(rewardHubRecord)
+    .values({
+      level,
+      levelName,
       streak: updatedStreak,
       gemsHave: totalGems,
-      gemsNextLevel: gemsNextLevel,
-      userId: achivementRecord.userId,
+      gemsNextLevel: GEMS_LEVEL[level + 1][1],
+      userId: achievementRecord.userId,
       timestamp: new Date(),
     });
 
@@ -50,59 +55,30 @@ export const createRewardHubRecord = async (
         gems: totalGems,
         streak: updatedStreak,
         streakUpdatedAt: new Date(),
-        level: currentLevel,
+        level,
       })
-      .where(eq(userAchievement.id, achivementRecord.id))
+      .where(eq(userAchievement.id, achievementRecord.id))
       .returning();
 
     //@ts-ignore
     if (postedAchievement.level > 9) return postedAchievement;
 
-    if (totalGems >= gemsNextLevel) {
-      // @ts-ignore
-      return await unlockNextLevel(db, postedAchievement);
-    }
     return postedAchievement;
   } catch (error) {
     throw error;
   }
 };
 
-const unlockNextLevel = async (
-  db: database["db"],
-  achivementRecord: AchievementRecord,
-) => {
-  // @ts-ignore
-  const nextLevel = achivementRecord.level + 1;
-  try {
-    await db.insert(rewardHubRecord).values({
-      level: nextLevel,
-      levelName: GEMS_LEVEL[nextLevel][0],
-      gemsNextLevel: GEMS_LEVEL[nextLevel + 1][1],
-    });
-
-    const [achievement] = await db
-      .update(userAchievement)
-      .set({ level: nextLevel })
-      .where(eq(userAchievement.id, achivementRecord.id))
-      .returning();
-
-    return achievement;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const getUserStreak = (achivementRecord: AchievementRecord) => {
+const getUserStreak = (achievementRecord: AchievementRecord) => {
   const NUMBER_OF_SECONDS = 86400; // seconds in 24 hours
-  const lastStreakUpdate: number = achivementRecord.streakUpdatedAt
-    ? new Date(`${achivementRecord.streakUpdatedAt}`).getTime()
+  const lastStreakUpdate: number = achievementRecord.streakUpdatedAt
+    ? new Date(`${achievementRecord.streakUpdatedAt}`).getTime()
     : 0;
   const currentStreakUpdate: number = new Date().getTime();
 
   if ((currentStreakUpdate - lastStreakUpdate) / 1000 < NUMBER_OF_SECONDS) {
     // @ts-ignore
-    return achivementRecord.streak + 1;
+    return achievementRecord.streak + 1;
   }
 
   return 1;
