@@ -567,7 +567,6 @@ export const rewardHubRecord = pgTable("rewardHubRecord", {
   gemsHave: integer("gemsHave"),
   gemsNextLevel: integer("gemsNextLevel"),
   timestamp: timestamp("timestamp", { mode: "date" }),
-  userId: integer("user_id").references(() => user.id)
 });
 
 export const subscription = pgTable("subscription", {
@@ -722,7 +721,6 @@ export const userAchievement = pgTable("userAchievement", {
     withTimezone: true,
     mode: "date",
   }),
-  level: integer("level")
 });
 
 export const userSystemResponse = pgTable("userSystemResponse", {
