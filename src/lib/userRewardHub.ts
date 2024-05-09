@@ -37,9 +37,7 @@ export const createRewardHubRecord = async (
   const updatedStreak: number = getUserStreak(achievementRecord);
 
   try {
-    await db
-    .insert(rewardHubRecord)
-    .values({
+    await db.insert(rewardHubRecord).values({
       level,
       levelName,
       streak: updatedStreak,
