@@ -96,7 +96,7 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const dailyCheckInResult = await fastify.db.transaction(async (trx) => {
         try {
-          await trx.insert(dailyCheckIn).values({
+          const [dailyCheckinRecord] = await trx.insert(dailyCheckIn).values({
             // @ts-ignore
             id: randomUUID(),
             howAreYouFeeling: request.body.how_are_you_feeling,
@@ -115,7 +115,7 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
               request.body.mood_description_cause_response_3,
             userId,
             createdAt: today,
-          });
+          }).returning();
 
           const userAchievementRecord =
             await trx.query.userAchievement.findFirst({
@@ -133,14 +133,7 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             userAchievementRecord,
             gemsToAdd,
           );
-
-          const dailyCheckinRecord = await trx.query.dailyCheckIn.findFirst({
-            where: and(
-              eq(dailyCheckIn.userId, userId),
-              eq(sql`DATE(${dailyCheckIn.createdAt})`, sql`DATE(NOW())`),
-            ),
-          });
-
+          
           return {
             id: dailyCheckinRecord?.id,
             gems: rewardHubRecord.gems,
