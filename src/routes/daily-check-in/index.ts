@@ -96,26 +96,29 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const dailyCheckInResult = await fastify.db.transaction(async (trx) => {
         try {
-          const [dailyCheckinRecord] = await trx.insert(dailyCheckIn).values({
-            // @ts-ignore
-            id: randomUUID(),
-            howAreYouFeeling: request.body.how_are_you_feeling,
-            moodDescription: request.body.mood_description,
-            moodDescriptionCauseCategory1:
-              request.body.mood_description_cause_category_1,
-            moodDescriptionCauseResponse1:
-              request.body.mood_description_cause_response_1,
-            moodDescriptionCauseCategory2:
-              request.body.mood_description_cause_category_2,
-            moodDescriptionCauseResponse2:
-              request.body.mood_description_cause_response_2,
-            moodDescriptionCauseCategory3:
-              request.body.mood_description_cause_category_3,
-            moodDescriptionCauseResponse3:
-              request.body.mood_description_cause_response_3,
-            userId,
-            createdAt: today,
-          }).returning();
+          const [dailyCheckinRecord] = await trx
+            .insert(dailyCheckIn)
+            .values({
+              // @ts-ignore
+              id: randomUUID(),
+              howAreYouFeeling: request.body.how_are_you_feeling,
+              moodDescription: request.body.mood_description,
+              moodDescriptionCauseCategory1:
+                request.body.mood_description_cause_category_1,
+              moodDescriptionCauseResponse1:
+                request.body.mood_description_cause_response_1,
+              moodDescriptionCauseCategory2:
+                request.body.mood_description_cause_category_2,
+              moodDescriptionCauseResponse2:
+                request.body.mood_description_cause_response_2,
+              moodDescriptionCauseCategory3:
+                request.body.mood_description_cause_category_3,
+              moodDescriptionCauseResponse3:
+                request.body.mood_description_cause_response_3,
+              userId,
+              createdAt: today,
+            })
+            .returning();
 
           const userAchievementRecord =
             await trx.query.userAchievement.findFirst({
@@ -133,7 +136,7 @@ const dailyCheckin: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             userAchievementRecord,
             gemsToAdd,
           );
-          
+
           return {
             id: dailyCheckinRecord?.id,
             gems: rewardHubRecord.gems,
