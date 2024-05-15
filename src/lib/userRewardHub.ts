@@ -28,6 +28,8 @@ export const createRewardHubRecord = async (
   nGems: number,
 ) => {
   // @ts-ignore
+  if (achievementRecord.level > 9) return achievementRecord;
+  // @ts-ignore
   const totalGems = achievementRecord.gems + nGems;
   const currentLevel = achievementRecord.level ? achievementRecord.level : 1;
   const gemsNextLevel = GEMS_LEVEL[currentLevel + 1][1];
@@ -35,9 +37,6 @@ export const createRewardHubRecord = async (
   const level = nextLevel ? currentLevel + 1 : currentLevel;
   const levelName = GEMS_LEVEL[level][0];
   const updatedStreak: number = getUserStreak(achievementRecord);
-
-  // @ts-ignore
-  if (achievementRecord.level > 9) return achievementRecord;
 
   try {
     await db.insert(rewardHubRecord).values({
