@@ -1,0 +1,67 @@
+{
+  "DAILY_CHECK_FEELING": [
+    "extremely positive",
+    "positive",
+    "neutral",
+    "negative",
+    "extremely negative"
+  ],
+  "MOOD_DESCRIPTION": [
+    "Happy",
+    "Grateful",
+    "Excited",
+    "Calm",
+    "Anxious",
+    "Overwhelmed",
+    "Exhausted/Tired",
+    "Nervous/Scared",
+    "Angry",
+    "Stressed",
+    "Sad",
+    "Confused",
+    "Helpless"
+  ],
+  "MOOD_DESCRIPTION_CAUSE": {
+    "Relationships": [
+      "Communication",
+      "Personality",
+      "Friend(s)",
+      "Partner(s)",
+      "Colleague(s)",
+      "Classmate(s)",
+      "Neighbour(s)"
+    ],
+    "Work Related": [
+      "Burnout Levels",
+      "Work-life Balance",
+      "Wages",
+      "Career Growth",
+      "Appreciation Levels",
+      "Support",
+      "Motivation Levels"
+    ],
+    "Academics": [
+      "Motivation Levels",
+      "School Fees",
+      "Focus / Concentration",
+      "Academic Performance",
+      "Educators"
+    ],
+    "Financial": ["Job(s)", "Property(ies)", "Money", "Budget"],
+    "Family": [
+      "Siblings",
+      "Parents",
+      "Family Support",
+      "Children",
+      "Boundaries"
+    ],
+    "Health": [
+      "Physical Health",
+      "Body Weight",
+      "Mental Health",
+      "Appetite",
+      "Sleep",
+      "Physical Exercise"
+    ]
+  }
+}
