@@ -36,6 +36,9 @@ export const createRewardHubRecord = async (
   const levelName = GEMS_LEVEL[level][0];
   const updatedStreak: number = getUserStreak(achievementRecord);
 
+  // @ts-ignore
+  if (achievementRecord.level > 9) return achievementRecord;
+
   try {
     await db.insert(rewardHubRecord).values({
       level,
@@ -57,10 +60,6 @@ export const createRewardHubRecord = async (
       })
       .where(eq(userAchievement.id, achievementRecord.id))
       .returning();
-
-    //@ts-ignore
-    if (postedAchievement.level > 9) return postedAchievement;
-
     return postedAchievement;
   } catch (error) {
     throw error;
