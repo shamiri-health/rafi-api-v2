@@ -6,6 +6,7 @@ import swaggerUI from "@fastify/swagger-ui";
 import fp from "fastify-plugin";
 import { FastifyJwtNamespace } from "@fastify/jwt";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
+import logger from "./lib/utils/logger";
 
 export interface AppOptions
   extends FastifyServerOptions,
