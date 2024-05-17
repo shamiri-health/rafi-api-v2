@@ -446,7 +446,7 @@ export const phoneEvent = pgTable(
     mobile: varchar("mobile", { length: 13 }),
     dataPrivacyString: varchar("dataPrivacyString", { length: 100 }),
     email: text("email"),
-    googleMeetLink: text("googleMeetLink"),
+    videoMeetLink: text("video_meet_link"),
   },
   (table) => {
     return {
