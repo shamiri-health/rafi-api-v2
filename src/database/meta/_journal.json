@@ -78,27 +78,6 @@
       "when": 1715255616117,
       "tag": "0010_steady_fabian_cortez",
       "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1715946659698,
-      "tag": "0011_military_puma",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "5",
-      "when": 1715948829018,
-      "tag": "0012_unique_nightshade",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "5",
-      "when": 1715949783169,
-      "tag": "0013_pale_lady_mastermind",
-      "breakpoints": true
     }
   ]
 }
