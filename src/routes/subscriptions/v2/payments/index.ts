@@ -165,6 +165,7 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         await fastify.db
           .update(subscriptionPayment)
           .set({
+            updatedAt: new Date(),
             status: "FAILED",
           })
           .where(eq(subscriptionPayment.mpesaRef, checkoutRequestId));
@@ -178,6 +179,7 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       const [updatedPayment] = await fastify.db
         .update(subscriptionPayment)
         .set({
+          updatedAt: new Date(),
           status: "PAID",
         })
         .where(eq(subscriptionPayment.mpesaRef, checkoutRequestId))
