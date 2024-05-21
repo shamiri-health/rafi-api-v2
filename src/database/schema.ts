@@ -11,6 +11,7 @@ import {
   doublePrecision,
   date,
   json,
+  jsonb,
   primaryKey,
   customType,
 } from "drizzle-orm/pg-core";
@@ -1008,7 +1009,7 @@ export const subscriptionType = pgTable("subscription_type", {
   description: text("description").notNull(),
   durationDays: integer("duration_days"),
   durationMonths: integer("duration_months"),
-  price: integer("price"),
+  price: integer("price").notNull(),
   archivedAt: timestamp("archived_at", { mode: "date", withTimezone: true }),
 });
 
@@ -1020,16 +1021,29 @@ export const subscriptionV2 = pgTable("subscription_v2", {
   subscriptionTypeId: varchar("subscription_type_id", { length: 100 })
     .notNull()
     .references(() => subscriptionType.id),
-  startDate: timestamp("start_date", {
-    mode: "date",
-    withTimezone: true,
-  }).notNull(),
-  endDate: timestamp("end_date", {
-    mode: "date",
-    withTimezone: true,
-  }).notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
   cancelledAt: timestamp("cancelled_at", {
     mode: "date",
     withTimezone: true,
   }),
+});
+
+export const subscriptionPayment = pgTable("subscription_payment", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  userId: integer("user_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  subscriptionTypeId: varchar("subscription_type_id", { length: 36 })
+    .references(() => subscriptionType.id)
+    .notNull(),
+  amountPaid: integer("amount_paid").notNull(),
+  paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  paymentShortCode: text("payment_short_code").notNull().unique(), // easy to consume short code for human use
+  status: text("status").notNull(),
+  mpesaRef: text("mpesa_ref"), // TO store the mpesa checkout response ID for processing the web hook
+  metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc
 });
