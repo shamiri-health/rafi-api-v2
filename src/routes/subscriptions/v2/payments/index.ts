@@ -155,7 +155,9 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         ];
 
         if (!SAF_IPs.includes(req.ip)) {
-          fastify.log.error(`Unauthorized attempt to access the STK callback endpoint from ${req.ip}`)
+          fastify.log.error(
+            `Unauthorized attempt to access the STK callback endpoint from ${req.ip}`,
+          );
           throw fastify.httpErrors.unauthorized();
         }
 
