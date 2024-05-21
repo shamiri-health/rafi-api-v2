@@ -26,6 +26,7 @@ export async function fetchMpesaAccessToken() {
   return accessTokenBody.access_token;
 }
 
+// TODO: add partyA/phoneNumber arg to this
 export async function triggerMpesaPush(accessToken: string, price: number) {
   const timestamp = format(new Date(), "yyyyMMddHHmmss");
 
@@ -43,8 +44,9 @@ export async function triggerMpesaPush(accessToken: string, price: number) {
     PartyA: "254717266218",
     PartyB: process.env.MPESA_SHORTCODE,
     PhoneNumber: "254717266218",
+    // TODO: ensure that callback url is from server url
     CallBackURL:
-      "https://cnet-comp-certificate-montreal.trycloudflare.com/subscriptions/v2/payments/mpesa-callback",
+      "https://swedish-vocabulary-reasoning-receives.trycloudflare.com/subscriptions/v2/payments/mpesa-callback",
     // TODO: ensure that account reference is changed
     AccountReference: "Test",
     TransactionDesc: "Test",

@@ -1,10 +1,10 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import {
-  subscriptionPayment,
+  //subscriptionPayment,
   subscriptionType,
 } from "../../../../database/schema";
-import { randomUUID } from "node:crypto";
+//import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { fetchMpesaAccessToken, triggerMpesaPush } from "../../../../lib/mpesa";
 
@@ -54,11 +54,11 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         where: eq(subscriptionType.id, req.body.subscription_type_id),
       });
 
-      if (!subType) {
-        throw fastify.httpErrors.notFound(
-          "Could not find a subscription type with the given ID",
-        );
-      }
+      // if (!subType) {
+      //   throw fastify.httpErrors.notFound(
+      //     "Could not find a subscription type with the given ID",
+      //   );
+      // }
 
       let accessToken: string;
       try {
@@ -70,9 +70,9 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         );
       }
 
-      let mpesaBody: Awaited<ReturnType<typeof triggerMpesaPush>>;
+      //let mpesaBody: Awaited<ReturnType<typeof triggerMpesaPush>>;
       try {
-        mpesaBody = await triggerMpesaPush(accessToken, subType.price);
+        /*mpesaBody = */await triggerMpesaPush(accessToken, subType?.price || 1);
       } catch (e: any) {
         fastify.log.error(e.message);
         throw fastify.httpErrors.internalServerError(
@@ -81,16 +81,16 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       }
 
       // TODO: need to save this MPESA ref in the payments table
-      await fastify.db.insert(subscriptionPayment).values({
-        id: randomUUID(),
-        subscriptionTypeId: subType.id,
-        amountPaid: subType.price,
-        paymentTimestamp: new Date(),
-        paymentMethod: "MPESA",
-        status: "PENDING",
-        mpesaRef: mpesaBody.CheckoutRequestID,
-        metaData: mpesaBody,
-      });
+      // await fastify.db.insert(subscriptionPayment).values({
+      //   id: randomUUID(),
+      //   subscriptionTypeId: subType.id,
+      //   amountPaid: subType.price,
+      //   paymentTimestamp: new Date(),
+      //   paymentMethod: "MPESA",
+      //   status: "PENDING",
+      //   mpesaRef: mpesaBody.CheckoutRequestID,
+      //   metaData: mpesaBody,
+      // });
 
       return {
         message: "MPESA transaction successfully initiated",

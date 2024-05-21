@@ -65,6 +65,7 @@
     "fastify-tsconfig": "^2.0.0",
     "prettier": "3.1.1",
     "sinon": "^17.0.1",
+    "snaplet": "^0.91.1",
     "tap": "^16.1.0",
     "ts-node": "^10.4.0",
     "typescript": "^5.2.2"
