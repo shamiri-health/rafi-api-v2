@@ -1,5 +1,10 @@
 import { format } from "date-fns/format";
 
+const SAFARICOM_URL =
+  process.env.APP_ENV === "production"
+    ? "https://api.safaricom.co.ke"
+    : "https://sandbox.safaricom.co.ke";
+
 export async function fetchMpesaAccessToken() {
   // base64 string of CONSUMER_KEY + : + CONSUMER_SECRET
   const tokenAuth = btoa(
@@ -7,7 +12,7 @@ export async function fetchMpesaAccessToken() {
   );
 
   const accessTokenResponse = await fetch(
-    "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    `${SAFARICOM_URL}/oauth/v1/generate?grant_type=client_credentials`,
     {
       headers: {
         Authorization: `Basic ${tokenAuth}`,
@@ -27,6 +32,7 @@ export async function fetchMpesaAccessToken() {
 }
 
 // TODO: add partyA/phoneNumber arg to this
+// FIXME: change the account reference
 export async function triggerMpesaPush(accessToken: string, price: number) {
   const timestamp = format(new Date(), "yyyyMMddHHmmss");
 
@@ -45,24 +51,20 @@ export async function triggerMpesaPush(accessToken: string, price: number) {
     PartyB: process.env.MPESA_SHORTCODE,
     PhoneNumber: "254717266218",
     // TODO: ensure that callback url is from server url
-    CallBackURL:
-      "https://swedish-vocabulary-reasoning-receives.trycloudflare.com/subscriptions/v2/payments/mpesa-callback",
+    CallBackURL: `${process.env.SERVER_URL}/subscriptions/v2/payments/mpesa-callback`,
     // TODO: ensure that account reference is changed
     AccountReference: "Test",
     TransactionDesc: "Test",
   });
 
-  const res = await fetch(
-    "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      method: "POST",
-      body,
+  const res = await fetch(`${SAFARICOM_URL}/mpesa/stkpush/v1/processrequest`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
-  );
+    method: "POST",
+    body,
+  });
 
   if (!res.ok) {
     throw new Error("Could not process MPESA payment request at this time");
