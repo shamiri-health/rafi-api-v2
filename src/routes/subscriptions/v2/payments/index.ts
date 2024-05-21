@@ -1,12 +1,14 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import {
-  //subscriptionPayment,
+  subscriptionPayment,
   subscriptionType,
+  subscriptionV2,
 } from "../../../../database/schema";
-//import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { fetchMpesaAccessToken, triggerMpesaPush } from "../../../../lib/mpesa";
+import { randomUUID } from "node:crypto";
+import { addDays, addMonths, formatISO } from "date-fns";
 
 const PurchaseSubscriptionBody = Type.Object({
   subscription_type_id: Type.String(),
@@ -72,7 +74,10 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       //let mpesaBody: Awaited<ReturnType<typeof triggerMpesaPush>>;
       try {
-        /*mpesaBody = */await triggerMpesaPush(accessToken, subType?.price || 1);
+        /*mpesaBody = */ await triggerMpesaPush(
+          accessToken,
+          subType?.price || 1,
+        );
       } catch (e: any) {
         fastify.log.error(e.message);
         throw fastify.httpErrors.internalServerError(
@@ -85,6 +90,7 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       //   id: randomUUID(),
       //   subscriptionTypeId: subType.id,
       //   amountPaid: subType.price,
+      //   userId: request.user.sub,
       //   paymentTimestamp: new Date(),
       //   paymentMethod: "MPESA",
       //   status: "PENDING",
@@ -107,7 +113,83 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       },
     },
     async (req) => {
-      console.log(req.body);
+      const {
+        Body: {
+          stkCallback: { CheckoutRequestID: checkoutRequestId },
+        },
+      } = req.body;
+
+      const paymentRecordResult = await fastify.db
+        .select()
+        .from(subscriptionPayment)
+        .innerJoin(
+          subscriptionType,
+          eq(subscriptionPayment.subscriptionTypeId, subscriptionType.id),
+        );
+
+      if (!paymentRecordResult.length) {
+        fastify.log.error(req.body);
+        fastify.log.error(
+          "Missed payment request received, Please check database records and MPESA portal for possible refund or correction",
+        );
+        return {};
+      }
+      if (req.body.Body.stkCallback.ResultCode !== 0) {
+        await fastify.db
+          .update(subscriptionPayment)
+          .set({
+            status: "FAILED",
+          })
+          .where(eq(subscriptionPayment.mpesaRef, checkoutRequestId));
+        fastify.log.warn(
+          `Failed MPESA transaction with checkout request ID: ${checkoutRequestId}`,
+        );
+        return {};
+      }
+
+      const [updatedPayment] = await fastify.db
+        .update(subscriptionPayment)
+        .set({
+          status: "PAID",
+        })
+        .where(eq(subscriptionPayment.mpesaRef, checkoutRequestId))
+        .returning();
+
+      const [paymentRecord] = paymentRecordResult;
+
+      const startDate = new Date();
+      let endDate;
+
+      if (paymentRecord.subscription_type.durationDays) {
+        endDate = addDays(
+          startDate,
+          paymentRecord.subscription_type.durationDays,
+        );
+      } else if (paymentRecord.subscription_type.durationMonths) {
+        endDate = addMonths(
+          startDate,
+          paymentRecord.subscription_type.durationMonths,
+        );
+      } else {
+        fastify.log.error(
+          "A subscription type was created without a valid duration. A subscription type can only have days specified or months specified",
+        );
+        fastify.log.error(
+          "Kindly ensure that the subscription type associated with this payment is correct",
+        );
+        throw fastify.httpErrors.internalServerError(
+          "Could not process payment",
+        );
+      }
+
+      // create new subscription
+      await fastify.db.insert(subscriptionV2).values({
+        id: randomUUID(),
+        userId: updatedPayment.userId,
+        subscriptionTypeId: paymentRecord.subscription_type.id,
+        startDate: formatISO(startDate, { representation: "date" }),
+        endDate: formatISO(endDate, { representation: "date" }),
+      });
     },
   );
 };
