@@ -1042,6 +1042,7 @@ export const subscriptionPayment = pgTable("subscription_payment", {
   amountPaid: integer("amount_paid").notNull(),
   paymentTimestamp: timestamp("payment_timestamp", { mode: "date" }).notNull(),
   paymentMethod: text("payment_method").notNull(),
+  paymentShortCode: text("payment_short_code").notNull().unique(), // easy to consume short code for human use
   status: text("status").notNull(),
   mpesaRef: text("mpesa_ref"), // TO store the mpesa checkout response ID for processing the web hook
   metaData: jsonb("meta_data"), // TO STORE STUFF LIKE THE RESPONSE FIELD FROM MPESA etc

@@ -31,9 +31,12 @@ export async function fetchMpesaAccessToken() {
   return accessTokenBody.access_token;
 }
 
-// TODO: add partyA/phoneNumber arg to this
-// FIXME: change the account reference
-export async function triggerMpesaPush(accessToken: string, price: number) {
+export async function triggerMpesaPush(
+  accessToken: string,
+  price: number,
+  phoneNumber: string,
+  accountReference: string,
+) {
   const timestamp = format(new Date(), "yyyyMMddHHmmss");
 
   // A base64 encoded string. (The base64 string is a combination of Shortcode+Passkey+Timestamp)
@@ -47,14 +50,12 @@ export async function triggerMpesaPush(accessToken: string, price: number) {
     Timestamp: timestamp,
     TransactionType: "CustomerPayBillOnline",
     Amount: price,
-    PartyA: "254717266218",
+    PartyA: phoneNumber,
     PartyB: process.env.MPESA_SHORTCODE,
-    PhoneNumber: "254717266218",
-    // TODO: ensure that callback url is from server url
+    PhoneNumber: phoneNumber,
     CallBackURL: `${process.env.SERVER_URL}/subscriptions/v2/payments/mpesa-callback`,
-    // TODO: ensure that account reference is changed
-    AccountReference: "Test",
-    TransactionDesc: "Test",
+    AccountReference: accountReference,
+    TransactionDesc: "Subscription Payment",
   });
 
   const res = await fetch(`${SAFARICOM_URL}/mpesa/stkpush/v1/processrequest`, {

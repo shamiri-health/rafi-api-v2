@@ -1,0 +1,2 @@
+ALTER TABLE "subscription_payment" ADD COLUMN "payment_short_code" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "subscription_payment" ADD CONSTRAINT "subscription_payment_payment_short_code_unique" UNIQUE("payment_short_code");

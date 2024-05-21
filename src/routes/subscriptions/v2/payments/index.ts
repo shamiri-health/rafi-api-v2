@@ -1,6 +1,7 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import {
+  human,
   subscriptionPayment,
   subscriptionType,
   subscriptionV2,
@@ -9,6 +10,8 @@ import { eq } from "drizzle-orm";
 import { fetchMpesaAccessToken, triggerMpesaPush } from "../../../../lib/mpesa";
 import { randomUUID } from "node:crypto";
 import { addDays, addMonths, formatISO } from "date-fns";
+import { customAlphabet } from "nanoid";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const PurchaseSubscriptionBody = Type.Object({
   subscription_type_id: Type.String(),
@@ -62,6 +65,23 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         );
       }
 
+      const user = await fastify.db.query.human.findFirst({
+        // @ts-ignore
+        where: eq(human.id, req.user.sub),
+      });
+
+      if (!user) {
+        throw fastify.httpErrors.notFound(
+          "Could not initiate purchase subscription for non-existent user",
+        );
+      }
+
+      if (!user?.mobile || !isValidPhoneNumber(user?.mobile, "KE")) {
+        throw fastify.httpErrors.notFound(
+          "Only Kenyan phone numbers supported for MPESA payment method",
+        );
+      }
+
       let accessToken: string;
       try {
         accessToken = await fetchMpesaAccessToken();
@@ -72,9 +92,17 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         );
       }
 
+      const nanoid = customAlphabet("23456789ABCDEFGHJKLMNOPQRSTUVWXYZ", 10);
+      const paymentShortCode = nanoid();
+
       let mpesaBody: Awaited<ReturnType<typeof triggerMpesaPush>>;
       try {
-        mpesaBody = await triggerMpesaPush(accessToken, subType?.price || 1);
+        mpesaBody = await triggerMpesaPush(
+          accessToken,
+          subType?.price,
+          user.mobile?.replace("+", ""),
+          paymentShortCode,
+        );
       } catch (e: any) {
         fastify.log.error(e.message);
         throw fastify.httpErrors.internalServerError(
@@ -91,6 +119,7 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         userId: req.user.sub,
         paymentTimestamp: new Date(),
         paymentMethod: "MPESA",
+        paymentShortCode: paymentShortCode,
         status: "PENDING",
         mpesaRef: mpesaBody.CheckoutRequestID,
         metaData: mpesaBody,
@@ -139,8 +168,9 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
             status: "FAILED",
           })
           .where(eq(subscriptionPayment.mpesaRef, checkoutRequestId));
+
         fastify.log.warn(
-          `Failed MPESA transaction with checkout request ID: ${checkoutRequestId}`,
+          `Failed MPESA transaction with checkout request ID ${checkoutRequestId}: ${req.body.Body.stkCallback.ResultDesc}`,
         );
         return {};
       }
