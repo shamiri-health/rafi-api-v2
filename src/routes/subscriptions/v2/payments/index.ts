@@ -135,6 +135,34 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post<{ Body: MpesaCallbackResponse }>(
     "/mpesa-callback",
     {
+      onRequest: (req, _, done) => {
+        // https://developer.safaricom.co.ke/Documentation
+        // read in the going live section
+
+        const SAF_IPs = [
+          "196.201.214.200",
+          "196.201.214.206",
+          "196.201.213.114",
+          "196.201.214.207",
+          "196.201.214.208",
+          "196.201.213.44",
+          "196.201.212.127",
+          "196.201.212.138",
+          "196.201.212.129",
+          "196.201.212.136",
+          "196.201.212.74",
+          "196.201.212.69",
+        ];
+
+        if (!SAF_IPs.includes(req.ip)) {
+          fastify.log.error(
+            `Unauthorized attempt to access the STK callback endpoint from ${req.ip}`,
+          );
+          throw fastify.httpErrors.unauthorized();
+        }
+
+        done();
+      },
       schema: {
         body: MpesaCallbackResponse,
       },
