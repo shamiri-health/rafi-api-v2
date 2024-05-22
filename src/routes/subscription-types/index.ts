@@ -9,7 +9,7 @@ const SubscriptionTypeSchema = Type.Object({
   price: Type.Number(),
   duration_days: Type.Optional(Type.Integer()),
   duration_months: Type.Optional(Type.Integer()),
-  is_one_off: Type.Optional(Type.Boolean())
+  is_one_off: Type.Optional(Type.Boolean()),
 });
 
 const ParamsSchema = Type.Object({

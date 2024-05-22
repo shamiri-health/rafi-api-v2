@@ -252,7 +252,9 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         subscriptionTypeId: paymentRecord.subscription_type.id,
         startDate: formatISO(startDate, { representation: "date" }),
         isOneOff,
-        endDate: endDate ? formatISO(endDate, { representation: "date" }) : endDate
+        endDate: endDate
+          ? formatISO(endDate, { representation: "date" })
+          : endDate,
       });
 
       return {};
