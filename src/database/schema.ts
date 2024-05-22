@@ -1009,6 +1009,7 @@ export const subscriptionType = pgTable("subscription_type", {
   description: text("description").notNull(),
   durationDays: integer("duration_days"),
   durationMonths: integer("duration_months"),
+  isOneOff: boolean("is_one_off"),
   price: integer("price").notNull(),
   archivedAt: timestamp("archived_at", { mode: "date", withTimezone: true }),
 });
@@ -1022,7 +1023,8 @@ export const subscriptionV2 = pgTable("subscription_v2", {
     .notNull()
     .references(() => subscriptionType.id),
   startDate: date("start_date").notNull(),
-  endDate: date("end_date").notNull(),
+  endDate: date("end_date"),
+  isOneOff: boolean("is_one_off").notNull().default(false),
   cancelledAt: timestamp("cancelled_at", {
     mode: "date",
     withTimezone: true,
