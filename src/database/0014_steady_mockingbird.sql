@@ -1,0 +1,1 @@
+ALTER TABLE "subscription_type" ADD COLUMN "is_one_off" boolean;
