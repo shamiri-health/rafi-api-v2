@@ -9,6 +9,7 @@ const SubscriptionTypeSchema = Type.Object({
   price: Type.Number(),
   duration_days: Type.Optional(Type.Integer()),
   duration_months: Type.Optional(Type.Integer()),
+  is_one_off: Type.Optional(Type.Boolean())
 });
 
 const ParamsSchema = Type.Object({
@@ -49,6 +50,7 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
         durationMonths: req.body.duration_months ?? undefined,
         price: req.body.price,
         description: req.body.description,
+        isOneOff: req.body.is_one_off ?? false,
       };
       const [newSubscriptionType] = await fastify.db
         .insert(subscriptionType)

@@ -215,8 +215,9 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       const [paymentRecord] = paymentRecordResult;
 
+      let isOneOff = false;
       const startDate = new Date();
-      let endDate;
+      let endDate = null;
 
       // end date computation to follow billing anchor as per Stripe's documentation
       // https://docs.stripe.com/billing/subscriptions/billing-cycle
@@ -230,6 +231,8 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
           startDate,
           paymentRecord.subscription_type.durationMonths,
         );
+      } else if (paymentRecord.subscription_type.isOneOff) {
+        isOneOff = true;
       } else {
         fastify.log.error(
           "A subscription type was created without a valid duration. A subscription type can only have days specified or months specified",
@@ -248,7 +251,8 @@ const paymentsRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
         userId: updatedPayment.userId,
         subscriptionTypeId: paymentRecord.subscription_type.id,
         startDate: formatISO(startDate, { representation: "date" }),
-        endDate: formatISO(endDate, { representation: "date" }),
+        isOneOff,
+        endDate: endDate ? formatISO(endDate, { representation: "date" }) : endDate
       });
 
       return {};
