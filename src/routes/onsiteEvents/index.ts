@@ -267,6 +267,20 @@ const onsiteSessions: FastifyPluginAsync = async (
       // @ts-ignore
       const userId = request.user.sub;
 
+      const onsiteTherapySession =
+        await fastify.db.query.therapySession.findFirst({
+          where: and(
+            eq(therapySession.id, onsiteEventId),
+            eq(therapySession.userId, userId),
+          ),
+        });
+
+      if (!onsiteTherapySession) {
+        throw fastify.httpErrors.notFound(
+          `Onsite session with the id of ${onsiteEventId} not found.`,
+        );
+      }
+
       await fastify.db.transaction(async (trx) => {
         try {
           await trx
