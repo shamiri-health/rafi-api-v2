@@ -1,7 +1,7 @@
 import { Static, Type } from "@sinclair/typebox";
 import { FastifyPluginAsync } from "fastify";
 import { onsiteEvent, therapySession } from "../../database/schema";
-import { and, eq, gte, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, gte, isNotNull, isNull, sql, or, lt } from "drizzle-orm";
 
 const OnsiteEvent = Type.Object({
   id: Type.String(),
@@ -9,7 +9,7 @@ const OnsiteEvent = Type.Object({
   summary: Type.Optional(Type.String()),
   startTime: Type.Optional(Type.String({ format: "date-time" })),
   endTime: Type.Optional(Type.String({ format: "date-time" })),
-  recommendDatetime: Type.String({ format: "date-time" }),
+  recommendDatetime: Type.Optional(Type.String({ format: "date-time" })),
   enrollDatetime: Type.Optional(Type.String({ format: "date-time" })),
   completeDatetime: Type.Optional(Type.String({ format: "date-time" })),
 });
@@ -62,7 +62,13 @@ const onsiteSessions: FastifyPluginAsync = async (
       // @ts-ignore
       const userId = request.user.sub;
       const enrolledSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          therapistId: onsiteEvent.therapistId,
+          startTime: onsiteEvent.startTime,
+          endTime: onsiteEvent.endTime,
+          summary: onsiteEvent.summary,
+        })
         .from(therapySession)
         .innerJoin(onsiteEvent, eq(onsiteEvent.id, therapySession.id))
         .where(
@@ -89,7 +95,14 @@ const onsiteSessions: FastifyPluginAsync = async (
       // @ts-ignore
       const userId = request.user.sub;
       const recommendedSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          therapistId: onsiteEvent.therapistId,
+          startTime: onsiteEvent.startTime,
+          endTime: onsiteEvent.endTime,
+          summary: onsiteEvent.summary,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
         .from(therapySession)
         .innerJoin(onsiteEvent, eq(onsiteEvent.id, therapySession.id))
         .where(
@@ -107,6 +120,43 @@ const onsiteSessions: FastifyPluginAsync = async (
     },
   );
 
+  fastify.get(
+    "/archived",
+    {
+      schema: {
+        response: {
+          200: Type.Array(OnsiteEvent),
+        },
+      },
+    },
+    async (request) => {
+      // @ts-ignore
+      const userId = request.user.sub;
+
+      const archivedSessions = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: onsiteEvent.therapistId,
+          summary: onsiteEvent.summary,
+          startTime: onsiteEvent.startTime,
+          endTime: onsiteEvent.endTime,
+        })
+        .from(therapySession)
+        .innerJoin(onsiteEvent, eq(onsiteEvent.id, therapySession.id))
+        .where(
+          and(
+            or(
+              lt(sql`${onsiteEvent.endTime}`, sql`DATE(NOW())`),
+              lt(sql`${therapySession.completeDatetime}`, sql`DATE(NOW())`),
+            ),
+            isNotNull(therapySession.enrollDatetime),
+            eq(therapySession.userId, userId),
+          ),
+        );
+      return archivedSessions;
+    },
+  );
+
   fastify.get<{ Params: OnsiteEventParams }>(
     "/:onsiteEventId",
     {
@@ -121,9 +171,24 @@ const onsiteSessions: FastifyPluginAsync = async (
       const { onsiteEventId } = request.params;
       // @ts-ignore
       const userId = request.user.sub;
-      const onsiteSession = await fastify.db.query.onsiteEvent.findFirst({
-        where: eq(onsiteEvent.id, onsiteEventId),
-      });
+
+      const [onsiteSession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: onsiteEvent.therapistId,
+          startTime: onsiteEvent.startTime,
+          endTime: onsiteEvent.endTime,
+          summary: onsiteEvent.summary,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
+        .from(therapySession)
+        .innerJoin(onsiteEvent, eq(onsiteEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, onsiteEventId),
+          ),
+        );
 
       if (!onsiteSession) {
         throw fastify.httpErrors.notFound(
@@ -149,7 +214,7 @@ const onsiteSessions: FastifyPluginAsync = async (
       const { onsiteEventId } = request.params;
       // @ts-ignore
       const userId = request.user.sub;
-      const [updatedSession] = await fastify.db
+      const [onsiteSession] = await fastify.db
         .update(onsiteEvent)
         .set({
           // @ts-ignore
@@ -161,14 +226,32 @@ const onsiteSessions: FastifyPluginAsync = async (
         .where(eq(onsiteEvent.id, onsiteEventId))
         .returning();
 
-      if (!updatedSession) {
+      if (!onsiteSession) {
         throw fastify.httpErrors.notFound(
           `Onsite session with the id of ${onsiteEventId} is not found.`,
         );
       }
 
+      const [updatedOnsiteSession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: onsiteEvent.therapistId,
+          startTime: onsiteEvent.startTime,
+          endTime: onsiteEvent.endTime,
+          summary: onsiteEvent.summary,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
+        .from(therapySession)
+        .innerJoin(onsiteEvent, eq(onsiteEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, onsiteEventId),
+          ),
+        );
+
       // update the google calendar with the new session.
-      return updatedSession;
+      return updatedOnsiteSession;
     },
   );
 
