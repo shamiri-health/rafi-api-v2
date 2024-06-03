@@ -4,6 +4,8 @@ import {
   groupEvent,
   groupSession,
   groupTopic,
+  human,
+  therapist,
   therapySession,
 } from "../../database/schema";
 import { and, eq, gte, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
@@ -87,11 +89,24 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const userId = request.user.sub;
 
       const groupSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
         .from(therapySession)
         .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
         .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
         .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
         .where(eq(therapySession.userId, userId));
 
       return groupSessions;
@@ -103,17 +118,33 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     {
       schema: {
         response: {
-          200: GroupEvent,
+          200: Type.Array(GroupEvent),
         },
       },
     },
     async (request) => {
       // @ts-ignore
       const userId = request.user.sub;
+
       const recommendedSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
         .from(therapySession)
         .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+        .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
+        .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
         .where(
           and(
             isNull(therapySession.completeDatetime),
@@ -123,6 +154,7 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             eq(therapySession.userId, userId),
           ),
         );
+
       // format the response
       return recommendedSessions;
     },
@@ -141,10 +173,24 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const userId = request.user.sub;
       const enrolledSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
         .from(therapySession)
         .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
         .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
+        .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
         .where(
           and(
             isNull(therapySession.completeDatetime),
@@ -170,9 +216,24 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const userId = request.user.sub;
       const archivedSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
         .from(therapySession)
         .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+        .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
+        .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
         .where(
           and(
             eq(therapySession.userId, userId),
@@ -196,7 +257,7 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       schema: {
         params: GroupEventParams,
         response: {
-          200: GroupEvent,
+          // 200: GroupEvent,
         },
       },
     },
@@ -204,21 +265,41 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const { groupEventId } = request.params;
       // @ts-ignore
       const userId = request.user.sub;
-      const groupSession = await fastify.db.query.therapySession.findFirst({
-        where: and(
-          eq(therapySession.userId, userId),
-          eq(therapySession.id, groupEventId),
-          eq(therapySession.type, "groupEvent"),
-        ),
-      });
 
-      if (!groupSession) {
+      const [foundGroupSession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
+        .from(therapySession)
+        .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+        .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
+        .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, groupEventId),
+            eq(therapySession.type, "groupEvent"),
+          ),
+        );
+
+      if (!foundGroupSession) {
         throw fastify.httpErrors.notFound(
           `Therapy session with the id of ${groupEventId} not found.`,
         );
       }
 
-      return groupSession;
+      return foundGroupSession;
     },
   );
 
@@ -242,8 +323,34 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         .set({
           groupSessionId: request.body.groupSessionId,
         })
-        .where(eq(groupEvent.id, groupEventId))
-        .returning();
+        .where(eq(groupEvent.id, groupEventId));
+
+      const [foundGroupSession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          recommendDatetime: therapySession.recommendDatetime,
+          completeDatetime: therapySession.completeDatetime,
+          enrollDatetime: therapySession.enrollDatetime,
+          groupSession: {
+            ...groupSession,
+            groupTopic: groupTopic,
+            therapist: { ...therapist, name: human.name },
+          },
+          groupTopic: groupTopic,
+        })
+        .from(therapySession)
+        .innerJoin(groupEvent, eq(groupEvent.id, therapySession.id))
+        .innerJoin(groupSession, eq(groupSession.id, groupEvent.groupSessionId))
+        .innerJoin(groupTopic, eq(groupTopic.id, groupEvent.groupTopicId))
+        .innerJoin(therapist, eq(groupSession.therapistId, therapist.id))
+        .innerJoin(human, eq(human.id, therapist.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, groupEventId),
+            eq(therapySession.type, "groupEvent"),
+          ),
+        );
 
       if (!updatedGroupEvent) {
         throw fastify.httpErrors.notFound(
@@ -251,7 +358,7 @@ const groupEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
       }
 
-      return updatedGroupEvent;
+      return foundGroupSession;
     },
   );
 
