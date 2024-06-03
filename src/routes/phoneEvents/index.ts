@@ -298,7 +298,7 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
 
       if (!teleTherapySession) {
-        fastify.httpErrors.notFound(
+        throw fastify.httpErrors.notFound(
           `PhoneEvent with the id of ${phoneEventId} is not found.`,
         );
       }
@@ -333,7 +333,8 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
           endTime: request.body.endTime,
           dataPrivacyString: request.body.dataPrivacy.join(","),
         })
-        .where(eq(phoneEvent.id, phoneEventId));
+        .where(eq(phoneEvent.id, phoneEventId))
+        .returning();
 
       const [teleTherapySession] = await fastify.db
         .select({
@@ -375,6 +376,20 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const userId = request.user.sub;
       const { phoneEventId } = request.params;
+
+      const teleTherapySession =
+        await fastify.db.query.therapySession.findFirst({
+          where: and(
+            eq(therapySession.id, phoneEventId),
+            eq(therapySession.userId, userId),
+          ),
+        });
+
+      if (!teleTherapySession) {
+        throw fastify.httpErrors.notFound(
+          `Phone event with the id of ${phoneEventId} not found.`,
+        );
+      }
 
       await fastify.db.transaction(async (trx) => {
         try {
