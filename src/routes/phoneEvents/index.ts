@@ -29,8 +29,8 @@ const PhoneEvent = Type.Object({
   summary: Type.Optional(Type.String()),
   startTime: Type.String({ format: "date-time" }),
   endTime: Type.String({ format: "date-time" }),
-  recommendDatetime: Type.String({ format: "date-time" }),
-  completeDatetime: Type.String({ format: "date-time" }),
+  recommendDatetime: Type.Optional(Type.String({ format: "date-time" })),
+  completeDatetime: Type.Optional(Type.String({ format: "date-time" })),
   mobile: Type.Optional(Type.String()),
   email: Type.Optional(Type.String()),
   assetUrl: Type.Optional(Type.String()),
@@ -103,7 +103,7 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     {
       schema: {
         response: {
-          200: PhoneEvent,
+          200: Type.Array(PhoneEvent),
         },
       },
     },
@@ -112,7 +112,18 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const userId = request.user.sub;
 
       const recommendedSession = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
         .from(therapySession)
         .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
         .where(
@@ -130,7 +141,7 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   );
 
   fastify.get(
-    "enrolled",
+    "/enrolled",
     {
       schema: {
         response: {
@@ -142,7 +153,18 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const userId = request.user.sub;
       const enrolledSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
         .from(therapySession)
         .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
         .where(
@@ -170,14 +192,30 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     async (request) => {
       // @ts-ignore
       const userId = request.user.sub;
-      const completedSessions = await fastify.db.query.therapySession.findMany({
-        where: and(
-          isNotNull(therapySession.enrollDatetime),
-          isNotNull(therapySession.completeDatetime),
-          eq(therapySession.userId, userId),
-          eq(therapySession.type, "phoneEvent"),
-        ),
-      });
+
+      const completedSessions = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
+        .from(therapySession)
+        .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
+        .where(
+          and(
+            isNotNull(therapySession.enrollDatetime),
+            isNotNull(therapySession.completeDatetime),
+            eq(therapySession.userId, userId),
+          ),
+        );
+
       return completedSessions;
     },
   );
@@ -196,16 +234,28 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       const userId = request.user.sub;
 
       const archivedSessions = await fastify.db
-        .select()
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
         .from(therapySession)
         .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
         .where(
           and(
             or(
-              lt(sql`${phoneEvent.endTime}`, sql`DATE(NOW)`),
-              lt(sql`${therapySession.completeDatetime}`, sql`DATE(NOW)`),
+              lt(sql`${phoneEvent.endTime}`, sql`DATE(NOW())`),
+              lt(sql`${therapySession.completeDatetime}`, sql`DATE(NOW())`),
             ),
             isNotNull(therapySession.enrollDatetime),
+            eq(therapySession.userId, userId),
           ),
         );
       return archivedSessions;
@@ -225,13 +275,27 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       // @ts-ignore
       const userId = request.user.sub;
       const { phoneEventId } = request.params;
-
-      const teleTherapySession = await fastify.db.query.phoneEvent.findFirst({
-        where: and(
-          eq(therapySession.id, phoneEventId),
-          eq(therapySession.userId, userId),
-        ),
-      });
+      const [teleTherapySession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
+        .from(therapySession)
+        .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, phoneEventId),
+          ),
+        );
 
       if (!teleTherapySession) {
         fastify.httpErrors.notFound(
@@ -269,8 +333,29 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
           endTime: request.body.endTime,
           dataPrivacyString: request.body.dataPrivacy.join(","),
         })
-        .where(eq(phoneEvent.id, phoneEventId))
-        .returning();
+        .where(eq(phoneEvent.id, phoneEventId));
+
+      const [teleTherapySession] = await fastify.db
+        .select({
+          id: therapySession.id,
+          therapistId: phoneEvent.therapistId,
+          relatedDomains: therapySession.relatedDomains,
+          summary: phoneEvent.summary,
+          startTime: phoneEvent.startTime,
+          endTime: phoneEvent.endTime,
+          mobile: phoneEvent.mobile,
+          email: phoneEvent.email,
+          credit: therapySession.credit,
+          recommendDatetime: therapySession.recommendDatetime,
+        })
+        .from(therapySession)
+        .innerJoin(phoneEvent, eq(phoneEvent.id, therapySession.id))
+        .where(
+          and(
+            eq(therapySession.userId, userId),
+            eq(therapySession.id, phoneEventId),
+          ),
+        );
 
       if (!updatedPhoneEvent) {
         throw fastify.httpErrors.notFound(
@@ -278,7 +363,9 @@ const phoneEvents: FastifyPluginAsync = async (fastify, _): Promise<void> => {
         );
       }
 
-      return updatedPhoneEvent;
+      // update the same event on the therapists calendar
+
+      return teleTherapySession;
     },
   );
 
