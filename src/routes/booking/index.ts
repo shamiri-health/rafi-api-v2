@@ -1,13 +1,64 @@
+import { and, eq, gte, isNull } from "drizzle-orm";
 import { FastifyPluginAsync } from "fastify";
+import { groupPlan, subscriptionV2, user } from "../../database/schema";
 
 const bookingRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.post('/onsite', async (req) => {
+  // @ts-ignore
+  fastify.addHook("onRequest", fastify.authenticate);
 
-  })
+  fastify.post("/onsite", async (req) => {
+    // @ts-ignore
+    const userId: number = req.user.sub;
 
-  fastify.post('/teletherapy', async (req) => {
+    const currentUser = await fastify.db.query.user.findFirst({
+      where: eq(user.id, userId)
+    })
 
-  })
-}
+    if (!currentUser) {
+      throw fastify.httpErrors.notFound(`User with id: ${userId} not found`)
+    }
+
+    const existingGroupPlan = await fastify.db.query.groupPlan.findFirst(({
+      where: eq(groupPlan.)
+    }))
+
+    const existingSubscription =
+      await fastify.db.query.subscriptionV2.findFirst({
+        where: and(
+          eq(subscriptionV2.userId, userId),
+          isNull(subscriptionV2.cancelledAt),
+          gte(subscriptionV2.endDate, new Date().toISOString()),
+        ),
+      });
+
+    if (!existingSubscription) {
+      throw fastify.httpErrors.badRequest(
+        "Cannot book an onsite session if the user does not have a valid subscription",
+      );
+    }
+
+
+  });
+
+  fastify.post("/teletherapy", async (req) => {
+    // @ts-ignore
+    const userId: number = req.user.sub;
+
+    const existingSubscription =
+      await fastify.db.query.subscriptionV2.findFirst({
+        where: and(
+          eq(subscriptionV2.userId, userId),
+          isNull(subscriptionV2.cancelledAt),
+          gte(subscriptionV2.endDate, new Date().toISOString()),
+        ),
+      });
+
+    if (!existingSubscription) {
+      throw fastify.httpErrors.badRequest(
+        "Cannot book an onsite session if the user does not have a valid subscription",
+      );
+    }
+  });
+};
 
 export default bookingRouter;
