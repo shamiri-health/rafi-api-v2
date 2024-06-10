@@ -1,5 +1,5 @@
 {
-  "id": "414cd99b-6071-4110-9571-e2f5f7852dc8",
+  "id": "9bde4207-f406-44a4-a3a2-938b74492b1c",
   "prevId": "f3900068-3241-42f0-bb16-6df8fad22d97",
   "version": "5",
   "dialect": "pg",
@@ -2224,15 +2224,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "questions_user_id_user_id_fk": {
-          "name": "questions_user_id_user_id_fk",
-          "tableFrom": "questions",
-          "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "questions_therapistId_therapist_id_fk": {
           "name": "questions_therapistId_therapist_id_fk",
           "tableFrom": "questions",
