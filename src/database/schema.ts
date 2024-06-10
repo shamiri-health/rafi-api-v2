@@ -531,8 +531,8 @@ export const order = pgTable(
 
 export const questions = pgTable("questions", {
   id: varchar("id", { length: 100 }).primaryKey().notNull(),
-  question: varchar("question", { length: 1000 }),
-  userId: integer("userId"),
+  question: text("question").notNull(),
+  userId: integer("user_id"),
   therapistId: integer("therapistId").references(() => therapist.id),
   createdAt: timestamp("created_at", {
     withTimezone: true,
