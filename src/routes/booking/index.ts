@@ -13,6 +13,7 @@ const EventBody = Type.Object({
   end_time: Type.String({ format: "end-time" }),
   therapist_id: Type.Optional(Type.String()),
   event_id: Type.Optional(Type.String()),
+  data_privacy_list: Type.Array(Type.String()).default([]),
 });
 
 type EventBody = Static<typeof EventBody>;
