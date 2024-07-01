@@ -1,15 +1,15 @@
-import { eq /*inArray*/ } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { database } from "../../db";
 import {
-  //onsiteEvent,
+  onsiteEvent,
   therapist,
-  //therapySession,
+  therapySession,
   userService,
 } from "../../../database/schema";
-import { sample } from "lodash";
+import { sample, shuffle } from "lodash";
 import { checkLegacyTherapistAvailability } from "../../therapist-availability";
 import { httpErrors } from "@fastify/sensible";
-//import { randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 
 // const NO_REPLY_EMAIL = "c_gln4ru3g4sbsra98vruhvte5nk@group.calendar.google.com";
 
@@ -41,7 +41,7 @@ export async function createOnsiteEvent(
     where: eq(userService.userId, userId),
   });
 
-  let therapistId = userServiceRecord?.assignedTherapistId;
+  let therapistId = 3216 || userServiceRecord?.assignedTherapistId;
 
   if (therapistId) {
     const existingTherapist = await db.query.therapist.findFirst({
@@ -61,39 +61,44 @@ export async function createOnsiteEvent(
     if (!availability) {
       throw httpErrors.badRequest(
         "Could not create event as the assigned therapist was not available during the specified times",
+    if (availability[0]?.errors) {
+      throw httpErrors.internalServerError(
+        "Could not create event as there was an issue finding available slots",
       );
     }
 
-    return {};
+    if (availability[0]?.available) {
+      throw httpErrors.internalServerError("Could not create event as the assigned therapist was not available at the specified time")
+    }
 
-    // return await db.transaction(async (trx) => {
-    //   const [session] = await trx
-    //     .insert(therapySession)
-    //     .values({
-    //       id: randomUUID(),
-    //       userId,
-    //       type: "onsiteEvent",
-    //       enrollDatetime: new Date(),
-    //       recommendDatetime: new Date(),
-    //       clinicalLevel: 2,
-    //     })
-    //     .returning();
-    //
-    //   const [newEvent] = await trx.insert(onsiteEvent).values({
-    //     id: session.id,
-    //     therapistId,
-    //     // TODO: update this to be existing therapist.name
-    //     summary: `Onsite session with user: ${userAlias} and ${existingTherapist?.id}`,
-    //     startTime,
-    //     endTime,
-    //     dataPrivacyString: dataPrivacyList.join(","),
-    //   });
-    //
-    //   // TODO:
-    //   // create calendar invite
-    //
-    //   return newEvent;
-    // });
+    return await db.transaction(async (trx) => {
+      const [session] = await trx
+        .insert(therapySession)
+        .values({
+          id: randomUUID(),
+          userId,
+          type: "onsiteEvent",
+          enrollDatetime: new Date(),
+          recommendDatetime: new Date(),
+          clinicalLevel: 2,
+        })
+        .returning();
+
+      const [newEvent] = await trx.insert(onsiteEvent).values({
+        id: session.id,
+        therapistId,
+        // TODO: update this to be existing therapist.name
+        summary: `Onsite session with user: ${userAlias} and ${existingTherapist?.id}`,
+        startTime,
+        endTime,
+        dataPrivacyString: dataPrivacyList.join(","),
+      });
+
+      // TODO:
+      // create calendar invite
+
+      return newEvent;
+    });
   }
 
   // const therapists = await db
