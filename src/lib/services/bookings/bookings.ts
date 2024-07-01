@@ -13,14 +13,14 @@ import checkTherapistAvailability from "../../therapist-availability";
 import { httpErrors } from "@fastify/sensible";
 import { randomUUID } from "crypto";
 
-const NO_REPLY_EMAIL = "c_gln4ru3g4sbsra98vruhvte5nk@group.calendar.google.com";
+// const NO_REPLY_EMAIL = "c_gln4ru3g4sbsra98vruhvte5nk@group.calendar.google.com";
 
-export async function updateOnsiteEventDetails(
-  db: database["db"],
-  userId: number,
-  startTime,
-  endTime,
-) { }
+// export async function updateOnsiteEventDetails(
+//   db: database["db"],
+//   userId: number,
+//   startTime,
+//   endTime,
+// ) { }
 
 export async function createOnsiteEvent(
   db: database["db"],
@@ -55,6 +55,7 @@ export async function createOnsiteEvent(
       emails,
       startTime,
       endTime,
+      "https://api.calendly.com/users/0fade096-1c36-425e-a94d-d6250302e925",
     );
 
     if (!availability) {
@@ -106,6 +107,7 @@ export async function createOnsiteEvent(
       [therapist.therapist.gmail, therapist.calendar.googleId as string],
       startTime,
       endTime,
+      "https://api.calendly.com/users/0fade096-1c36-425e-a94d-d6250302e925",
     );
 
     if (availability) {
@@ -157,6 +159,8 @@ export async function createTeletherapyEvent(
   const userServiceRecord = await db.query.userService.findFirst({
     where: eq(userService.userId, userId),
   });
+
+  console.log(startTime, endTime);
 
   let therapistId = userServiceRecord?.assignedTherapistId;
 
