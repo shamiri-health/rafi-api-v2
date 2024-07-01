@@ -1,11 +1,20 @@
-import { and, eq, gte, isNull } from "drizzle-orm";
-import { FastifyPluginAsync } from "fastify";
-import { groupPlan, subscriptionV2, user } from "../../database/schema";
 import {
-  createOnsiteEvent,
-  // createTeletherapyEvent,
-} from "../../lib/services/bookings/bookings";
-import { formatISO } from "date-fns";
+  and,
+  eq,
+  gte,
+  isNull
+} from "drizzle-orm";
+import { FastifyPluginAsync } from "fastify";
+import {
+  groupPlan,
+  subscriptionV2,
+  user
+} from "../../database/schema";
+// import {
+//   createOnsiteEvent,
+//   // createTeletherapyEvent,
+// } from "../../lib/services/bookings/bookings";
+//import { formatISO } from "date-fns";
 import { Static, Type } from "@sinclair/typebox";
 
 const EventBody = Type.Object({
@@ -46,14 +55,15 @@ const bookingRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
           // update onsite event
           // return event
         }
-        return await createOnsiteEvent(
-          fastify.db,
-          currentUser.id,
-          currentUser.alias || "",
-          new Date(req.body.start_time),
-          new Date(req.body.end_time),
-          req.body.data_privacy_list,
-        );
+        return {}
+        // return await createOnsiteEvent(
+        //   fastify.db,
+        //   currentUser.id,
+        //   currentUser.alias || "",
+        //   new Date(req.body.start_time),
+        //   new Date(req.body.end_time),
+        //   req.body.data_privacy_list,
+        // );
       }
 
       const existingSubscription =
@@ -67,35 +77,37 @@ const bookingRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       if (!existingSubscription) {
         throw fastify.httpErrors.badRequest(
-          "Cannot book an onsite session if the user does not have a valid subscription",
+          "Cannot book an onsite session if the user does not have a valid subscription or group plan",
         );
       }
-
-      let event;
-      if (req.body.event_id) {
-        // update onsite event
-        // update event
-      } else {
-        event = await createOnsiteEvent(
-          fastify.db,
-          currentUser.id,
-          currentUser.alias || "",
-          new Date(req.body.start_time),
-          new Date(req.body.end_time),
-          req.body.data_privacy_list,
-        );
-      }
-
-      if (existingSubscription.isOneOff) {
-        await fastify.db
-          .update(subscriptionV2)
-          .set({
-            endDate: formatISO(new Date(), { representation: "date" }),
-          })
-          .where(eq(subscriptionV2.id, existingSubscription.id));
-      }
-
-      return event;
+      //
+      // let event;
+      // if (req.body.event_id) {
+      //   // update onsite event
+      //   // update event
+      // } else {
+      //   event = await createOnsiteEvent(
+      //     fastify.db,
+      //     currentUser.id,
+      //     currentUser.alias || "",
+      //     new Date(req.body.start_time),
+      //     new Date(req.body.end_time),
+      //     req.body.data_privacy_list,
+      //   );
+      // }
+      //
+      // // cleanup existing subscription if it's a one-off
+      // if (existingSubscription.isOneOff) {
+      //   await fastify.db
+      //     .update(subscriptionV2)
+      //     .set({
+      //       endDate: formatISO(new Date(), { representation: "date" }),
+      //     })
+      //     .where(eq(subscriptionV2.id, existingSubscription.id));
+      // }
+      //
+      // return event;
+      return {}
     },
   );
 
