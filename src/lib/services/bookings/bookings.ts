@@ -1,17 +1,15 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq /*inArray*/ } from "drizzle-orm";
 import type { database } from "../../db";
 import {
-  calendar,
-  onsiteEvent,
+  //onsiteEvent,
   therapist,
-  therapistCal,
-  therapySession,
+  //therapySession,
   userService,
 } from "../../../database/schema";
 import { sample } from "lodash";
-import checkTherapistAvailability from "../../therapist-availability";
+import { checkLegacyTherapistAvailability } from "../../therapist-availability";
 import { httpErrors } from "@fastify/sensible";
-import { randomUUID } from "crypto";
+//import { randomUUID } from "crypto";
 
 // const NO_REPLY_EMAIL = "c_gln4ru3g4sbsra98vruhvte5nk@group.calendar.google.com";
 
@@ -21,6 +19,15 @@ import { randomUUID } from "crypto";
 //   startTime,
 //   endTime,
 // ) { }
+
+export async function updateOnsiteEvent(
+  db: database["db"],
+  userId: number,
+  startTime: Date,
+  endTime: Date,
+) {
+  return {};
+}
 
 export async function createOnsiteEvent(
   db: database["db"],
@@ -40,23 +47,16 @@ export async function createOnsiteEvent(
     const existingTherapist = await db.query.therapist.findFirst({
       where: eq(therapist.id, therapistId),
     });
-    const otherCalendars = await db
-      .select()
-      .from(therapistCal)
-      .innerJoin(calendar, eq(calendar.id, therapistCal.id))
-      .where(eq(therapistCal.therapistId, therapistId));
 
-    const emails = [
-      existingTherapist?.gmail.toLowerCase() as string,
-      otherCalendars[0].calendar.googleId as string,
-    ];
+    const emails = [existingTherapist?.gmail.toLowerCase() as string];
 
-    const availability = await checkTherapistAvailability(
+    const availability = await checkLegacyTherapistAvailability(
       emails,
       startTime,
       endTime,
-      "https://api.calendly.com/users/0fade096-1c36-425e-a94d-d6250302e925",
     );
+
+    console.log(availability);
 
     if (!availability) {
       throw httpErrors.badRequest(
@@ -64,90 +64,92 @@ export async function createOnsiteEvent(
       );
     }
 
-    return await db.transaction(async (trx) => {
-      const [session] = await trx
-        .insert(therapySession)
-        .values({
-          id: randomUUID(),
-          userId,
-          type: "onsiteEvent",
-          enrollDatetime: new Date(),
-          recommendDatetime: new Date(),
-          clinicalLevel: 2,
-        })
-        .returning();
+    return {};
 
-      const [newEvent] = await trx.insert(onsiteEvent).values({
-        id: session.id,
-        therapistId,
-        // TODO: update this to be existing therapist.name
-        summary: `Onsite session with user: ${userAlias} and ${existingTherapist?.id}`,
-        startTime,
-        endTime,
-        dataPrivacyString: dataPrivacyList.join(","),
-      });
-
-      // TODO:
-      // create calendar invite
-
-      return newEvent;
-    });
+    // return await db.transaction(async (trx) => {
+    //   const [session] = await trx
+    //     .insert(therapySession)
+    //     .values({
+    //       id: randomUUID(),
+    //       userId,
+    //       type: "onsiteEvent",
+    //       enrollDatetime: new Date(),
+    //       recommendDatetime: new Date(),
+    //       clinicalLevel: 2,
+    //     })
+    //     .returning();
+    //
+    //   const [newEvent] = await trx.insert(onsiteEvent).values({
+    //     id: session.id,
+    //     therapistId,
+    //     // TODO: update this to be existing therapist.name
+    //     summary: `Onsite session with user: ${userAlias} and ${existingTherapist?.id}`,
+    //     startTime,
+    //     endTime,
+    //     dataPrivacyString: dataPrivacyList.join(","),
+    //   });
+    //
+    //   // TODO:
+    //   // create calendar invite
+    //
+    //   return newEvent;
+    // });
   }
 
-  const therapists = await db
-    .select()
-    .from(therapist)
-    .innerJoin(therapistCal, eq(therapistCal.id, therapist.id))
-    .innerJoin(calendar, eq(calendar.id, therapistCal.id))
-    .where(inArray(therapist.id, [10, 205]));
-
-  let event;
-  for (let therapist of therapists) {
-    const availability = await checkTherapistAvailability(
-      [therapist.therapist.gmail, therapist.calendar.googleId as string],
-      startTime,
-      endTime,
-      "https://api.calendly.com/users/0fade096-1c36-425e-a94d-d6250302e925",
-    );
-
-    if (availability) {
-      event = await db.transaction(async (trx) => {
-        const [session] = await trx
-          .insert(therapySession)
-          .values({
-            id: randomUUID(),
-            userId,
-            type: "onsiteEvent",
-            enrollDatetime: new Date(),
-            recommendDatetime: new Date(),
-            clinicalLevel: 2,
-          })
-          .returning();
-
-        const [newEvent] = await trx.insert(onsiteEvent).values({
-          id: session.id,
-          therapistId,
-          // TODO: update this to be existing therapist.name
-          summary: `Onsite session with user: ${userAlias} and ${therapist.therapist.id}`,
-          startTime,
-          endTime,
-          dataPrivacyString: dataPrivacyList.join(","),
-        });
-        // TODO: create calendar invite
-
-        return newEvent;
-      });
-      break;
-    }
-  }
-
-  if (!event) {
-    throw httpErrors.badRequest(
-      "Could not create an onsite event because there was no therapist available",
-    );
-  }
-
-  return event;
+  // const therapists = await db
+  //   .select()
+  //   .from(therapist)
+  //   .innerJoin(therapistCal, eq(therapistCal.id, therapist.id))
+  //   .innerJoin(calendar, eq(calendar.id, therapistCal.id))
+  //   .where(inArray(therapist.id, [10, 205]));
+  //
+  // let event;
+  // for (let therapist of therapists) {
+  //   const availability = await checkTherapistAvailability(
+  //     [therapist.therapist.gmail, therapist.calendar.googleId as string],
+  //     startTime,
+  //     endTime,
+  //     "https://api.calendly.com/users/0fade096-1c36-425e-a94d-d6250302e925",
+  //   );
+  //
+  //   if (availability) {
+  //     event = await db.transaction(async (trx) => {
+  //       const [session] = await trx
+  //         .insert(therapySession)
+  //         .values({
+  //           id: randomUUID(),
+  //           userId,
+  //           type: "onsiteEvent",
+  //           enrollDatetime: new Date(),
+  //           recommendDatetime: new Date(),
+  //           clinicalLevel: 2,
+  //         })
+  //         .returning();
+  //
+  //       const [newEvent] = await trx.insert(onsiteEvent).values({
+  //         id: session.id,
+  //         therapistId,
+  //         // TODO: update this to be existing therapist.name
+  //         summary: `Onsite session with user: ${userAlias} and ${therapist.therapist.id}`,
+  //         startTime,
+  //         endTime,
+  //         dataPrivacyString: dataPrivacyList.join(","),
+  //       });
+  //       // TODO: create calendar invite
+  //
+  //       return newEvent;
+  //     });
+  //     break;
+  //   }
+  // }
+  //
+  // if (!event) {
+  //   throw httpErrors.badRequest(
+  //     "Could not create an onsite event because there was no therapist available",
+  //   );
+  // }
+  //
+  // return event;
 }
 
 export async function createTeletherapyEvent(

@@ -1,19 +1,10 @@
-import {
-  and,
-  eq,
-  gte,
-  isNull
-} from "drizzle-orm";
+import { and, eq, gte, isNull } from "drizzle-orm";
 import { FastifyPluginAsync } from "fastify";
+import { groupPlan, subscriptionV2, user } from "../../database/schema";
 import {
-  groupPlan,
-  subscriptionV2,
-  user
-} from "../../database/schema";
-// import {
-//   createOnsiteEvent,
-//   // createTeletherapyEvent,
-// } from "../../lib/services/bookings/bookings";
+  createOnsiteEvent,
+  //   // createTeletherapyEvent,
+} from "../../lib/services/bookings/bookings";
 //import { formatISO } from "date-fns";
 import { Static, Type } from "@sinclair/typebox";
 
@@ -52,18 +43,19 @@ const bookingRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       if (existingGroupPlan && existingGroupPlan.expireTime > new Date()) {
         if (req.body.event_id) {
+          // return await updateOnsiteEvent(fastify.db, currentUser.id, req.body.event_id, new Date(req.body.start_time), new Date(req.body.end_time))
           // update onsite event
           // return event
         }
-        return {}
-        // return await createOnsiteEvent(
-        //   fastify.db,
-        //   currentUser.id,
-        //   currentUser.alias || "",
-        //   new Date(req.body.start_time),
-        //   new Date(req.body.end_time),
-        //   req.body.data_privacy_list,
-        // );
+
+        return await createOnsiteEvent(
+          fastify.db,
+          currentUser.id,
+          currentUser.alias || "",
+          new Date(req.body.start_time),
+          new Date(req.body.end_time),
+          req.body.data_privacy_list,
+        );
       }
 
       const existingSubscription =
@@ -107,7 +99,7 @@ const bookingRouter: FastifyPluginAsync = async (fastify): Promise<void> => {
       // }
       //
       // return event;
-      return {}
+      return {};
     },
   );
 

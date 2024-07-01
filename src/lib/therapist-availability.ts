@@ -30,7 +30,27 @@ export async function checkLegacyTherapistAvailability(
     },
   });
 
-  return res.data.calendars;
+  console.log(JSON.stringify(res, null, 2));
+
+  const availability: { email: string; available: boolean; errors?: any }[] =
+    [];
+  for (let i = 0; i < therapistEmails.length; i++) {
+    const calendar = res?.data?.calendars?.[therapistEmails[i]];
+
+    if (calendar?.errors) {
+      availability.push({
+        email: therapistEmails[i],
+        errors: calendar?.errors,
+        available: false,
+      });
+    } else if (calendar?.busy?.length) {
+      availability.push({ email: therapistEmails[i], available: false });
+    } else {
+      availability.push({ email: therapistEmails[i], available: false });
+    }
+  }
+
+  return availability;
 }
 
 export default async function checkTherapistAvailability(

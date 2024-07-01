@@ -616,7 +616,6 @@ export const therapist = pgTable("therapist", {
   supportPhone: boolean("supportPhone"),
   supportInPerson: boolean("supportInPerson"),
   clientId: integer("client_id").references(() => client.id),
-  calendlyURL: text("calendly_url"),
 });
 
 export const shamiriScore = pgTable("shamiriScore", {
