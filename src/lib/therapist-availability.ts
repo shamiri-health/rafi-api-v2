@@ -46,7 +46,7 @@ export async function checkLegacyTherapistAvailability(
     } else if (calendar?.busy?.length) {
       availability.push({ email: therapistEmails[i], available: false });
     } else {
-      availability.push({ email: therapistEmails[i], available: false });
+      availability.push({ email: therapistEmails[i], available: true });
     }
   }
 

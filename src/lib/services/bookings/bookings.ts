@@ -11,6 +11,7 @@ import { checkLegacyTherapistAvailability } from "../../therapist-availability";
 import { httpErrors } from "@fastify/sensible";
 import { randomUUID } from "crypto";
 
+// THIS email must be added to all events for clinic ops to monitor them
 // const NO_REPLY_EMAIL = "c_gln4ru3g4sbsra98vruhvte5nk@group.calendar.google.com";
 
 export async function updateOnsiteEvent(
@@ -34,7 +35,9 @@ export async function createOnsiteEvent(
     where: eq(userService.userId, userId),
   });
 
-  let therapistId = 3216 || userServiceRecord?.assignedTherapistId;
+  let therapistId: number | null =
+    3216 || userServiceRecord?.assignedTherapistId;
+  therapistId = null;
 
   if (therapistId) {
     const existingTherapist = await db.query.therapist.findFirst({
@@ -91,20 +94,25 @@ export async function createOnsiteEvent(
     });
   }
 
-  const therapists = await db
+  let therapists = await db
     .select()
     .from(therapist)
-    .where(inArray(therapist.id, [10, 205]));
+    .where(inArray(therapist.id, [3216, 205]));
+
+  therapists = shuffle(therapists);
 
   let event;
   let bookingIssues = [];
   // randomise the list of therapists
-  for (let therapist of shuffle(therapists)) {
+  for (let therapist of therapists) {
+    console.log("therapist under consideration: ", therapist.gmail);
     const availability = await checkLegacyTherapistAvailability(
       [therapist.gmail],
       startTime,
       endTime,
     );
+    console.log({ availability: availability[0] });
+    console.log({ email: availability[0].email });
 
     if (availability[0].available) {
       event = await db.transaction(async (trx) => {
@@ -124,7 +132,7 @@ export async function createOnsiteEvent(
           id: session.id,
           therapistId,
           // TODO: update this to be existing therapist.name
-          summary: `Onsite session with user: ${userAlias} and ${therapist}`,
+          summary: `Onsite session with user: ${userAlias} and ${therapist.id}`,
           startTime,
           endTime,
           dataPrivacyString: dataPrivacyList.join(","),
@@ -143,7 +151,6 @@ export async function createOnsiteEvent(
   }
 
   if (!event) {
-    console.log(JSON.stringify(bookingIssues, null, 2));
     throw httpErrors.badRequest(
       "Could not create an onsite event because there was no therapist available",
     );
