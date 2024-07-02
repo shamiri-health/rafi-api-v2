@@ -1,0 +1,1 @@
+ALTER TABLE "therapist" ADD COLUMN "calendly_url" text;

@@ -38,7 +38,11 @@ const subscriptionTypesRouter: FastifyPluginAsync = async (
       },
     },
     async (req) => {
-      if (!req.body.duration_months && !req.body.duration_days) {
+      if (
+        !req.body.duration_months &&
+        !req.body.duration_days &&
+        !req.body.is_one_off
+      ) {
         throw fastify.httpErrors.badRequest(
           "Please supply one of duration_days or duration_months",
         );

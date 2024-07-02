@@ -588,6 +588,7 @@ export const therapySession = pgTable("therapySession", {
   id: varchar("id", { length: 64 }).primaryKey().notNull(),
   userId: integer("userId").notNull(),
   type: varchar("type", { length: 80 }),
+  // TODO: add it to default to 2
   clinicalLevel: integer("clinicalLevel"),
   relatedDomains: varchar("relatedDomains", { length: 100 }),
   recommendDatetime: timestamp("recommendDatetime", { mode: "date" }),
